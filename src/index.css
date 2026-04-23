@@ -1,0 +1,106 @@
+:root {
+    --sidebar-bg: #0f172a;
+    --sidebar-hover: #1e293b;
+    --sidebar-text: #ffffff;
+    --header-bg: #1e293b;
+    --content-bg: #f8fafc;
+    --primary: #334155;
+    --secondary: #94a3b8;
+    --accent: #2563eb;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --border: #e2e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--content-bg);
+    color: var(--text-main);
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+}
+
+.sidebar-logo {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 1.5rem 0;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    gap: 1rem;
+    font-weight: 500;
+}
+
+.nav-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid var(--sidebar-text);
+}
+.nav-item:hover {
+    background-color: var(--sidebar-hover);
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 260px;
+    height: 100vh; /* Altura fija de la pantalla */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Evita scroll en el contenedor padre */
+}
+
+.content-body {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* El scroll lo manejarán los hijos */
+}
+
+.page-title {
+    font-size: 1.5rem; /* Un poco más pequeño para ahorrar espacio */
+    margin-bottom: 1rem;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.header {
+    height: 64px;
+    background-color: var(--header-bg);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+}

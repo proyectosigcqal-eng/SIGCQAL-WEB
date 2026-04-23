@@ -1,0 +1,205 @@
+/* --- Estructura Principal en GenerarMemorandumPage.jsx --- */
+.generar-memorandum-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Mitad formulario, mitad vista previa */
+  gap: 2rem;
+  /* Calcula el alto de la pantalla menos el header para que no se corte la página entera */
+  height: calc(100vh - 120px); 
+  padding: 1rem 2rem;
+}
+
+/* --- Panel del Formulario --- */
+.formulario-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto; /* Esto evita que se corte, agrega scroll interno solo aquí */
+  padding-right: 10px; /* Espacio para la barra de scroll */
+}
+
+/* Scrollbar minimalista para que se vea profesional */
+.formulario-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.formulario-panel::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* --- Grid Interno del Formulario --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.full-width {
+  grid-column: 1 / -1; /* Hace que el textarea ocupe ambas columnas */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b; /* Gris sutil */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1A2238; /* Color azul oscuro de tu sidebar */
+  background-color: #ffffff;
+}
+
+/* --- Botones --- */
+.form-acciones {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-primario {
+  background-color: #1A2238; /* Mantiene tu paleta de colores */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primario:hover {
+  background-color: #2a3655;
+}
+
+.btn-secundario {
+  background-color: transparent;
+  color: #1A2238;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid #1A2238;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secundario:hover {
+  background-color: #f1f5f9;
+}
+/* Contenedor principal de la página */
+.sigcqal-page-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px); /* Ajusta según el alto de tu navbar superior */
+    overflow: hidden; /* Evita scroll en toda la página */
+    background-color: #f8fafc;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* LA CLAVE: El contenedor Split */
+.split-view-container {
+    display: grid;
+    grid-template-columns: 45% 55%; /* El formulario un poco más estrecho que la hoja */
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Panel del Formulario con scroll independiente */
+.panel-formulario {
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: white;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Panel de Vista Previa con fondo gris para resaltar la "hoja" */
+.panel-vista-previa {
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: #e2e8f0; /* Fondo grisáceo tipo Word/Google Docs */
+    display: flex;
+    justify-content: center; /* Centra la hoja horizontalmente */
+}
+
+/* Estilo de la "Hoja" de papel */
+.hoja-memorandum {
+    background-color: white;
+    width: 100%;
+    max-width: 700px; /* Tamaño carta aproximado */
+    min-height: 900px;
+    padding: 4rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.form-info-readonly {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #1A2238;
+}
+
+.form-info-readonly p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.texto-instruccion {
+    margin-top: 1.5rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: #1e293b;
+    white-space: pre-wrap; /* Mantiene los saltos de línea del textarea */
+}
+
+.hoja-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid #8b0000; /* Un toque elegante en rojo oscuro */
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.espacio-firma {
+    height: 60px;
+    margin: 10px 0;
+}
