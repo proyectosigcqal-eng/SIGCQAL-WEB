@@ -203,3 +203,204 @@
     height: 60px;
     margin: 10px 0;
 }
+.memorandum-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 20px;
+  background: #fff;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.full-width {
+  grid-column: span 2; /* Ocupa las dos columnas */
+}
+
+.half-width {
+  grid-column: span 1;
+}
+
+.label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.input, select, textarea {
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.input-readonly {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+/* Estilo para el área de texto final */
+.rich-text-area {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.toolbar-mockup {
+  background: #f1f3f5;
+  padding: 8px;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  gap: 10px;
+}
+
+.tool-btn {
+  padding: 2px 8px;
+  background: #fff;
+  border: 1px solid #ced4da;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cuerpo-documento {
+  border: none;
+  width: 100%;
+  resize: vertical;
+  background: #fff;
+}
+
+/* =========================================
+   VISTA PREVIA - ESTILO DOCUMENTO OFICIAL
+   ========================================= */
+
+.hoja-membretada-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: #e2e8f0; 
+  overflow-y: auto;        
+  height: 100%;
+}
+
+.hoja-membretada-papel {
+  background: white;
+  width: 100%;              
+  max-width: 600px;          
+  min-height: 890px;        
+  padding: 40px 40px 120px 40px; 
+  box-sizing: border-box;    
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  position: relative; 
+  font-family: 'Arial', sans-serif; 
+  color: #333;
+}
+
+/* ENCABEZADO */
+.membrete-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 50px;
+}
+
+.membrete-logo-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-circulo-guinda {
+  width: 55px;
+  height: 55px;
+  background-color: #8a1c22; /* Color institucional Guinda */
+  border-radius: 50%;
+}
+
+.membrete-institucion p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.2;
+  color: #4a4a4a;
+}
+
+.membrete-meta-info {
+  text-align: right;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.membrete-meta-info p {
+  margin: 0 0 3px 0;
+}
+
+.meta-folio {
+  font-size: 14px;
+}
+
+/* CUERPO */
+.texto-presente {
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  font-size: 14px;
+}
+
+.texto-contenido {
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: justify;
+  min-height: 400px; /* Empuja la firma hacia abajo */
+}
+
+.texto-contenido p {
+  margin-bottom: 15px;
+}
+
+.placeholder-muted {
+  color: #a0a0a0;
+  font-style: italic;
+}
+
+/* FIRMAS */
+.membrete-footer {
+  margin-top: 50px;
+}
+
+.bloque-firma p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.texto-ccp {
+  margin-top: 40px;
+  font-size: 11px;
+  color: #666;
+}
+
+/* CENEFA INFERIOR */
+.cenefa-inferior-guinda {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #c4262e; 
+  clip-path: polygon(0 20%, 25% 0, 50% 20%, 75% 0, 100% 20%, 100% 100%, 0 100%);
+  padding: 30px 20px 15px 20px;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.cenefa-inferior-guinda p {
+  margin: 0;
+  color: white;
+  font-size: 10px;
+}

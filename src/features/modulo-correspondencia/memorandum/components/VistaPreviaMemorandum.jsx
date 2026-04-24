@@ -1,69 +1,92 @@
-export const VistaPreviaMemorandum = ({ data }) => {
- 
- const obtenerNombreFirmante = () => {
-  if (data?.nombreUsuarioFirmante) return data.nombreUsuarioFirmante;
-  
-  const firmantes = {
-    "1": "LIC. JUAN PÉREZ GARCÍA", 
-    "2": "DRA. MARÍA LOPEZ"
+import React from 'react';
+import '../styles/memorandum.css';
+
+export const VistaPreviaMemorandum = ({ formData, usuarios = [] }) => {
+
+  const getNombreUsuario = (id) => {
+    if (!id) return "_________________________";
+    const usuario = usuarios.find(u => u.id === Number(id));
+    return usuario ? usuario.usuarioLogin : "_________________________";
   };
-  
-  return firmantes[data?.idUsuarioFirmante] || "NOMBRE DEL FIRMANTE";
-};
+
+
+  const getAreaUsuario = (id) => {
+    if (!id) return "_________________________";
+    const usuario = usuarios.find(u => u.id === Number(id));
+    return usuario && usuario.nombreArea ? usuario.nombreArea : "Área sin asignar";
+  };
+
+  const obtenerFechaActual = () => {
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const fecha = new Date();
+    return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
+  };
+
+  const folioCorrespondencia = formData.folioUnico || "______/______";
+  const emisorNombre = formData.idUsuarioEmisor ? getNombreUsuario(formData.idUsuarioEmisor) : "...";
+  const emisorArea = formData.idUsuarioEmisor ? getAreaUsuario(formData.idUsuarioEmisor) : "...";
+
   return (
-    <div className="hoja-memorandum">
-      {/* Encabezado Institucional */}
-      <div className="hoja-header">
-        <div className="escudo-mexico"></div>
-        <div className="header-text">
-          <h3>COMISIÓN ESTATAL DE LA DEFENSA DEL CONTRIBUYENTE</h3>
-          <p className="subtitulo">Estado de Tlaxcala</p>
-        </div>
-      </div>
+    <div className="hoja-membretada-container">
+      <div className="hoja-membretada-papel">
+        
 
-      <div className="hoja-contenido-principal">
-        {/* Metadatos del Documento */}
-        <div className="datos-documento">
-          <p><strong>Asunto:</strong> {data?.asuntoCorrespondencia || "Sin asunto definido"}</p>
-          <p><strong>No. Oficio:</strong> {data?.folioUnico || "PENDIENTE"}</p>
-          <p><strong>Fecha:</strong> {new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-        </div>
+        <header className="membrete-header">
+          <div className="membrete-logo-box">
+            <div className="logo-circulo-guinda"></div>
+            <div className="membrete-institucion">
+              <p>COMISIÓN ESTATAL DE LA</p>
+              <p>DEFENSA DEL CONTRIBUYENTE</p>
+              <p>ESTADO DE ZACATECAS</p>
+            </div>
+          </div>
+          
+          <div className="membrete-meta-info">
+            <p className="meta-folio">
+  
+              <strong>MEMORÁNDUM-05/2026</strong>
+            </p>
+            <p>
+              <strong>Asunto:</strong> {formData.asuntoCorrespondencia || 'Sin asunto asignado'}
+            </p>
+            <p>Guadalupe, Zacatecas, a {obtenerFechaActual()}.</p>
+          </div>
+        </header>
 
-        {/* Cuerpo del Memorándum */}
-        <div className="cuerpo-texto">
-          <p className="saludo-protocolario">A QUIEN CORRESPONDA:</p>
+  
+        <main className="membrete-body">
+          <p className="texto-presente"><strong>P R E S E N T E .</strong></p>
           
-          <p>Por medio del presente y en relación a la correspondencia con folio <strong>{data?.idCorrespondencia || '---'}</strong>, se le comunica la siguiente instrucción:</p>
+          <div className="texto-contenido">
           
-          <div className="cuadro-instruccion">
-            {data?.instruccionSeguimiento ? (
-              <p className="texto-final">{data.instruccionSeguimiento}</p>
-            ) : (
-              <p className="placeholder-text">[ Aquí aparecerá la instrucción de seguimiento redactada en el formulario ]</p>
+            <p className="parrafo-introductorio">
+              De conformidad al oficio marcado con el Número <strong>{folioCorrespondencia}</strong> emitido por <strong>{emisorNombre}</strong>, perteneciente a la dependencia: <strong>{emisorArea}</strong>.
+            </p>
+            
+          
+            {formData.instruccionSeguimiento && (
+              formData.instruccionSeguimiento.split('\n').map((parrafo, index) => (
+                <p key={index}>{parrafo}</p>
+              ))
             )}
           </div>
+        </main>
 
-          {data?.observaciones && (
-             <p className="nota-observaciones">
-               <small><strong>Nota:</strong> {data.observaciones}</small>
-             </p>
-          )}
+        <footer className="membrete-footer">
+          <div className="bloque-firma">
+            <p><strong>Atentamente</strong></p>
+            <p><strong>{getNombreUsuario(formData.idUsuarioFirmante)}</strong></p>
+            <p>{getAreaUsuario(formData.idUsuarioFirmante)}</p>
+          </div>
+          
+          <p className="texto-ccp">C.c.p.- Archivo.</p>
+        </footer>
+
+        <div className="cenefa-inferior-guinda">
+          <p>Boulevard José López Portillo, número 60, Dependencias Federales, C.P. 98600,</p>
+          <p>Guadalupe, Zac. Tel. (492)9279703.</p>
         </div>
-
-        {/* Sección de Firma */}
-        <div className="seccion-firma">
-          <p>Atentamente,</p>
-          <div className="linea-firma"></div>
-          <p className="nombre-autoridad">{obtenerNombreFirmante()}</p>
-          <p className="cargo-autoridad">SERVIDOR PÚBLICO AUTORIZADO</p>
-        </div>
-      </div>
-
-      {/* Pie de página institucional */}
-      <div className="hoja-footer">
-        <div className="barra-decorativa"></div>
-        <p>Generado por SIGCQAL | Módulo de Correspondencia</p>
-        <p className="folio-seguridad">Verificación: {data?.folioUnico || '---'}</p>
+        
       </div>
     </div>
   );
