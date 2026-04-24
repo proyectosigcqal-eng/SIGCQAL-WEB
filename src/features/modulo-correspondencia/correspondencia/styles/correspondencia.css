@@ -1,7 +1,9 @@
 .registrar-correspondencia-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   background: var(--content-bg);
 }
 
@@ -23,7 +25,7 @@
 
 .form-container-corr {
   max-width: 860px;
-  margin: auto;
+  margin: 0 auto;
   width: 100%;
   padding: 2rem;
 }
