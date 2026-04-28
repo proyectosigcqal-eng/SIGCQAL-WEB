@@ -1,9 +1,8 @@
 /* --- Estructura Principal en GenerarMemorandumPage.jsx --- */
 .generar-memorandum-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Mitad formulario, mitad vista previa */
+  grid-template-columns: 1fr 1fr; 
   gap: 2rem;
-  /* Calcula el alto de la pantalla menos el header para que no se corte la página entera */
   height: calc(100vh - 120px); 
   padding: 1rem 2rem;
 }
@@ -85,7 +84,7 @@
 }
 
 .btn-primario {
-  background-color: #1A2238; /* Mantiene tu paleta de colores */
+  background-color: #1A2238; 
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 6px;
@@ -294,8 +293,8 @@
 .hoja-membretada-papel {
   background: white;
   width: 100%;              
-  max-width: 600px;          
-  min-height: 890px;        
+  max-width: 700px;          
+  min-height: 990px;        
   padding: 40px 40px 120px 40px; 
   box-sizing: border-box;    
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -355,15 +354,25 @@
 }
 
 .texto-contenido {
-  font-size: 14px;
-  line-height: 1.6;
-  text-align: justify;
-  min-height: 400px; /* Empuja la firma hacia abajo */
+    flex-grow: 4; /* Empuja el footer hacia abajo */
+    margin-top: 10px;
+    text-align: justify;
+    line-height: 1.6;
+    /* SOLUCIÓN AL DESBORDAMIENTO */
+    overflow-wrap: break-word; /* Rompe palabras largas */
+    word-wrap: break-word;
+    word-break: break-word; 
+    hyphens: auto; /* Agrega guiones si es necesario */
+}
+
+.parrafo-introductorio {
+    margin-bottom: 1.5rem;
 }
 
 .texto-contenido p {
-  margin-bottom: 15px;
+    margin-bottom: .5rem;
 }
+
 
 .placeholder-muted {
   color: #a0a0a0;

@@ -76,7 +76,7 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
           </select>
         </div>
         <div className="form-group">
-          <label>Dependencia del Emisor</label>
+          <label>Dependencia</label>
           <input 
             type="text" 
             value={getAreaUsuario(formData.idUsuarioEmisor)} 
@@ -96,7 +96,7 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
           </select>
         </div>
         <div className="form-group">
-          <label>Dependencia del Firmante</label>
+          <label>Dependencia</label>
           <input 
             type="text" 
             value={getAreaUsuario(formData.idUsuarioFirmante)} 

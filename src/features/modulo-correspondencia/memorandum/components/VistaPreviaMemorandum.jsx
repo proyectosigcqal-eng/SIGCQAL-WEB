@@ -1,14 +1,14 @@
 import React from 'react';
 import '../styles/memorandum.css';
 
-export const VistaPreviaMemorandum = ({ formData, usuarios = [] }) => {
+export const VistaPreviaMemorandum = ({ formData, usuarios = [], areaDestino, idUsuarioAsignado }) => {
 
   const getNombreUsuario = (id) => {
     if (!id) return "_________________________";
     const usuario = usuarios.find(u => u.id === Number(id));
-    return usuario ? usuario.usuarioLogin : "_________________________";
+    if (!usuario) return "_________________________";
+    return usuario.usuarioLogin || `${usuario.nombre || ''} ${usuario.apellidoPaterno || ''}`.trim() || "_________________________";
   };
-
 
   const getAreaUsuario = (id) => {
     if (!id) return "_________________________";
@@ -22,6 +22,8 @@ export const VistaPreviaMemorandum = ({ formData, usuarios = [] }) => {
     return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
   };
 
+  const nombreResponsable = idUsuarioAsignado ? getNombreUsuario(idUsuarioAsignado) : null;
+
   const folioCorrespondencia = formData.folioUnico || "______/______";
   const emisorNombre = formData.idUsuarioEmisor ? getNombreUsuario(formData.idUsuarioEmisor) : "...";
   const emisorArea = formData.idUsuarioEmisor ? getAreaUsuario(formData.idUsuarioEmisor) : "...";
@@ -30,7 +32,6 @@ export const VistaPreviaMemorandum = ({ formData, usuarios = [] }) => {
     <div className="hoja-membretada-container">
       <div className="hoja-membretada-papel">
         
-
         <header className="membrete-header">
           <div className="membrete-logo-box">
             <div className="logo-circulo-guinda"></div>
@@ -43,7 +44,6 @@ export const VistaPreviaMemorandum = ({ formData, usuarios = [] }) => {
           
           <div className="membrete-meta-info">
             <p className="meta-folio">
-  
               <strong>MEMORÁNDUM-05/2026</strong>
             </p>
             <p>
@@ -53,24 +53,40 @@ export const VistaPreviaMemorandum = ({ formData, usuarios = [] }) => {
           </div>
         </header>
 
+    <main className="cuerpo-memorandum">
+  {/* Sección del Responsable */}
+  <div className="area-responsable-preview mb-4">
+    {nombreResponsable ? (
+      <>
+        <h5 className="text-uppercase mb-0" style={{ fontSize: '1.1rem', color: '#2c3e50', fontWeight: 'bold' }}>
+          {nombreResponsable}
+        </h5>
+        <h5 className="text-uppercase mb-0" style={{ fontSize: '0.95rem', color: '#333' }}>
+          {areaDestino?.nombre || areaDestino?.nombreArea || 'Área no especificada'}
+        </h5>
+      </>
+    ) : (
+      <h5 className="text-muted italic">[Responsable y Área No Asignados]</h5>
+    )}
+  </div>
+
+  <p className="texto-presente"><strong>P R E S E N T E .</strong></p>
   
-        <main className="membrete-body">
-          <p className="texto-presente"><strong>P R E S E N T E .</strong></p>
-          
-          <div className="texto-contenido">
-          
-            <p className="parrafo-introductorio">
-              De conformidad al oficio marcado con el Número <strong>{folioCorrespondencia}</strong> emitido por <strong>{emisorNombre}</strong>, perteneciente a la dependencia: <strong>{emisorArea}</strong>.
-            </p>
-            
-          
-            {formData.instruccionSeguimiento && (
-              formData.instruccionSeguimiento.split('\n').map((parrafo, index) => (
-                <p key={index}>{parrafo}</p>
-              ))
-            )}
-          </div>
-        </main>
+  <div className="texto-contenido">
+    <p className="parrafo-introductorio">
+      De conformidad al oficio marcado con el Número <strong>{folioCorrespondencia}</strong> emitido por <strong>{emisorNombre}</strong>, perteneciente a la dependencia: <strong>{emisorArea}</strong>.
+    </p>
+    
+    {/* Mapeo de párrafos con seguridad contra nulos */}
+    {formData.instruccionSeguimiento ? (
+      formData.instruccionSeguimiento.split('\n').map((parrafo, index) => (
+        parrafo.trim() !== "" && <p key={index}>{parrafo}</p>
+      ))
+    ) : (
+      <p className="text-muted">[Sin instrucciones de seguimiento]</p>
+    )}
+  </div>
+</main>
 
         <footer className="membrete-footer">
           <div className="bloque-firma">
