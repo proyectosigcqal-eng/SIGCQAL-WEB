@@ -3,6 +3,7 @@ import { MainLayout } from './shared/MainLayout';
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
 import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica';
+import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
 
           {/* Consulta de Bitácora */}
           <Route path="correspondencia/bitacora/:id" element={<BitacoraHistorica />} />
+
+          {/* Lista de Memorandums por Área */}
+          <Route path="correspondencia/lista-memorandums" element={<ListaMemorandumsPage />} />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>
