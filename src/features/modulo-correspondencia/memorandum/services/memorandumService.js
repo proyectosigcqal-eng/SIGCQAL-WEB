@@ -49,5 +49,22 @@ export const listarPorArea = async (idArea) => {
     } catch (error) {
         console.error("Error al obtener por área:", error.message);
         throw error;
+    };
+};
+
+export const finalizarAsignacion = async (id, archivo) => {
+    const formData = new FormData();
+    formData.append('archivo', archivo); 
+
+    const response = await fetch(`${API_URL}/${id}/finalizar`, {
+        method: 'POST',
+        body: formData,
+        
+    });
+
+    if (!response.ok) {
+        throw new Error('Error al subir el documento firmado');
     }
+
+    return true;
 };

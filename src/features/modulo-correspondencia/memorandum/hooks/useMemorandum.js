@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { generarMemorandum } from '../services/memorandumService';
 
 export const useMemorandum = (datosInicialesDB) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     idCorrespondencia: 1, 
     instruccionSeguimiento: '',
@@ -25,14 +27,22 @@ export const useMemorandum = (datosInicialesDB) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        console.log("Enviando DTO al servidor...", formData);
+        console.log("Enviando borrador de memorándum...", formData);
+      
         const resultado = await generarMemorandum(formData);
-        alert(`¡Memorándum guardado con éxito! Folio: ${resultado.folioUnico}`);
+
+        if (resultado && resultado.id) {
+            navigate(`/correspondencia/asignar-area/${resultado.id}`);
+        } else {
+            console.error("El servidor no devolvió el ID del memorándum");
+        }
+
     } catch (error) {
-        alert("Error al guardar. Revisa la consola y tu backend.");
+        console.error("Error al guardar:", error);
+        alert("Error al guardar el borrador. Revisa la conexión con el servidor.");
     }
   };
 

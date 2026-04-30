@@ -3,6 +3,7 @@ import { MainLayout } from './shared/MainLayout';
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
 
+import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
 import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica';
 
 function App() {
@@ -11,10 +12,17 @@ function App() {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Navigate to="correspondencia/nuevo-memorandum" replace />} />
+          
+          {/* Flujo de creación de Memorándum */}
           <Route path="correspondencia/nuevo-memorandum" element={<GenerarMemorandumPage />} />
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
           
           {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
+          
+          {/* 2. Nueva ruta para Asignar Área (Paso posterior a la generación) */}
+          <Route path="correspondencia/asignar-area/:id" element={<AsignarAreaPage />} />
+
+          {/* Consulta de Bitácora */}
           <Route path="correspondencia/bitacora/:id" element={<BitacoraHistorica />} />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
