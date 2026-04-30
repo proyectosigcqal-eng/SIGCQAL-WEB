@@ -33,3 +33,8 @@ export const getRoles = async () => {
         return response.data;
 
 };
+
+export const getCorrespondencias = async () => {
+  const response = await axios.get(`http://localhost:8081/SIGCQAL_dev/api/v1/correspondencias/entrada`);
+  return response.data;
+};

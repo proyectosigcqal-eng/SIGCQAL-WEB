@@ -10,11 +10,12 @@ export const BitacoraHistorica = ({ idCorrespondencia }) => {
   const [loading, setLoading] = useState(true);
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
   const { id } = useParams();
+  const idFinal = idCorrespondencia ?? id;
 
   useEffect(() => {
   const fetchBitacora = async () => {
     try {
-      const data = await obtenerBitacoraPorCorrespondencia(id);
+      const data = await obtenerBitacoraPorCorrespondencia(idFinal);
      
       setHistorial(data || []); 
     } catch (error) {
@@ -25,7 +26,7 @@ export const BitacoraHistorica = ({ idCorrespondencia }) => {
     }
   };
   fetchBitacora();
-}, [id]);
+}, [idFinal]);
 
   const formatearFecha = (fechaString) => {
     if (!fechaString) return '';

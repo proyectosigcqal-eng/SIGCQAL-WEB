@@ -12,7 +12,7 @@ export const useMemorandum = (datosInicialesDB) => {
     idPlantilla: '',
     idArea: '', 
     observaciones: '',
-    folioUnico: `MEMO-${Date.now()}`, 
+    folioUnico: '', 
     asuntoCorrespondencia: datosInicialesDB?.asunto || 'Sin asunto',
   });
 
@@ -30,9 +30,12 @@ export const useMemorandum = (datosInicialesDB) => {
  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        console.log("Enviando borrador de memorándum...", formData);
-      
-        const resultado = await generarMemorandum(formData);
+        const payload = {
+          ...formData,
+          folioUnico: formData.folioUnico || `MEMO-${Date.now()}`
+        };
+
+        const resultado = await generarMemorandum(payload);
 
         if (resultado && resultado.id) {
             navigate(`/correspondencia/asignar-area/${resultado.id}`);

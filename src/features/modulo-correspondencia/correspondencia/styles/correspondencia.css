@@ -261,3 +261,119 @@
     transform: rotate(360deg);
   }
 }
+
+.registrar-page-container {
+  display: flex;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+}
+
+.registrar-split {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel-formulario-correspondencia {
+  padding: 2rem;
+  overflow-y: auto;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+}
+
+.panel-tabla-correspondencias {
+  padding: 2rem;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.tabla-correspondencias {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-correspondencias th {
+  background: #1A2238;
+  color: white;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.8rem;
+}
+
+.tabla-correspondencias td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.tabla-correspondencias tr:hover {
+  background: #f1f5f9;
+}
+
+.badge-estatus {
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+}
+
+.badge-registrado {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-asignado {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.badge-en-seguimiento {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.badge-concluido {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.indicador-flujo-exitoso {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid #22c55e;
+  background: #f0fdf4;
+  margin-top: 1rem;
+}
+
+.indicador-flujo-warning {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.indicador-flujo-error {
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid #ef4444;
+  background: #fef2f2;
+  margin-top: 1rem;
+}
+
+.filtro-tabla {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

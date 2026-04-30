@@ -1,13 +1,37 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/correspondencias/entrada';
+const api = axios.create({
+  baseURL: 'http://localhost:8081/SIGCQAL_dev'
+});
+
+const PATH = '/api/v1/correspondencias/entrada';
 
 export const registrarCorrespondencia = async (dto) => {
-  const response = await axios.post(API_URL, dto);
-  return response.data;
+  try {
+    const response = await api.post(PATH, dto);
+    return response.data;
+  } catch (error) {
+    console.error('Error al registrar correspondencia:', error);
+    throw error;
+  }
 };
 
 export const obtenerCorrespondenciaPorId = async (id) => {
-  const response = await axios.get(`${API_URL}/${id}`);
-  return response.data;
+  try {
+    const response = await api.get(`${PATH}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error al obtener correspondencia por id:', error);
+    throw error;
+  }
+};
+
+export const listarCorrespondencias = async () => {
+  try {
+    const response = await api.get(PATH);
+    return response.data;
+  } catch (error) {
+    console.error('Error al listar correspondencias:', error);
+    throw error;
+  }
 };

@@ -11,7 +11,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="correspondencia/nuevo-memorandum" replace />} />
+          <Route index element={<Navigate to="correspondencia/registrar" replace />} />
           
           {/* Flujo de creación de Memorándum */}
           <Route path="correspondencia/nuevo-memorandum" element={<GenerarMemorandumPage />} />
