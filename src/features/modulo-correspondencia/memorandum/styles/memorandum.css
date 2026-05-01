@@ -299,8 +299,20 @@
   box-sizing: border-box;    
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   position: relative; 
-  font-family: 'Arial', sans-serif; 
+  font-family: 'Arial', 'Helvetica', sans-serif; 
   color: #333;
+}
+
+
+/* Esta clase se aplicará solo durante la generación del PDF */
+.pdf-capture-mode {
+    letter-spacing: normal !important;
+    text-rendering: optimizeLegibility;
+}
+
+.pdf-capture-mode p, 
+.pdf-capture-mode div {
+    text-align: left !important; /* El justificado a veces rompe los espacios en canvas */
 }
 
 /* ENCABEZADO */
