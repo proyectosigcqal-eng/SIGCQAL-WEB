@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
 import { VistaPreviaMemorandum } from '../../../features/modulo-correspondencia/memorandum/components/VistaPreviaMemorandum'; 
@@ -9,12 +11,12 @@ export const AsignarAreaPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     
-    // 1. Extraemos 'areas' y 'usuarios' (usuarios sigue siendo útil para el firmante en la previa)
+    // 1. Extraemos 'areas' y 'usuarios'
     const { areas, usuarios } = useCatalogos(); 
     
     const [memoData, setMemoData] = useState(null);
     const [areaSeleccionadaId, setAreaSeleccionadaId] = useState('');
-    const [areaData, setAreaData] = useState(null); // Para pasar el objeto completo a la previa
+    const [areaData, setAreaData] = useState(null); 
     const [fueDescargado, setFueDescargado] = useState(false); 
     const [archivoFirmado, setArchivoFirmado] = useState(null);
     const [cargando, setCargando] = useState(true);
@@ -33,7 +35,6 @@ export const AsignarAreaPage = () => {
         if (id) cargarDatos();
     }, [id]);
 
-    // 2. Nueva lógica de cambio enfocada solo en el Área
     const handleAreaChange = (e) => {
         const areaId = e.target.value;
         setAreaSeleccionadaId(areaId);
@@ -53,11 +54,6 @@ export const AsignarAreaPage = () => {
                 nombreAreaAsignada: area.nombreArea || area.nombre 
             }));
         }
-    };
-
-    const handleDescargar = () => {
-        console.log("Generando documento para firma física...");
-        setFueDescargado(true); 
     };
 
     const handleArchivoChange = (e) => {
@@ -81,6 +77,45 @@ export const AsignarAreaPage = () => {
         }
     };
 
+  const handleDescargar = async () => {
+    try {
+        const elemento = document.getElementById('memorandum-pdf-content');
+        if (!elemento) return;
+
+        const canvas = await html2canvas(elemento, {
+            scale: 3, // Mayor escala = mayor nitidez
+            useCORS: true,
+            logging: false,
+            // LA CLAVE: Forzamos estilos que html2canvas entienda bien
+            onclone: (clonedDoc) => {
+                const el = clonedDoc.getElementById('memorandum-pdf-content');
+                el.style.letterSpacing = "0.5px"; // Forzamos espacio entre letras
+                el.style.wordSpacing = "2px";    // Forzamos espacio entre palabras
+                
+                // Quitamos cualquier transformación extraña que pueda romper el layout
+                const parrafos = el.getElementsByTagName('p');
+                for (let p of parrafos) {
+                    p.style.textAlign = "left"; 
+                    p.style.display = "block";
+                }
+            }
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'letter');
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`MEMO_${memoData?.folioUnico || 'DESC'}.pdf`);
+        
+        setFueDescargado(true);
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};
+
     if (cargando) return <div className="p-5 text-center">Cargando datos...</div>;
 
     return (
@@ -93,7 +128,6 @@ export const AsignarAreaPage = () => {
                     <label className="fw-bold small text-uppercase mb-2" style={{color: 'var(--gold)', letterSpacing: '1px'}}>
                         Área Destino 
                     </label>
-                    {/* 3. El select ahora mapea el catálogo de áreas */}
                     <select 
                         className="form-select form-select-premium" 
                         onChange={handleAreaChange}
@@ -164,8 +198,8 @@ export const AsignarAreaPage = () => {
                         <VistaPreviaMemorandum 
                             formData={memoData} 
                             usuarios={usuarios}
-                            areaDestino={areaData} // Pasamos el objeto del área seleccionada
-              
+                            areaDestino={areaData} 
+                            idUsuarioAsignado={null} 
                         />
                     )}
                 </div>
