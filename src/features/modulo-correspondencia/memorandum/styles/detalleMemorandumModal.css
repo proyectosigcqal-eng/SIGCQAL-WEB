@@ -1,0 +1,96 @@
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(30, 41, 59, 0.45);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 1000px;
+  width: 95vw;
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  position: relative;
+  font-family: inherit;
+}
+.modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #64748b;
+  cursor: pointer;
+}
+.detalle-memorandum h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+.detalle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem 2.5rem;
+  margin-bottom: 1.5rem;
+}
+.detalle-grid > div {
+  font-size: 1rem;
+}
+.detalle-grid strong {
+  display: inline;
+  font-size: 0.95rem;
+  color: #22223b;
+  margin-right: 0.3rem;
+  font-weight: 700;
+}
+.detalle-asunto {
+  grid-column: 1 / -1;
+}
+.detalle-contenido {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+}
+.detalle-contenido div {
+  color: #475569;
+  font-size: 1.05rem;
+  margin-top: 0.2rem;
+  line-height: 1.5;
+}
+.detalle-botones {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+.btn-si {
+  background: #222c3a;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 2.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-no {
+  background: #a32a1c;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 2.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-loading, .modal-error {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 1.1rem;
+}
