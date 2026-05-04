@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { obtenerMemorandumPorId } from '../services/memorandumService';
-import './detalleMemorandumModal.css';
+import { responderAcuse } from '../../acuserecibointerno/services/acuserecibointernoService';
+import '../styles/detalleMemorandumModal.css';
 
 export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [respondiendo, setRespondiendo] = useState(false);
 
   useEffect(() => {
     if (!idMemo) return;
@@ -28,6 +30,79 @@ export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
   const fechaStr = fecha ? fecha.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
   const horaStr = fecha ? fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '-';
 
+  // Función para manejar la respuesta "Si es del área"
+  const handleSiEsDelArea = async () => {
+    if (!memo || respondiendo) return;
+
+    try {
+      setRespondiendo(true);
+      
+      const now = new Date();
+      const request = {
+        idAcuse: memo.idAcuse || memo.id,
+        esDelArea: true,
+        fechaAceptacion: now.toISOString().split('T')[0],
+        horaAceptacion: now.toTimeString().slice(0, 8),
+        idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
+        idMemorandum: memo.idMemorandum || memo.id,
+        idCorrespondencia: memo.idCorrespondencia,
+        numMemo: memo.numMemo || memo.folioUnico,
+        fechaEmision: memo.fechaEmision,
+        idUsuarioEmisor: memo.idUsuarioEmisor,
+        folioUnico: memo.folioUnico,
+        observaciones: memo.observaciones,
+        urlMemorandumGenerado: memo.urlMemorandumGenerado,
+        idPlantilla: memo.idPlantilla,
+        idArea: memo.idArea,
+        idUsuarioFirmante: memo.idUsuarioFirmante
+      };
+
+      await responderAcuse(request);
+      alert('Acuse de recibo confirmado correctamente');
+      if (onClose) onClose();
+    } catch (error) {
+      console.error('Error al responder acuse:', error);
+      alert('Error al confirmar el acuse de recibo');
+    } finally {
+      setRespondiendo(false);
+    }
+  };
+
+  const handleNoEsDelArea = async () => {
+    if (!memo || respondiendo) return;
+    try {
+      setRespondiendo(true);
+      const now = new Date();
+      const request = {
+        idAcuse: memo.idAcuse || memo.id,
+        esDelArea: false,
+        fechaAceptacion: now.toISOString().split('T')[0],
+        horaAceptacion: now.toTimeString().slice(0, 8),
+        idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
+        idMemorandum: memo.idMemorandum || memo.id,
+        idCorrespondencia: memo.idCorrespondencia,
+        numMemo: memo.numMemo || memo.folioUnico,
+        fechaEmision: memo.fechaEmision,
+        idUsuarioEmisor: memo.idUsuarioEmisor,
+        folioUnico: memo.folioUnico,
+        observaciones: memo.observaciones,
+        urlMemorandumGenerado: memo.urlMemorandumGenerado,
+        idPlantilla: memo.idPlantilla,
+        idArea: memo.idArea,
+        idUsuarioFirmante: memo.idUsuarioFirmante
+      };
+      await responderAcuse(request);
+      alert('Se notificó que NO es del área.');
+      if (onClose) onClose();
+    } catch (error) {
+      console.error('Error al responder acuse (no es del área):', error);
+      alert('Error al notificar que no es del área');
+    } finally {
+      setRespondiendo(false);
+    }
+  };
+
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -38,24 +113,40 @@ export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
           <div className="modal-error">{error}</div>
         ) : (
           <div className="detalle-memorandum">
-            <h2>Detalles Memorandum <span>{memo.folioUnico || memo.id}</span></h2>
+            <h2>Detalles  Del Memorandum <span>{memo.folioUnico || memo.id}</span></h2>
             <div className="detalle-grid">
-            <div>
-                    <strong>FOLIO ÚNICO</strong>
-                    <div>{memo.folioUnico || '-'}</div>
+              {/* Información de Correspondencia Vinculada */}
+              <div>
+                    <strong>FOLIO MEMORANDUM</strong> {memo.folioUnico || memo.id || '-'}
                 </div>
                 <div>
-                    <strong>ÁREA</strong>
-                    <div>{memo.idArea || '-'}</div>
+                    <strong>ÁREA</strong> {memo.idArea || '-'}
                 </div>
+
                 <div>
-                    <strong>FECHA</strong>
+                    <strong>FECHA EMISIÓN</strong>
                     <div>{fechaStr}</div>
                 </div>
                 <div>
-                    <strong>HORA</strong>
+                    <strong>HORA EMISIÓN</strong>
                     <div>{horaStr}</div>
                 </div>
+              <div className="info-correspondencia">
+                <strong>REMITENTE</strong>
+                <div>{memo.remitente || memo.nombreRemitente || memo.remitenteNombre || '-'}</div>
+              </div>
+              <div className="info-correspondencia">
+                <strong>DEPENDENCIA</strong>
+                <div>{memo.dependenciaRemitente || memo.dependencia || memo.nombreDependencia || '-'}</div>
+              </div>
+              <div className="info-correspondencia">
+                <strong>ASUNTO </strong>
+                <div>{memo.asuntoCorrespondencia || memo.asunto || '-'}</div>
+              </div>
+              <div className="info-correspondencia">
+                <strong>FOLIO CORRESPONDENCIA</strong>
+                <div>{memo.folioUnicoCorrespondencia || memo.folioCorrespondencia || '-'}</div>
+              </div>
                 <div>
                     <strong>USUARIO EMISOR</strong>
                     <div>{memo.nombreUsuarioEmisor || '-'}</div>
@@ -74,8 +165,14 @@ export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
                 </div>
                 </div>
             <div className="detalle-botones">
-              <button className="btn-si">Si es del área.</button>
-              <button className="btn-no">No es del área</button>
+              <button 
+                className="btn-si" 
+                onClick={handleSiEsDelArea}
+                disabled={respondiendo}
+              >
+                {respondiendo ? 'Confirmando...' : 'Si es del área.'}
+              </button>
+              <button className="btn-no" onClick={handleNoEsDelArea}>No es del área</button>
             </div>
           </div>
         )}

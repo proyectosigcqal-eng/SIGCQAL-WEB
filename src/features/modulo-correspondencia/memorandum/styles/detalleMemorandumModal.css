@@ -10,7 +10,7 @@
 .modal-content {
   background: #fff;
   border-radius: 16px;
-  max-width: 700px;
+  max-width: 1000px;
   width: 95vw;
   padding: 2.5rem 2.5rem 2rem 2.5rem;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
@@ -33,11 +33,6 @@
   color: #1e293b;
   margin-bottom: 1.5rem;
 }
-.detalle-memorandum h2 span {
-  font-weight: 400;
-  color: #64748b;
-  font-size: 1.1rem;
-}
 .detalle-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -48,10 +43,10 @@
   font-size: 1rem;
 }
 .detalle-grid strong {
-  display: block;
+  display: inline;
   font-size: 0.95rem;
   color: #22223b;
-  margin-bottom: 0.2rem;
+  margin-right: 0.3rem;
   font-weight: 700;
 }
 .detalle-asunto {

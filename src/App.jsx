@@ -22,7 +22,7 @@ function App() {
           <Route path="correspondencia/bitacora/:id" element={<BitacoraHistorica />} />
 
           {/* Lista de Memorandums por Área */}
-          <Route path="correspondencia/lista-memorandums" element={<ListaMemorandumsPage />} />
+          <Route path="correspondencia/lista-memorandums-revision" element={<ListaMemorandumsPage />} />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>

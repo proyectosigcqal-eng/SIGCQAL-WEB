@@ -42,7 +42,7 @@ export const ListaMemorandums = () => {
   return (
     <div className="lista-memorandums-container">
       <div className="lista-header">
-        <h2>Lista de Memorandums</h2>
+        <h2>Memorandums en revisión</h2>
         <div className="header-info">
           <span className="area-badge">Área: {areaForzada}</span>
           <button onClick={recargar} className="btn-actualizar">
@@ -60,18 +60,24 @@ export const ListaMemorandums = () => {
           <table className="memorandums-table">
             <thead>
               <tr>
-                <th>Fecha Emisión</th>
-                <th>Folio Único</th>
+                <th>#</th>
+                <th>Folio Correspondencia</th>
+                <th>Asunto</th>
+                <th>Folio Memorandum</th>
                 <th>Emisor</th>
+                <th>Fecha Emisión</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {memorandums.map((memo) => (
+              {memorandums.map((memo, index) => (
                 <tr key={memo.id}>
+                  <td>{index + 1}</td>
+                  <td>{memo.folioUnicoCorrespondencia || memo.folioCorrespondencia || '-'}</td>
+                  <td>{memo.asuntoCorrespondencia || memo.asunto || '-'}</td>
+                  <td>{memo.folioUnico || memo.id || '-'}</td>
+                  <td>{memo.nombreUsuarioEmisor || memo.remitente || memo.nombreRemitente || '-'}</td>
                   <td>{formatearFecha(memo.fechaEmision)}</td>
-                  <td>{memo.folioUnico || '-'}</td>
-                  <td>{memo.nombreUsuarioEmisor || '-'}</td>
                   <td>
                     <button 
                       className="btn-ver-detalle"
