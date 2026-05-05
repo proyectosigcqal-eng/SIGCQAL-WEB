@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { listarSeguimientosMemo, listarSeguimientosCorr } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
+// navegación no usada aquí
+import { listarSeguimientosMemo, listarSeguimientosCorr, guardarSeguimientoMemo, guardarSeguimientoCorr } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
+import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
 import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
+import axios from 'axios';
 
 export const BandejaCentralPage = () => {
-    const navigate = useNavigate();
+    // no usamos navegación directa desde la bandeja; abrimos modal en su lugar
     const [activeTab, setActiveTab] = useState('memorandums');
     const [datosTabla, setDatosTabla] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
 
     useEffect(() => {
         cargarDatos(activeTab);
@@ -19,18 +23,31 @@ export const BandejaCentralPage = () => {
         if (tab === 'memorandums') {
             // Traemos los datos de la tabla seguimiento_memorandum
             const data = await listarSeguimientosMemo();
+             console.log('>>> data del back:', data);
             
             setDatosTabla(data.map(item => ({
-                id: item.idMemo, // ID del memo original para poder navegar
-                idSeguimiento: item.idSeguimiento, 
-                folio: item.folioRespuesta, // El folio que generó el área
-                asunto: item.respuestaSeguimientoMemorandum, // Lo que el área escribió
-                fecha: item.fechaResolucion,
-                estatus: 'CONTESTADO', // Si está aquí, es porque ya hubo respuesta
-                archivo: item.archivoAdjunto
-            })));
+            id:      item.idSeguimientoMemorandum,  
+            idMemo:  item.idMemo,
+            folio:   item.folioRespuesta,
+            asunto:  item.respuestaSeguimientoMemorandum,
+            fecha:   item.fechaResolucion,
+            estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+            archivo: item.archivoAdjunto,
+            tipo:    'memorandum'
+        })));
         } else {
-            // ... lógica similar para correspondencia
+            // Traemos los datos de la tabla seguimiento_correspondencia
+            const data = await listarSeguimientosCorr();
+            setDatosTabla(data.map(item => ({
+                id:      item.idSeguimientoMemorandum,  // ← ID único del seguimiento
+                idMemo:  item.idMemo,
+                folio:   item.folioRespuesta,
+                asunto:  item.respuestaSeguimientoMemorandum,
+                fecha:   item.fechaResolucion,
+                estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO', // ← leer del back
+                archivo: item.archivoAdjunto,
+                tipo:    'memorandum'
+            })));
         }
     } catch (error) {
         console.error("Error", error);
@@ -39,13 +56,39 @@ export const BandejaCentralPage = () => {
         setIsLoading(false);
     }
 };
-    const handleAtenderClick = (id) => {
-        if (activeTab === 'memorandums') {
-            navigate(`/memorandum/seguimiento/${id}`);
-        } else {
-            navigate(`/correspondencia/seguimiento/${id}`);
-        }
+    const handleAbrirDetalle = (item) => {
+        setSelectedItem(item);
+        setModalOpen(true);
     };
+
+  const handleCerrarSeguimiento = async (item, comentario) => {
+    try {
+        if (!item) return;
+
+        if (item.tipo === 'memorandum') {
+            // ← PUT al nuevo endpoint, NO guardarSeguimientoMemo
+            await axios.put(
+                `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-memorandum/concluir/${item.id}`,
+                { respuestaSeguimientoMemorandum: comentario || 'Cierre desde bandeja' }
+            );
+        } else {
+            await axios.put(
+                `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia/concluir/${item.id}`,
+                { respuestaSeguimientoCorrespondencia: comentario || 'Cierre desde bandeja' }
+            );
+        }
+
+        setDatosTabla(prev =>
+            prev.map(d =>
+                d.id === item.id ? { ...d, estatus: 'CONCLUIDO' } : d
+            )
+        );
+        return true;
+    } catch (error) {
+        console.error('Error al cerrar:', error);
+        throw error;
+    }
+};
 
     return (
         <div className="bandeja-wrapper">
@@ -94,16 +137,21 @@ export const BandejaCentralPage = () => {
                                             <td>{item.asunto}</td>
                                             <td>{item.fecha}</td>
                                             <td>
-                                                <span className={`status-badge ${item.estatus === 'PENDIENTE' ? 'status-pendiente' : 'status-seguimiento'}`}>
-                                                    {item.estatus}
-                                                </span>
+                                               <span className={`status-badge ${
+                                                item.estatus === 'PENDIENTE'   ? 'status-pendiente'  :
+                                                item.estatus === 'CONCLUIDO'   ? 'status-concluido'  :
+                                                item.estatus === 'CONTESTADO'  ? 'status-contestado' :
+                                                                                'status-seguimiento'
+                                            }`}>
+                                                {item.estatus}
+                                            </span>
                                             </td>
                                             <td style={{ textAlign: 'center' }}>
                                                 <button
                                                     className="btn-atender"
-                                                    onClick={() => handleAtenderClick(item.id)}
+                                                    onClick={() => handleAbrirDetalle(item)}
                                                 >
-                                                    Cerrar seguimiento
+                                                    Detalles
                                                 </button>
                                             </td>
                                         </tr>
@@ -120,6 +168,18 @@ export const BandejaCentralPage = () => {
                     )}
                 </div>
             </div>
+                    {selectedItem && (
+                        <DetalleBandejaModal
+                            isOpen={modalOpen}
+                            onClose={() => { setModalOpen(false); setSelectedItem(null); }}
+                            item={selectedItem}
+                            onCerrarSeguimiento={async (it, comentario) => {
+                                await handleCerrarSeguimiento(it, comentario);
+                                setModalOpen(false);
+                                setSelectedItem(null);
+                            }}
+                        />
+                    )}
         </div>
     );
 };

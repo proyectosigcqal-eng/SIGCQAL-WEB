@@ -23,12 +23,21 @@
     font-size: 1rem;
 }
 
-/* Contenedor principal de la tarjeta */
+/* 1. Elimina el recorte en la tarjeta */
 .bandeja-card {
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    /* overflow: hidden;  <-- ELIMINA O COMENTA ESTA LÍNEA */
+    margin-bottom: 2rem; /* Agrega espacio al final para que no pegue con el borde */
+}
+
+/* 2. Asegúrate de que el wrapper permita el flujo */
+.bandeja-wrapper {
+    padding: 2rem;
+    background-color: #f4f7f6;
+    min-height: 100vh; /* Cambia a 100vh simple */
+    overflow-y: auto; /* Asegura que el scroll vertical esté habilitado */
 }
 
 /* Diseño personalizado para las pestañas (Tabs) */
@@ -147,4 +156,18 @@
 .status-seguimiento {
     background-color: #eebfbc;
     color: #691c32;
+}
+
+/* Agrega estas clases al final de tu bandeja.css */
+
+.status-concluido {
+    background-color: #d4edda;
+    color: #276749;
+    border: 1px solid #c3e6cb;
+}
+
+.status-contestado {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
 }
