@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { shouldMostrarGenerarMemorandum } from '../utils/correspondenciaUtils';
 
 const getValue = (value, fallback = '—') => {
   if (value === null || value === undefined) return fallback;
@@ -58,14 +59,16 @@ export const BandejaSinArea = ({ correspondencias = [], onGenerarMemorandum }) =
                       {getValue(item.fechaRecibido || item.fecha)}
                     </td>
                     <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                      <button
-                        type="button"
-                        className="btn-primario-corr"
-                        style={{ padding: '0.5rem 0.9rem' }}
-                        onClick={() => onGenerarMemorandum?.(item, 'bandeja-sin-area')}
-                      >
-                        Generar Memorándum
-                      </button>
+                      {shouldMostrarGenerarMemorandum(item) ? (
+                        <button
+                          type="button"
+                          className="btn-primario-corr"
+                          style={{ padding: '0.5rem 0.9rem' }}
+                          onClick={() => onGenerarMemorandum?.(item, 'bandeja-sin-area')}
+                        >
+                          Generar Memorándum
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 ))}

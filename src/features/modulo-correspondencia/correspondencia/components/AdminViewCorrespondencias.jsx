@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { hasAreaAsignada, shouldMostrarGenerarMemorandum } from '../utils/correspondenciaUtils';
 
 const norm = (value) => String(value ?? '').toLowerCase();
 
@@ -32,7 +33,7 @@ export const AdminViewCorrespondencias = ({ correspondencias = [], areas = [], o
       })
       .filter((c) => {
         if (filtroAsignacion === 'TODAS') return true;
-        const tieneArea = c.idArea !== null && c.idArea !== undefined && String(c.idArea) !== '';
+        const tieneArea = hasAreaAsignada(c);
         if (filtroAsignacion === 'SIN_AREA') return !tieneArea;
         if (filtroAsignacion === 'CON_AREA') return tieneArea;
         return true;
@@ -104,8 +105,8 @@ export const AdminViewCorrespondencias = ({ correspondencias = [], areas = [], o
                 </tr>
               ) : (
                 items.map((c) => {
-                  const tieneArea = c.idArea !== null && c.idArea !== undefined && String(c.idArea) !== '';
-                  const area = tieneArea ? areaPorId.get(String(c.idArea)) : null;
+                  const tieneArea = hasAreaAsignada(c);
+                  const area = c?.idArea ? areaPorId.get(String(c.idArea)) : null;
                   const estatus = c.estatus || c.nombreEstatus || c.idEstatus;
 
                   return (
@@ -137,14 +138,16 @@ export const AdminViewCorrespondencias = ({ correspondencias = [], areas = [], o
                         {getValue(c.fechaRecibido || c.fecha)}
                       </td>
                       <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                        <button
-                          type="button"
-                          className="btn-primario-corr"
-                          style={{ padding: '0.5rem 0.9rem' }}
-                          onClick={() => onGenerarMemorandum?.(c, 'admin-view')}
-                        >
-                          Generar Memorándum
-                        </button>
+                        {shouldMostrarGenerarMemorandum(c) ? (
+                          <button
+                            type="button"
+                            className="btn-primario-corr"
+                            style={{ padding: '0.5rem 0.9rem' }}
+                            onClick={() => onGenerarMemorandum?.(c, 'admin-view')}
+                          >
+                            Generar Memorándum
+                          </button>
+                        ) : null}
                       </td>
                     </tr>
                   );
