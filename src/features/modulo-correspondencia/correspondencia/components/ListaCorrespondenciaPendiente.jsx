@@ -1,13 +1,16 @@
 import { useCorrespondenciaPendientePorArea } from '../hooks/useCorrespondenciaPendientePorArea';
+import { DetalleCorrespondenciaModal } from './DetalleCorrespondenciaModal';
+import { useState } from 'react';
 import '@/features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
 
 export const ListaCorrespondenciaPendiente = () => {
   const { correspondencia, loading, error, recargar, areaForzada } = useCorrespondenciaPendientePorArea();
+  const [detalleId, setDetalleId] = useState(null);
 
   // Función para manejar el click (puedes adaptarla)
   const verDetalles = (item) => {
     console.log('Ver detalles de:', item);
-    // Aquí puedes navegar, abrir modal, etc.
+    setDetalleId(item.id);
   };
 
   return (
@@ -76,6 +79,14 @@ export const ListaCorrespondenciaPendiente = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de detalle */}
+      {detalleId && (
+        <DetalleCorrespondenciaModal
+          idCorrespondencia={detalleId}
+          onClose={() => setDetalleId(null)}
+        />
+      )}
     </div>
   );
 };
