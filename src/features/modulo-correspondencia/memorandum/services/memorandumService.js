@@ -44,7 +44,7 @@ export const obtenerMemorandumPorId = async (id) => {
 
 export const listarPorArea = async (idArea) => {
     try {
-        const response = await axios.get(`${API_URL}/area/${idArea}`);
+        const response = await axios.get(`${API_URL}/pendientesacuse/area/${idArea}`);
         return response.data;
     } catch (error) {
         console.error("Error al obtener por área:", error.message);

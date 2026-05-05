@@ -1,0 +1,106 @@
+import { useListaMemorandums } from '../hooks/useListaMemorandums';
+import '@/features/modulo-correspondencia/memorandum/styles/listaMemorandums.css';
+import { useState } from 'react';
+import { DetalleMemorandumModal } from './DetalleMemorandumModal';
+
+export const ListaMemorandums = () => {
+  const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandums();
+  const [detalleId, setDetalleId] = useState(null);
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) return '-';
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="lista-memorandums-container">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Cargando memorandums...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="lista-memorandums-container">
+        <div className="error-state">
+          <p>Error al cargar: {error}</p>
+          <button onClick={recargar} className="btn-reintentar">Reintentar</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="lista-memorandums-container">
+      <div className="lista-header">
+        <h2>Memorandums en revisión</h2>
+        <div className="header-info">
+          <span className="area-badge">Área: {areaForzada}</span>
+          <button onClick={recargar} className="btn-actualizar">
+            ↻ Actualizar
+          </button>
+        </div>
+      </div>
+
+      {memorandums.length === 0 ? (
+        <div className="empty-state">
+          <p>No hay memorandums para esta área.</p>
+        </div>
+      ) : (
+        <div className="table-wrapper">
+          <table className="memorandums-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Folio Correspondencia</th>
+                <th>Asunto</th>
+                <th>Folio Memorandum</th>
+                <th>Emisor</th>
+                <th>Fecha Emisión</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {memorandums.map((memo, index) => (
+                <tr key={memo.id}>
+                  <td>{index + 1}</td>
+                  <td>{memo.folioUnicoCorrespondencia || memo.folioCorrespondencia || '-'}</td>
+                  <td>{memo.asuntoCorrespondencia || memo.asunto || '-'}</td>
+                  <td>{memo.folioUnico || memo.id || '-'}</td>
+                  <td>{memo.nombreUsuarioEmisor || memo.remitente || memo.nombreRemitente || '-'}</td>
+                  <td>{formatearFecha(memo.fechaEmision)}</td>
+                  <td>
+                    <button 
+                      className="btn-ver-detalle"
+                      onClick={() => setDetalleId(memo.id)}
+                    >
+                      Ver Detalle
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal de detalle */}
+      {detalleId && (
+        <DetalleMemorandumModal idMemo={detalleId} onClose={() => setDetalleId(null)} />
+      )}
+
+      <div className="lista-footer">
+        <span>Total: {memorandums.length} memorandums</span>
+      </div>
+    </div>
+  );
+};
