@@ -8,6 +8,8 @@ import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-me
 import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-central/BandejaCentralPage';
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
+import { CorrespondenciaPendienteRevisionPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage';
+import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage';
 
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
+          <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
+          <Route path="correspondencia/acuses-correspondencia" element={<ListaAcusesCorrespondenciaPage />} />
           
           {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
           

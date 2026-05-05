@@ -42,7 +42,7 @@ export const ListaMemorandums = () => {
   return (
     <div className="lista-memorandums-container">
       <div className="lista-header">
-        <h2>Memorandums en revisión</h2>
+        <h2>Memorandums pendientes revisión</h2>
         <div className="header-info">
           <span className="area-badge">Área: {areaForzada}</span>
           <button onClick={recargar} className="btn-actualizar">

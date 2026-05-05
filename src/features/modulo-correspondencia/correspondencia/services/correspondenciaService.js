@@ -21,3 +21,8 @@ export const obtenerCorrespondenciaPorId = async (id) => {
   const response = await axios.get(`${API_URL}/${id}`);
   return response.data;
 };
+
+export const obtenerCorrespondenciaPendientePorArea = async (idArea) => {
+  const response = await axios.get(`${API_URL}/pendienteacuse/area/${idArea}`);
+  return response.data;
+};
