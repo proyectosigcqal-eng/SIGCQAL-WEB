@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AdminViewCorrespondencias } from '@/features/modulo-correspondencia/correspondencia/components/AdminViewCorrespondencias';
 import { BandejaAreaAsignada } from '@/features/modulo-correspondencia/correspondencia/components/BandejaAreaAsignada';
 import { BandejaSinArea } from '@/features/modulo-correspondencia/correspondencia/components/BandejaSinArea';
 import { FormularioRegistrarCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/components/FormularioRegistrarCorrespondencia';
@@ -17,7 +16,6 @@ export const RegistrarCorrespondenciaPage = () => {
     correspondenciaRegistrada,
     areaSeleccionada,
     areas,
-    todasCorrespondencias,
     correspondenciasSinArea,
     loading,
     error,
@@ -65,28 +63,14 @@ export const RegistrarCorrespondenciaPage = () => {
       ) : null}
 
       {fase === 'FORMULARIO' ? (
-        <div style={{ padding: '1.5rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 520px' }}>
-            <FormularioRegistrarCorrespondencia onRegistroExitoso={onFormularioGuardado} />
-          </div>
-          <div style={{ flex: '1 1 520px' }}>
-            <AdminViewCorrespondencias
-              correspondencias={todasCorrespondencias}
-              areas={areas}
-              onGenerarMemorandum={onGenerarMemorandum}
-            />
-          </div>
+        <div style={{ padding: '1.5rem' }}>
+          <FormularioRegistrarCorrespondencia onRegistroExitoso={onFormularioGuardado} />
         </div>
       ) : null}
 
       {fase === 'SIN_AREA' ? (
         <div className="registrar-split-vertical">
           <BandejaSinArea correspondencias={correspondenciasSinArea} onGenerarMemorandum={onGenerarMemorandum} />
-          <AdminViewCorrespondencias
-            correspondencias={todasCorrespondencias}
-            areas={areas}
-            onGenerarMemorandum={onGenerarMemorandum}
-          />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-primario-corr" onClick={onNuevoRegistro}>
               + Registrar otra

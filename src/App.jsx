@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './shared/MainLayout'; 
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
+import { CorrespondenciasRegistradasPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage';
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
 import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica';
 import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-memorandum/ContestacionPage';
@@ -17,11 +18,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="correspondencia/nuevo-memorandum" replace />} />
+          <Route index element={<Navigate to="correspondencia/registrar" replace />} />
           
           {/* Flujo de creación de Memorándum */}
           <Route path="correspondencia/nuevo-memorandum" element={<GenerarMemorandumPage />} />
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
+          <Route path="correspondencia/registradas" element={<CorrespondenciasRegistradasPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />

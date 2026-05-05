@@ -1,15 +1,24 @@
-import { Mail, LogOut, User } from 'lucide-react';
-import { Outlet, Link } from 'react-router-dom';
+import { FileText, FileEdit, List, LogOut, User } from 'lucide-react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 
 export const MainLayout = () => {
+    const location = useLocation();
+    const isActive = (path) => location.pathname === path || location.pathname.startsWith(`${path}/`);
+
     return (
         <div className="app-container">
             {/* Sidebar de tu HTML */}
             <aside className="sidebar">
                 <div className="sidebar-logo"><h1>SIGCQAL</h1></div>
                 <nav className="sidebar-nav">
-                    <Link to="/correspondencia" className="nav-item active">
-                        <Mail /> <span>Correspondencia</span>
+                    <Link to="/correspondencia/registrar" className={`nav-item ${isActive('/correspondencia/registrar') ? 'active' : ''}`}>
+                        <FileText /> <span>Registrar Correspondencia</span>
+                    </Link>
+                    <Link to="/correspondencia/registradas" className={`nav-item ${isActive('/correspondencia/registradas') ? 'active' : ''}`}>
+                        <List /> <span>Correspondencia Registrada</span>
+                    </Link>
+                    <Link to="/correspondencia/nuevo-memorandum" className={`nav-item ${isActive('/correspondencia/nuevo-memorandum') ? 'active' : ''}`}>
+                        <FileEdit /> <span>Memorándum</span>
                     </Link>
                 </nav>
                 <div className="sidebar-footer">
