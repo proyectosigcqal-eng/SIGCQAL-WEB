@@ -13,38 +13,32 @@ export const BandejaCentralPage = () => {
         cargarDatos(activeTab);
     }, [activeTab]);
 
-    const cargarDatos = async (tab) => {
-        setIsLoading(true);
-        try {
-            if (tab === 'memorandums') {
-                const data = await listarSeguimientosMemo();
-                // Mapeamos la respuesta del DTO al formato que espera la tabla
-                setDatosTabla(data.map(item => ({
-                    id: item.idMemorandum,          // viene de SeguimientoMemorandumResponseDTO
-                    folio: item.folio ?? `MEM-${item.idMemorandum}`,
-                    asunto: item.asunto ?? item.descripcion,
-                    fecha: item.fecha ?? item.fechaRegistro,
-                    estatus: item.estatus ?? 'PENDIENTE'
-                })));
-            } else if (tab === 'correspondencia') {
-                const data = await listarSeguimientosCorr();
-                // Mapeamos la respuesta del DTO al formato que espera la tabla
-                setDatosTabla(data.map(item => ({
-                    id: item.idCorrespondencia,     // viene de SeguimientoCorrespondenciaResponseDTO
-                    folio: item.folio ?? `CORR-${item.idCorrespondencia}`,
-                    asunto: item.asunto ?? item.descripcion,
-                    fecha: item.fecha ?? item.fechaRegistro,
-                    estatus: item.estatus ?? 'PENDIENTE'
-                })));
-            }
-        } catch (error) {
-            console.error("Error al cargar la información", error);
-            setDatosTabla([]);
-        } finally {
-            setIsLoading(false);
+   const cargarDatos = async (tab) => {
+    setIsLoading(true);
+    try {
+        if (tab === 'memorandums') {
+            // Traemos los datos de la tabla seguimiento_memorandum
+            const data = await listarSeguimientosMemo();
+            
+            setDatosTabla(data.map(item => ({
+                id: item.idMemo, // ID del memo original para poder navegar
+                idSeguimiento: item.idSeguimiento, 
+                folio: item.folioRespuesta, // El folio que generó el área
+                asunto: item.respuestaSeguimientoMemorandum, // Lo que el área escribió
+                fecha: item.fechaResolucion,
+                estatus: 'CONTESTADO', // Si está aquí, es porque ya hubo respuesta
+                archivo: item.archivoAdjunto
+            })));
+        } else {
+            // ... lógica similar para correspondencia
         }
-    };
-
+    } catch (error) {
+        console.error("Error", error);
+        setDatosTabla([]);
+    } finally {
+        setIsLoading(false);
+    }
+};
     const handleAtenderClick = (id) => {
         if (activeTab === 'memorandums') {
             navigate(`/memorandum/seguimiento/${id}`);
@@ -109,7 +103,7 @@ export const BandejaCentralPage = () => {
                                                     className="btn-atender"
                                                     onClick={() => handleAtenderClick(item.id)}
                                                 >
-                                                    Atender / Detalles
+                                                    Cerrar seguimiento
                                                 </button>
                                             </td>
                                         </tr>

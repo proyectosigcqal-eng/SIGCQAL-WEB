@@ -36,44 +36,44 @@ export const AsignarAreaPage = () => {
     }, [id]);
 
     const handleAreaChange = (e) => {
-        const areaId = e.target.value;
-        setAreaSeleccionadaId(areaId);
+    const areaId = e.target.value;
+    setAreaSeleccionadaId(areaId);
 
-        if (areaId === '') {
-            setAreaData(null);
-            return;
-        }
+    if (areaId === '') {
+        setAreaData(null);
+        return;
+    }
 
-        const area = areas?.find(a => a.id === Number(areaId));
+    const area = areas?.find(a => a.id === Number(areaId));
 
-        if (area) {
-            setAreaData(area); 
-            setMemoData(prev => ({
-                ...prev,
-                idAreaAsignada: area.id,
-                nombreAreaAsignada: area.nombreArea || area.nombre 
-            }));
-        }
-    };
+    if (area) {
+        setAreaData(area);
+        setMemoData(prev => ({
+            ...prev,
+            idAreaAsignada: area.id,        // ← Number, no string
+            nombreAreaAsignada: area.nombreArea || area.nombre
+        }));
+    }
+};
 
+const handleConfirmarFinalizar = async () => {
+    if (!archivoFirmado || !areaData) return;
+    try {
+        // ✅ Pasas el Number desde areaData.id, no el string del select
+        await finalizarAsignacion(id, archivoFirmado, areaData.id);
+        alert("Memorándum Asignado y Enviado con Éxito");
+        navigate('/correspondencia/bitacora/' + id);
+    } catch (error) {
+        console.error("Error al finalizar:", error);
+        alert("Hubo un error al procesar el archivo.");
+    }
+};
     const handleArchivoChange = (e) => {
         const file = e.target.files[0];
         if (file?.type === 'application/pdf') {
             setArchivoFirmado(file);
         } else {
             alert("Por favor, sube un archivo PDF válido");
-        }
-    };
-
-    const handleConfirmarFinalizar = async () => {
-        if (!archivoFirmado) return;
-        try {
-            await finalizarAsignacion(id, archivoFirmado);
-            alert("Memorándum Asignado y Enviado con Éxito");
-            navigate('/correspondencia/bitacora/' + id);
-        } catch (error) {
-            console.error("Error al finalizar:", error);
-            alert("Hubo un error al procesar el archivo.");
         }
     };
 

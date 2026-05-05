@@ -14,7 +14,8 @@ export const useListaMemorandums = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listarPorArea(idArea);
+      // Pedimos una página grande para obtener todos los registros de una sola vez
+      const data = await listarPorArea(idArea, { page: 0, size: 10000 });
       console.log('Memorandums recibidos de la API:', data);
       console.log(' Primer memo (keys):', data.length > 0 ? Object.keys(data[0]) : 'sin datos');
       setMemorandums(data);

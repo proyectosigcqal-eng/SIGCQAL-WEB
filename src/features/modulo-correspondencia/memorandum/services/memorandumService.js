@@ -42,29 +42,56 @@ export const obtenerMemorandumPorId = async (id) => {
 };
 
 
-export const listarPorArea = async (idArea) => {
+/**
+ * Listar memorandums por área.
+ * Soporta paginación si el backend lo expone (page, size).
+ * Si el backend devuelve un objeto paginado ({ content: [...] }), se retorna el array de content.
+ * @param {number} idArea
+ * @param {{page?: number, size?: number}} [options]
+ * @returns {Promise<Array>} arreglo de memorandums
+ */
+export const listarPorArea = async (idArea, options = {}) => {
     try {
-        const response = await axios.get(`${API_URL}/pendientesacuse/area/${idArea}`);
-        return response.data;
+        const { page, size } = options;
+        let url = `${API_URL}/pendientesacuse/area/${idArea}`;
+        const params = new URLSearchParams();
+        if (typeof page !== 'undefined' && page !== null) params.append('page', String(page));
+        if (typeof size !== 'undefined' && size !== null) params.append('size', String(size));
+        if ([...params].length) url += `?${params.toString()}`;
+
+        const response = await axios.get(url);
+        const data = response.data;
+
+        // Caso típico: el backend devuelve un arreglo
+        if (Array.isArray(data)) return data;
+
+        // Caso paginado estilo Spring: { content: [...], totalElements, ... }
+        if (data && Array.isArray(data.content)) return data.content;
+
+        // Otros wrappers comunes
+        if (data && Array.isArray(data.items)) return data.items;
+
+        // Si no es un arreglo conocido, devolver tal cual (podría romper código que espera array)
+        return data;
     } catch (error) {
         console.error("Error al obtener por área:", error.message);
         throw error;
     };
 };
 
-export const finalizarAsignacion = async (id, archivo) => {
+export const finalizarAsignacion = async (id, archivo, idArea) => {
     const formData = new FormData();
-    formData.append('archivo', archivo); 
+    formData.append('archivo', archivo);
+    formData.append('idArea', idArea);
 
     const response = await fetch(`${API_URL}/${id}/finalizar`, {
         method: 'POST',
         body: formData,
-        
     });
 
     if (!response.ok) {
         throw new Error('Error al subir el documento firmado');
-    };
+    }
 
     return true;
 };
