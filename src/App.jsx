@@ -6,6 +6,7 @@ import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/cor
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
 import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica';
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
+import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
 
           {/* Lista de Memorandums por Área */}
           <Route path="correspondencia/lista-memorandums-revision" element={<ListaMemorandumsPage />} />
+
+          {/* Lista de Memorandums por Área (Acuse Recibo Interno) */}
+          <Route path="correspondencia/memorandums-por-area" element={<ListaMemorandumsPorAreaPage />} />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>

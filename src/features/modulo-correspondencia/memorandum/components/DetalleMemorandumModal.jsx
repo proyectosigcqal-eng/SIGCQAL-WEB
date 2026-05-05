@@ -3,7 +3,7 @@ import { obtenerMemorandumPorId } from '../services/memorandumService';
 import { responderAcuse } from '../../acuserecibointerno/services/acuserecibointernoService';
 import '../styles/detalleMemorandumModal.css';
 
-export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
+export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) => {
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,6 +59,7 @@ export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
 
       await responderAcuse(request);
       alert('Acuse de recibo confirmado correctamente');
+      if (onActualizarLista) onActualizarLista();
       if (onClose) onClose();
     } catch (error) {
       console.error('Error al responder acuse:', error);
@@ -93,6 +94,7 @@ export const DetalleMemorandumModal = ({ idMemo, onClose }) => {
       };
       await responderAcuse(request);
       alert('Se notificó que NO es del área.');
+      if (onActualizarLista) onActualizarLista();
       if (onClose) onClose();
     } catch (error) {
       console.error('Error al responder acuse (no es del área):', error);
