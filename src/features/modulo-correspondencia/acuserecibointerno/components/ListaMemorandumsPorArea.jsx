@@ -1,8 +1,10 @@
 import { useListaMemorandumsPorArea } from '../hooks/useListaMemorandumsPorArea';
 import '@/features/modulo-correspondencia/acuserecibointerno/styles/listaMemorandumsPorArea.css';
+import { useNavigate } from 'react-router-dom';
 
 export const ListaMemorandumsPorArea = () => {
   const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandumsPorArea();
+  const navigate = useNavigate();
 
   const formatearFecha = (fecha) => {
     if (!fecha) return '-';
@@ -90,6 +92,7 @@ export const ListaMemorandumsPorArea = () => {
                     <button 
                       className="btn-accion btn-contestacion"
                       title="Contestación"
+                      onClick={() => navigate(`/correspondencia/contestacion/${memo.idAcuse}`)}
                     >
                       Contestación
                     </button>

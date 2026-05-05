@@ -12,3 +12,13 @@ export const obtenerBitacoraPorCorrespondencia = async (idCorrespondencia) => {
     throw error;
   }
 };
+
+export const crearRegistro = async (dto) => {
+  try {
+    const response = await axios.post(API_URL, dto);
+    return response.data;
+  } catch (error) {
+    console.error('Error al crear registro de bitácora', error.response?.data || error.message);
+    throw error;
+  }
+};

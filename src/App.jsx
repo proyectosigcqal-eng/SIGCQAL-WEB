@@ -21,6 +21,7 @@ function App() {
           <Route path="correspondencia/nuevo-memorandum" element={<GenerarMemorandumPage />} />
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
+          <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
           
           {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
