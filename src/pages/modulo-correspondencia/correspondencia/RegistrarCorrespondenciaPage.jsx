@@ -85,7 +85,9 @@ export const RegistrarCorrespondenciaPage = () => {
           <AdminViewCorrespondencias
             correspondencias={todasCorrespondencias}
             areas={areas}
-            onGenerarMemorandum={onGenerarMemorandum}
+            onGenerarMemorandum={(correspondencia) => {
+              navigate(`/correspondencia/nuevo-memorandum/${correspondencia.id}`);
+            }}
           />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-primario-corr" onClick={onNuevoRegistro}>

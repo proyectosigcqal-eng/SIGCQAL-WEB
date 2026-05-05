@@ -20,7 +20,7 @@ function App() {
           <Route index element={<Navigate to="correspondencia/nuevo-memorandum" replace />} />
           
           {/* Flujo de creación de Memorándum */}
-          <Route path="correspondencia/nuevo-memorandum" element={<GenerarMemorandumPage />} />
+          <Route path="correspondencia/nuevo-memorandum/:idCorrespondencia" element={<GenerarMemorandumPage />} />
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />

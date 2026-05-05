@@ -128,10 +128,11 @@ export const usePostRegistroCorrespondencia = () => {
         null;
 
       if (!id) return;
-      navigate('/correspondencia/nuevo-memorandum', { state: { idCorrespondencia: id, from: from || null } });
+      // ← cambia state por parámetro en URL
+      navigate(`/correspondencia/nuevo-memorandum/${id}`);
     },
     [navigate]
-  );
+);
 
   return {
     fase,

@@ -5,12 +5,13 @@ import '../styles/detalleBandejaModal.css';
 
 // Mapa visual por estatus
 const ESTATUS_CONFIG = {
-  'REGISTRADO':     { color: '#3182ce', bg: '#ebf8ff', icon: '📝' },
+  'CORRESPONDENCIA RECIBIDA': { color: '#2b6cb0', bg: '#ebf8ff', icon: '📬' },
+  'MEMORANDUM GENERADO':     { color: '#3182ce', bg: '#ebf8ff', icon: '📝' },
   'VALIDADO':       { color: '#38a169', bg: '#f0fff4', icon: '✅' },
   'ASIGNADO':       { color: '#d69e2e', bg: '#fffff0', icon: '📋' },
   'REASIGNADO':     { color: '#dd6b20', bg: '#fffaf0', icon: '🔄' },
   'EN SEGUIMIENTO': { color: '#805ad5', bg: '#faf5ff', icon: '👁️' },
-  'ATENDIDO':       { color: '#2b6cb0', bg: '#ebf8ff', icon: '📨' },
+  'CONTESTADO':       { color: '#2b6cb0', bg: '#ebf8ff', icon: '📨' },
   'CONCLUIDO':      { color: '#276749', bg: '#f0fff4', icon: '🏁' },
 };
 

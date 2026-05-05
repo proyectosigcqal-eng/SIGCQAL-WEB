@@ -41,7 +41,9 @@ export const VistaPreviaMemorandum = ({ formData, usuarios = [], areaDestino }) 
           </div>
           
           <div className="membrete-meta-info">
-            <p className="meta-folio"><strong>MEMORÁNDUM-05/2026</strong></p>
+            <p className="meta-folio">
+              <strong>{formData.folioUnico || 'MEMO-XXXXXXXX'}</strong>
+            </p>
             <p><strong>Asunto:</strong> {formData.asuntoCorrespondencia || 'Sin asunto asignado'}</p>
             <p>Guadalupe, Zacatecas, a {obtenerFechaActual()}.</p>
           </div>
