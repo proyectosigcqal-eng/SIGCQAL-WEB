@@ -90,46 +90,67 @@ export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
         ) : (
           <div className="detalle-correspondencia">
             <h2>Detalles de la Correspondencia <span>{correspondencia.folioUnico || correspondencia.id}</span></h2>
+
             <div className="detalle-grid">
-              <div>
-                <strong>FOLIO ÚNICO</strong> {correspondencia.folioUnico || correspondencia.id || '-'}
-              </div>
-              <div>
-                <strong>NÚMERO DE OFICIO</strong> {correspondencia.numeroOficio || correspondencia.nroOficio || '-'}
-              </div>
-              <div>
-                <strong>FECHA EXPEDICIÓN</strong> {fechaExpedicionStr}
-              </div>
-              <div>
-                <strong>DEPENDENCIA REMITENTE</strong> {correspondencia.dependenciaRemitente || '-'}
-              </div>
-              <div>
-                <strong>TITULAR DEPENDENCIA</strong> {correspondencia.titularDependencia || '-'}
-              </div>
-              <div>
-                <strong>NOMBRE ÁREA</strong> {correspondencia.nombreArea || '-'}
-              </div>
-              <div className="detalle-asunto">
-                <strong>ASUNTO</strong> {correspondencia.asunto || '-'}
-              </div>
-              <div className="detalle-observaciones">
+                <div>
+                <strong>FOLIO ÚNICO</strong>
+                <div>{correspondencia.folioUnico || correspondencia.id || '-'}</div>
+                </div>
+
+                <div>
+                <strong>NÚMERO DE OFICIO</strong>
+                <div>{correspondencia.numeroOficio || correspondencia.nroOficio || '-'}</div>
+                </div>
+
+                <div>
+                <strong>FECHA EXPEDICIÓN</strong>
+                <div>{fechaExpedicionStr}</div>
+                </div>
+
+                <div>
+                <strong>DEPENDENCIA REMITENTE</strong>
+                <div>{correspondencia.dependenciaRemitente || '-'}</div>
+                </div>
+
+                <div>
+                <strong>TITULAR DEPENDENCIA</strong>
+                <div>{correspondencia.titularDependencia || '-'}</div>
+                </div>
+
+                <div>
+                <strong>NOMBRE ÁREA</strong>
+                <div>{correspondencia.nombreArea || '-'}</div>
+                </div>
+
+                <div className="detalle-asunto">
+                <strong>ASUNTO</strong>
+                <div>{correspondencia.asunto || '-'}</div>
+                </div>
+
+                <div className="detalle-observaciones">
                 <strong>OBSERVACIONES</strong>
                 <div>{correspondencia.observaciones || '-'}</div>
-              </div>
+                </div>
             </div>
+
             <div className="detalle-botones">
-              <button
+                <button
                 className="btn-si"
                 onClick={handleSiEsDelArea}
                 disabled={respondiendo}
-              >
+                >
                 {respondiendo ? 'Confirmando...' : 'Si es del área'}
-              </button>
-              <button className="btn-no" onClick={handleNoEsDelArea} disabled={respondiendo}>
+                </button>
+
+                <button
+                className="btn-no"
+                onClick={handleNoEsDelArea}
+                disabled={respondiendo}
+                >
                 No es del área
-              </button>
+                </button>
             </div>
-          </div>
+            </div>
         )}
       </div>
     </div>

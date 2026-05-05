@@ -50,7 +50,7 @@ export const ListaMemorandumsPorArea = () => {
   return (
     <div className="lista-memorandums-area-container">
       <div className="lista-header">
-        <h2>Memorandums por Área</h2>
+        <h2>Memorandum asignados</h2>
         <div className="header-info">
           <span className="area-badge">Área: {areaForzada}</span>
           <button onClick={recargar} className="btn-actualizar">

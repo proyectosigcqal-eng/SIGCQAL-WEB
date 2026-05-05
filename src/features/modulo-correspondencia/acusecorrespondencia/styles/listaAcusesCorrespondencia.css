@@ -28,30 +28,30 @@
 }
 
 .area-badge {
-  background-color: #691C32;
-  color: white;
+  color: gray;
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 600;
 }
 
-.btn-actualizar {
-  background-color: #691C32;
+
+.btn-actualizar-acuse {
+  background: #3b82f6;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
-.btn-actualizar:hover {
-  background-color: #5a1528;
-  box-shadow: 0 2px 4px rgba(105, 28, 50, 0.3);
+.btn-actualizar-acuse:hover {
+  background: #2563eb;
 }
+
 
 .loading-state, .error-state, .empty-state {
   text-align: center;

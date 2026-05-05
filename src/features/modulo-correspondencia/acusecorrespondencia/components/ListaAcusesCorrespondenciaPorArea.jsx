@@ -39,10 +39,10 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
   return (
     <div className="lista-acuses-correspondencia-container">
       <div className="lista-header">
-        <h2>Acuses de Correspondencia por Área</h2>
+        <h2>Correspondencia asignada</h2>
         <div className="header-info">
           <span className="area-badge">Área: {areaForzada}</span>
-          <button onClick={recargar} className="btn-actualizar">
+          <button onClick={recargar} className="btn-actualizar-acuse">
             ↻ Actualizar
           </button>
         </div>
