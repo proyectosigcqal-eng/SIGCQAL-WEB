@@ -8,6 +8,7 @@ import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-me
 import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-central/BandejaCentralPage';
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
+import { ContestacionCorrespondenciaPage } from './pages/modulo-correspondencia/contestacion-correspondencia/ContestacionCorrespondenciaPage';
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           <Route path="correspondencia/nuevo-memorandum" element={<GenerarMemorandumPage />} />
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
+          <Route path="correspondencia/contestacion-correspondencia/:id" element={<ContestacionCorrespondenciaPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
           
           {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
