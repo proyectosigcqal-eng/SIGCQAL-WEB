@@ -1,41 +1,32 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { FormularioCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/components/FormularioCorrespondencia';
-import { PanelArchivoAdjunto } from '@/features/modulo-correspondencia/correspondencia/components/PanelArchivoAdjunto';
-import { ModalConfirmacionArchivo } from '@/features/modulo-correspondencia/correspondencia/components/ModalConfirmacionArchivo';
-import { useRegistrarCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/hooks/useRegistrarCorrespondencia';
+import { AdminViewCorrespondencias } from '@/features/modulo-correspondencia/correspondencia/components/AdminViewCorrespondencias';
+import { BandejaAreaAsignada } from '@/features/modulo-correspondencia/correspondencia/components/BandejaAreaAsignada';
+import { BandejaSinArea } from '@/features/modulo-correspondencia/correspondencia/components/BandejaSinArea';
+import { FormularioRegistrarCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/components/FormularioRegistrarCorrespondencia';
+import { ModalAsignarArea } from '@/features/modulo-correspondencia/correspondencia/components/ModalAsignarArea';
+import { usePostRegistroCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/hooks/usePostRegistroCorrespondencia';
 import '@/features/modulo-correspondencia/correspondencia/styles/correspondencia.css';
 
 export const RegistrarCorrespondenciaPage = () => {
   const navigate = useNavigate();
 
   const {
-    formData,
-    erroresCampo,
-    archivoSeleccionado,
-    archivoPreview,
-    archivoConfirmado,
-    errorArchivo,
-    mostrarModalConfirmacion,
-    isLoading,
+    fase,
+    correspondenciaRegistrada,
+    areaSeleccionada,
+    areas,
+    todasCorrespondencias,
+    correspondenciasSinArea,
+    loading,
     error,
-    registroExitoso,
-    tamanoArchivo,
-    handleChange,
-    handleArchivoChange,
-    handleConfirmarArchivo,
-    handleRechazarArchivo,
-    handleQuitarArchivo,
-    handleSubmit
-  } = useRegistrarCorrespondencia();
-
-  const folio =
-    registroExitoso?.folioUnico ||
-    registroExitoso?.folio ||
-    registroExitoso?.folioGenerado ||
-    registroExitoso?.consecutivo ||
-    null;
+    onFormularioGuardado,
+    onConfirmarConArea,
+    onSaltarSinArea,
+    onNuevoRegistro,
+    onGenerarMemorandum
+  } = usePostRegistroCorrespondencia();
 
   return (
     <div className="registrar-correspondencia-page">
@@ -47,61 +38,70 @@ export const RegistrarCorrespondenciaPage = () => {
         <div style={{ width: 180 }} />
       </div>
 
-      <div className="form-container-corr">
-        <div className="form-card-corr">
-          {registroExitoso ? (
-            <div className="alerta-exito">
-              Registro guardado{folio ? ` · Folio generado: ${folio}` : ''}
-            </div>
-          ) : null}
-
-          <form onSubmit={handleSubmit}>
-            <FormularioCorrespondencia
-              formData={formData}
-              erroresCampo={erroresCampo}
-              handleChange={handleChange}
-              isLoading={isLoading}
-              errorGlobal={error}
-            />
-
-            <div style={{ marginTop: '1.75rem' }}>
-              <div className="form-section-title">Documento digitalizado</div>
-              <PanelArchivoAdjunto
-                archivoSeleccionado={archivoSeleccionado}
-                archivoPreview={archivoPreview}
-                archivoConfirmado={archivoConfirmado}
-                errorArchivo={errorArchivo}
-                onArchivoChange={handleArchivoChange}
-                onQuitarArchivo={handleQuitarArchivo}
-              />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
-              <button type="button" className="btn-secundario-corr" onClick={() => navigate(-1)} disabled={isLoading}>
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn-primario-corr"
-                disabled={isLoading}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}
-              >
-                {isLoading ? <span className="spinner-corr" /> : null}
-                Guardar Registro
-              </button>
-            </div>
-          </form>
+      {error ? (
+        <div className="form-container-corr" style={{ paddingTop: '1rem', paddingBottom: 0 }}>
+          <div className="alerta-error" style={{ marginBottom: 0 }}>
+            {error}
+          </div>
         </div>
-      </div>
+      ) : null}
 
-      <ModalConfirmacionArchivo
-        visible={mostrarModalConfirmacion}
-        nombreArchivo={archivoSeleccionado?.name || ''}
-        tamanoArchivo={tamanoArchivo}
-        previewUrl={archivoPreview}
-        onConfirmar={handleConfirmarArchivo}
-        onRechazar={handleRechazarArchivo}
-      />
+      {fase === 'MODAL_AREA' ? (
+        <ModalAsignarArea
+          visible={true}
+          areas={areas}
+          onConfirmar={onConfirmarConArea}
+          onSaltarSinArea={onSaltarSinArea}
+        />
+      ) : null}
+
+      {fase === 'GUARDANDO' || loading ? (
+        <div className="form-container-corr" style={{ maxWidth: 860 }}>
+          <div className="form-card-corr" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span className="spinner-corr" />
+            <div style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Procesando...</div>
+          </div>
+        </div>
+      ) : null}
+
+      {fase === 'FORMULARIO' ? (
+        <div style={{ padding: '1.5rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 520px' }}>
+            <FormularioRegistrarCorrespondencia onRegistroExitoso={onFormularioGuardado} />
+          </div>
+          <div style={{ flex: '1 1 520px' }}>
+            <AdminViewCorrespondencias
+              correspondencias={todasCorrespondencias}
+              areas={areas}
+              onGenerarMemorandum={onGenerarMemorandum}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {fase === 'SIN_AREA' ? (
+        <div className="registrar-split-vertical">
+          <BandejaSinArea correspondencias={correspondenciasSinArea} onGenerarMemorandum={onGenerarMemorandum} />
+          <AdminViewCorrespondencias
+            correspondencias={todasCorrespondencias}
+            areas={areas}
+            onGenerarMemorandum={onGenerarMemorandum}
+          />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <button type="button" className="btn-primario-corr" onClick={onNuevoRegistro}>
+              + Registrar otra
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {fase === 'CON_AREA' ? (
+        <BandejaAreaAsignada
+          correspondencia={correspondenciaRegistrada}
+          areaSeleccionada={areaSeleccionada}
+          onNuevoRegistro={onNuevoRegistro}
+        />
+      ) : null}
     </div>
   );
 };
