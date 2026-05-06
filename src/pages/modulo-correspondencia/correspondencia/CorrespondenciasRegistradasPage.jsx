@@ -182,7 +182,8 @@ export const CorrespondenciasRegistradasPage = () => {
   const handleNavigateMemorandum = (item) => {
     const id = getId(item);
     if (!id) return;
-    navigate('/correspondencia/nuevo-memorandum', { state: { idCorrespondencia: id, from: 'registradas' } });
+    // Navegar incluyendo el id en la URL para que la ruta con :idCorrespondencia coincida
+    navigate(`/correspondencia/nuevo-memorandum/${id}`, { state: { from: 'registradas' } });
   };
 
   const handleResetFilters = () => {
