@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { BandejaAreaAsignada } from '@/features/modulo-correspondencia/correspondencia/components/BandejaAreaAsignada';
 import { BandejaSinArea } from '@/features/modulo-correspondencia/correspondencia/components/BandejaSinArea';
+import { AdminViewCorrespondencias } from '@/features/modulo-correspondencia/correspondencia/components/AdminViewCorrespondencias';
 import { FormularioRegistrarCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/components/FormularioRegistrarCorrespondencia';
 import { ModalAsignarArea } from '@/features/modulo-correspondencia/correspondencia/components/ModalAsignarArea';
 import { usePostRegistroCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/hooks/usePostRegistroCorrespondencia';
@@ -71,6 +72,14 @@ export const RegistrarCorrespondenciaPage = () => {
       {fase === 'SIN_AREA' ? (
         <div className="registrar-split-vertical">
           <BandejaSinArea correspondencias={correspondenciasSinArea} onGenerarMemorandum={onGenerarMemorandum} />
+
+          <AdminViewCorrespondencias
+            correspondencias={todasCorrespondencias}
+            areas={areas}
+            onGenerarMemorandum={(correspondencia) => {
+              navigate(`/correspondencia/nuevo-memorandum/${correspondencia.id}`);
+            }}
+          />
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-primario-corr" onClick={onNuevoRegistro}>
               + Registrar otra

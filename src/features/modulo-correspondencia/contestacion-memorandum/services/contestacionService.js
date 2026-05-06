@@ -26,3 +26,11 @@ export const subirPdfFirmado = async (idSeguimiento, archivo) => {
   if (!response.ok) throw new Error('Error al subir el documento firmado');
   return true;
 };
+
+export const obtenerProximoFolio = async () => {
+  const res = await axios.get(`${API}/seguimiento-memorandum/listar`);
+  const total = res.data.length;
+  const proximo = total + 1;
+  const anio = new Date().getFullYear();
+  return `CM-${String(proximo).padStart(6, '0')}-${anio}`;
+};

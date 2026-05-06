@@ -29,9 +29,16 @@ export const listarSeguimientosCorr = async () => {
 
 export const obtenerBitacoraCompletaMemo = async (idMemo) => {
 
-  const [memo, acuses, seguimientos] = await Promise.all([
-    axios.get(`${API_BASE}/memorandums/${idMemo}`)
-      .then(r => r.data).catch(() => null),
+   // Primero obtenemos el memo para saber el idCorrespondencia
+  const memo = await axios.get(`${API_BASE}/memorandums/${idMemo}`)
+    .then(r => r.data).catch(() => null);
+
+  // Con el idCorrespondencia del memo, cargamos todo en paralelo
+  const [correspondencia, acuses, seguimientos] = await Promise.all([
+    memo?.idCorrespondencia
+      ? axios.get(`${API_BASE}/correspondencias/entrada/${memo.idCorrespondencia}`)
+          .then(r => r.data).catch(() => null)
+      : Promise.resolve(null),
     axios.get(`${API_BASE}/acuse-interno/memorandum/${idMemo}`)
       .then(r => r.data).catch(() => []),
     axios.get(`${API_BASE}/seguimiento-memorandum/memorandum/${idMemo}`)
@@ -40,31 +47,43 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
 
   const eventos = [];
 
-  // 1️⃣ REGISTRADO
+  // 0️⃣ CORRESPONDENCIA RECIBIDA — origen del trámite
+  if (correspondencia) {
+    eventos.push({
+      idLog:       `corr-${correspondencia.id}`,
+      estatus:     'CORRESPONDENCIA RECIBIDA',
+      fecha:       correspondencia.fechaRecibido || correspondencia.fechaRegistro,
+      usuario:     correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
+      descripcion: correspondencia.asunto || '',
+      folio:       correspondencia.folioUnico,
+    });
+  }
+
+  // 1️⃣ MEMORANDUM GENERADO
   if (memo) {
     eventos.push({
       idLog:       `memo-${memo.idMemo}`,
-      estatus:     'REGISTRADO',
+      estatus:     'MEMORANDUM GENERADO',
       fecha:       memo.fechaEmision,
-      usuario:     `Usuario ${memo.idUsuarioEmisor}`,
-      descripcion: memo.instruccionSeguimiento || '',
+      usuario:     memo.nombreUsuarioEmisor || `Usuario ${memo.idUsuarioEmisor}`,
+      descripcion: memo.asuntoCorrespondencia || '',
       folio:       memo.folioUnico,
     });
   }
 
   // 2️⃣ ASIGNADO
   if (memo?.idArea) {
-  eventos.push({
-    idLog:       `asignado-${memo.id}`,
-    estatus:     'ASIGNADO',
-    fecha:       memo.fechaEmision,
-    usuario:     memo.nombreUsuarioFirmante || `Usuario ${memo.idUsuarioFirmante}`,
-    descripcion: `Memorándum asignado al área: ${memo.nombreArea || `Área ${memo.idArea}`}`,
-    folio:       memo.folioUnico,
-  });
-}
+    eventos.push({
+      idLog:       `asignado-${memo.idMemo}`,
+      estatus:     'ASIGNADO',
+      fecha:       memo.fechaEmision,
+      usuario:     memo.nombreUsuarioFirmante || `Usuario ${memo.idUsuarioFirmante}`,
+      descripcion: `Memorándum asignado al área: ${memo.nombreArea || `Área ${memo.idArea}`}`,
+      folio:       memo.folioUnico,
+    });
+  }
 
-  // 3️⃣ EN SEGUIMIENTO o REASIGNADO — un evento por cada acuse
+  // 3️⃣ EN SEGUIMIENTO o REASIGNADO
   (acuses || []).forEach((acuse, i) => {
     eventos.push({
       idLog:       `acuse-${acuse.idAcuse || i}`,
@@ -78,11 +97,11 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     });
   });
 
-  // 4️⃣ ATENDIDO — una entrada por cada contestación registrada
+  // 4️⃣ CONTESTADO
   (seguimientos || []).forEach((seg, i) => {
     eventos.push({
       idLog:       `seg-${seg.idSeguimientoMemorandum || i}`,
-      estatus:     'ATENDIDO',
+      estatus:     'CONTESTADO',
       fecha:       seg.fechaResolucion,
       usuario:     `Usuario ${seg.idUsuario}`,
       descripcion: seg.respuestaSeguimientoMemorandum || '',
@@ -90,7 +109,6 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     });
   });
 
-  // Orden cronológico
   return eventos.sort((a, b) => {
     const da = a.fecha ? new Date(a.fecha) : new Date(0);
     const db = b.fecha ? new Date(b.fecha) : new Date(0);

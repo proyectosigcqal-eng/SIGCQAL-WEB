@@ -93,7 +93,7 @@ export const BandejaCentralPage = () => {
     return (
         <div className="bandeja-wrapper">
             <div className="bandeja-header">
-                <h1 className="bandeja-title">Bandeja de Trámites</h1>
+                <h1 className="bandeja-title">Bandeja de Contestación</h1>
                 <p className="bandeja-subtitle">Gestiona y da seguimiento a los documentos asignados a tu área.</p>
             </div>
 

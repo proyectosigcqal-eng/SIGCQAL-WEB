@@ -62,7 +62,7 @@ const handleConfirmarFinalizar = async () => {
         // ✅ Pasas el Number desde areaData.id, no el string del select
         await finalizarAsignacion(id, archivoFirmado, areaData.id);
         alert("Memorándum Asignado y Enviado con Éxito");
-        navigate('/correspondencia/bitacora/' + id);
+       navigate('/correspondencia/lista-memorandums-revision');
     } catch (error) {
         console.error("Error al finalizar:", error);
         alert("Hubo un error al procesar el archivo.");
