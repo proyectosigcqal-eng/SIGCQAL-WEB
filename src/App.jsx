@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { MainLayout } from './shared/MainLayout'; 
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { GenerarOficioPage } from './pages/modulo-correspondencia/oficio/GenerarOficioPage';
+import { GenerarOficioPage as GenerarOficioCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioPage';
 import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
 import { CorrespondenciasRegistradasPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage';
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
@@ -30,6 +31,7 @@ function App() {
           <Route path="correspondencia/nuevo-oficio/:idCorrespondencia" element={<GenerarOficioPage />} />
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
           <Route path="correspondencia/registradas" element={<CorrespondenciasRegistradasPage />} />
+          <Route path="correspondencia/generar-oficio/:id" element={<GenerarOficioCorrespondenciaPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />

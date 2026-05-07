@@ -5,7 +5,7 @@ import { ModalConfirmacionArchivo } from './ModalConfirmacionArchivo';
 import { PanelArchivoAdjunto } from './PanelArchivoAdjunto';
 import { useRegistrarCorrespondencia } from '../hooks/useRegistrarCorrespondencia';
 
-export const FormularioRegistrarCorrespondencia = ({ onRegistroExitoso }) => {
+export const FormularioRegistrarCorrespondencia = ({ onRegistroExitoso, tiposCorrespondencia = [] }) => {
   const ultimoRegistroRef = useRef(null);
 
   const {
@@ -41,6 +41,25 @@ export const FormularioRegistrarCorrespondencia = ({ onRegistroExitoso }) => {
     <div className="form-container-corr">
       <div className="form-card-corr">
         <form onSubmit={handleSubmit}>
+          <div className="form-group-corr full-width">
+            <label htmlFor="idTipoCorrespondencia">Tipo de Correspondencia *</label>
+            <select
+              id="idTipoCorrespondencia"
+              name="idTipoCorrespondencia"
+              value={formData.idTipoCorrespondencia || ''}
+              onChange={handleChange}
+              disabled={isLoading}
+              required
+            >
+              <option value="">Seleccionar tipo...</option>
+              {tiposCorrespondencia.map((t) => (
+                <option key={t.idTipo} value={t.idTipo}>
+                  {t.descripcion}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <FormularioCorrespondencia
             formData={formData}
             erroresCampo={erroresCampo}
