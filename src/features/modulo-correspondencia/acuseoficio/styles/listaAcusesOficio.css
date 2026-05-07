@@ -1,0 +1,78 @@
+.lista-acuses-oficio-container {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 10px;
+}
+.lista-header,
+.lista-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.area-badge {
+  background: #f0f4ff;
+  color: #1f3c88;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+.table-wrapper {
+  overflow-x: auto;
+}
+.acuses-oficio-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.acuses-oficio-table th,
+.acuses-oficio-table td {
+  padding: 0.75rem 0.8rem;
+  border: 1px solid #e3e8f0;
+}
+.status-badge {
+  display: inline-flex;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+.status-si { background: #d1fae5; color: #065f46; }
+.status-no { background: #fee2e2; color: #991b1b; }
+.empty-state,
+.error-state,
+.loading-state {
+  padding: 2rem;
+  text-align: center;
+}
+.btn-actualizar-acuse,
+.btn-reintentar {
+  background: #1f3c88;
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+.btn-contestacion-acuse-oficio {
+  background: transparent;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  line-height: normal;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-contestacion-acuse-oficio:hover {
+  background: #3b82f6;
+  color: white;
+}

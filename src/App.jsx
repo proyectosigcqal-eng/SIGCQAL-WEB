@@ -14,6 +14,7 @@ import { ListaOficiosPage } from './pages/modulo-correspondencia/oficio/ListaOfi
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
 import { CorrespondenciaPendienteRevisionPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage';
 import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage';
+import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
           <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
           <Route path="correspondencia/acuses-correspondencia" element={<ListaAcusesCorrespondenciaPage />} />
+          <Route path="correspondencia/acuses-oficio-por-area" element={<ListaAcusesOficioPage />} />
           
           {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
           
