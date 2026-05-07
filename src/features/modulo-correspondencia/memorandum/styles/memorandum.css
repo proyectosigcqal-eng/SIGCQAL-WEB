@@ -425,3 +425,112 @@
   color: white;
   font-size: 10px;
 }
+
+/* === VISTA PREVIA CON MEMBRETE REAL === */
+
+.hoja-membretada-container {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.hoja-membretada-papel {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  aspect-ratio: 8.5 / 11;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  background: white;
+  overflow: hidden;
+}
+
+/* Imagen de fondo ocupa toda la hoja */
+.membrete-fondo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Contenido dinámico encima del fondo */
+.membrete-contenido {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22% 9% 24% 9%; /* ← ajuste fino: más espacio arriba y abajo */
+  box-sizing: border-box;
+  font-size: clamp(0.5rem, 1vw, 0.8rem);
+  font-family: Arial, sans-serif;
+  color: #000;
+}
+
+/* META INFO — debe quedar alineada a la derecha debajo del header */
+.membrete-meta-info {
+  text-align: right;
+  margin-bottom: 5%;
+  line-height: 1.6;
+  font-size: 0.95em;
+}
+
+/* CUERPO — zona central de la hoja */
+.cuerpo-memorandum {
+  flex: 1;
+  line-height: 1.7;
+  overflow: hidden; /* evita que desborde sobre el footer */
+}
+
+/* FIRMA — pegada al fondo antes del footer */
+.membrete-footer-firma {
+  text-align: center;
+  line-height: 1.8;
+  margin-top: 4%;
+  padding-bottom: 2%;
+}
+
+
+.meta-folio {
+  font-size: 1.05em;
+}
+
+/* CUERPO */
+.cuerpo-memorandum {
+  flex: 1;
+  line-height: 1.7;
+  text-align: justify;
+}
+
+.area-responsable-preview {
+  margin-bottom: 4px;
+  font-size: 1em;
+}
+
+.texto-presente {
+  margin-bottom: 12px;
+  letter-spacing: 3px;
+}
+
+.texto-contenido p {
+  margin-bottom: 8px;
+  text-align: justify;
+}
+
+/* FIRMA */
+.membrete-footer-firma {
+  margin-top: auto;
+  text-align: center;
+  padding-bottom: 4%;
+  line-height: 1.8;
+}
+
+.bloque-firma {
+  margin-top: 8px;
+}

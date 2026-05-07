@@ -15,7 +15,7 @@ export const generarMemorandum = async (memorandumDTO) => {
     } catch (error) {
         console.error("Error al generar memorándum:", error.response?.data || error.message);
         throw error;
-    }
+    };
 };
 
 

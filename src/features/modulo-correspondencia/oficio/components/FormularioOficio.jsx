@@ -25,14 +25,15 @@ export const FormularioOficio = ({ formData, setFormData, handleChange, handleSu
 
       {/* Folio — solo lectura */}
       <div className="form-group full-width">
-        <label>No. Oficio</label>
-        <input
-          type="text"
-          value={formData.folioUnico || 'Se generará automáticamente'}
-          disabled
-          className="input-readonly"
-        />
-      </div>
+  <label>No. Oficio</label>
+  <input
+    type="text"
+    value={formData.folioUnico || ''}
+    placeholder="Se generará al guardar"
+    disabled
+    className="input-readonly"
+  />
+</div>
 
       {/* Asunto */}
       <div className="form-group full-width">

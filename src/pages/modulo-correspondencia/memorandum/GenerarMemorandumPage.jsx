@@ -24,7 +24,7 @@ export const GenerarMemorandumPage = () => {
         .finally(() => setLoadingCorr(false));
 }, [idCorrespondencia]);
 
-  const { formData, setFormData, handleChange, handleSubmit } = useMemorandum(correspondencia);
+  const { formData, setFormData, handleChange, handleSubmit } = useMemorandum(correspondencia, catalogos);
 
   if (loadingCorr) {
     return <div className="sigcqal-page-container"><p>Cargando correspondencia...</p></div>;
