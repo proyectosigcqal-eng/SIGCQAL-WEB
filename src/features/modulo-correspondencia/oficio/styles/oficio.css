@@ -1,0 +1,427 @@
+/* --- Estructura Principal en GenerarMemorandumPage.jsx --- */
+.generar-memorandum-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 2rem;
+  height: calc(100vh - 120px); 
+  padding: 1rem 2rem;
+}
+
+/* --- Panel del Formulario --- */
+.formulario-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto; /* Esto evita que se corte, agrega scroll interno solo aquí */
+  padding-right: 10px; /* Espacio para la barra de scroll */
+}
+
+/* Scrollbar minimalista para que se vea profesional */
+.formulario-panel::-webkit-scrollbar {
+  width: 6px;
+}
+.formulario-panel::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* --- Grid Interno del Formulario --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.full-width {
+  grid-column: 1 / -1; /* Hace que el textarea ocupe ambas columnas */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b; /* Gris sutil */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1A2238; /* Color azul oscuro de tu sidebar */
+  background-color: #ffffff;
+}
+
+/* --- Botones --- */
+.form-acciones {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-primario {
+  background-color: #1A2238; 
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primario:hover {
+  background-color: #2a3655;
+}
+
+.btn-secundario {
+  background-color: transparent;
+  color: #1A2238;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: 1px solid #1A2238;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secundario:hover {
+  background-color: #f1f5f9;
+}
+/* Contenedor principal de la página */
+.sigcqal-page-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px); /* Ajusta según el alto de tu navbar superior */
+    overflow: hidden; /* Evita scroll en toda la página */
+    background-color: #f8fafc;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* LA CLAVE: El contenedor Split */
+.split-view-container {
+    display: grid;
+    grid-template-columns: 45% 55%; /* El formulario un poco más estrecho que la hoja */
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Panel del Formulario con scroll independiente */
+.panel-formulario {
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: white;
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Panel de Vista Previa con fondo gris para resaltar la "hoja" */
+.panel-vista-previa {
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: #e2e8f0; /* Fondo grisáceo tipo Word/Google Docs */
+    display: flex;
+    justify-content: center; /* Centra la hoja horizontalmente */
+}
+
+/* Estilo de la "Hoja" de papel */
+.hoja-memorandum {
+    background-color: white;
+    width: 100%;
+    max-width: 700px; /* Tamaño carta aproximado */
+    min-height: 900px;
+    padding: 4rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.form-info-readonly {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #1A2238;
+}
+
+.form-info-readonly p {
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.texto-instruccion {
+    margin-top: 1.5rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: #1e293b;
+    white-space: pre-wrap; /* Mantiene los saltos de línea del textarea */
+}
+
+.hoja-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid #8b0000; /* Un toque elegante en rojo oscuro */
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.espacio-firma {
+    height: 60px;
+    margin: 10px 0;
+}
+.memorandum-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 20px;
+  background: #fff;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.full-width {
+  grid-column: span 2; /* Ocupa las dos columnas */
+}
+
+.half-width {
+  grid-column: span 1;
+}
+
+.label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.input, select, textarea {
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.input-readonly {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+/* Estilo para el área de texto final */
+.rich-text-area {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
+.toolbar-mockup {
+  background: #f1f3f5;
+  padding: 8px;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  gap: 10px;
+}
+
+.tool-btn {
+  padding: 2px 8px;
+  background: #fff;
+  border: 1px solid #ced4da;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.cuerpo-documento {
+  border: none;
+  width: 100%;
+  resize: vertical;
+  background: #fff;
+}
+
+/* =========================================
+   VISTA PREVIA - ESTILO DOCUMENTO OFICIAL
+   ========================================= */
+
+.hoja-membretada-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background-color: #e2e8f0; 
+  overflow-y: auto;        
+  height: 100%;
+}
+
+.hoja-membretada-papel {
+  background: white;
+  width: 100%;              
+  max-width: 700px;          
+  min-height: 990px;        
+  padding: 40px 40px 120px 40px; 
+  box-sizing: border-box;    
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  position: relative; 
+  font-family: 'Arial', 'Helvetica', sans-serif; 
+  color: #333;
+}
+
+
+/* Esta clase se aplicará solo durante la generación del PDF */
+.pdf-capture-mode {
+    letter-spacing: normal !important;
+    text-rendering: optimizeLegibility;
+}
+
+.pdf-capture-mode p, 
+.pdf-capture-mode div {
+    text-align: left !important; /* El justificado a veces rompe los espacios en canvas */
+}
+
+/* ENCABEZADO */
+.membrete-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 50px;
+}
+
+.membrete-logo-box {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-circulo-guinda {
+  width: 55px;
+  height: 55px;
+  background-color: #8a1c22; /* Color institucional Guinda */
+  border-radius: 50%;
+}
+
+.membrete-institucion p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.2;
+  color: #4a4a4a;
+}
+
+.membrete-meta-info {
+  text-align: right;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.membrete-meta-info p {
+  margin: 0 0 3px 0;
+}
+
+.meta-folio {
+  font-size: 14px;
+}
+
+/* CUERPO */
+.texto-presente {
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+  font-size: 14px;
+}
+
+.texto-contenido {
+    flex-grow: 4; /* Empuja el footer hacia abajo */
+    margin-top: 10px;
+    text-align: justify;
+    line-height: 1.6;
+    /* SOLUCIÓN AL DESBORDAMIENTO */
+    overflow-wrap: break-word; /* Rompe palabras largas */
+    word-wrap: break-word;
+    word-break: break-word; 
+    hyphens: auto; /* Agrega guiones si es necesario */
+}
+
+.parrafo-introductorio {
+    margin-bottom: 1.5rem;
+}
+
+.texto-contenido p {
+    margin-bottom: .5rem;
+}
+
+
+.placeholder-muted {
+  color: #a0a0a0;
+  font-style: italic;
+}
+
+/* FIRMAS */
+.membrete-footer {
+  margin-top: 50px;
+}
+
+.bloque-firma p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.texto-ccp {
+  margin-top: 40px;
+  font-size: 11px;
+  color: #666;
+}
+
+/* CENEFA INFERIOR */
+.cenefa-inferior-guinda {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #c4262e; 
+  clip-path: polygon(0 20%, 25% 0, 50% 20%, 75% 0, 100% 20%, 100% 100%, 0 100%);
+  padding: 30px 20px 15px 20px;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.cenefa-inferior-guinda p {
+  margin: 0;
+  color: white;
+  font-size: 10px;
+}

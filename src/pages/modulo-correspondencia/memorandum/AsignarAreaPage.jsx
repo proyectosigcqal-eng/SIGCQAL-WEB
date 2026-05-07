@@ -36,26 +36,38 @@ export const AsignarAreaPage = () => {
     }, [id]);
 
     const handleAreaChange = (e) => {
-        const areaId = e.target.value;
-        setAreaSeleccionadaId(areaId);
+    const areaId = e.target.value;
+    setAreaSeleccionadaId(areaId);
 
-        if (areaId === '') {
-            setAreaData(null);
-            return;
-        }
+    if (areaId === '') {
+        setAreaData(null);
+        return;
+    }
 
-        const area = areas?.find(a => a.id === Number(areaId));
+    const area = areas?.find(a => a.id === Number(areaId));
 
-        if (area) {
-            setAreaData(area); 
-            setMemoData(prev => ({
-                ...prev,
-                idAreaAsignada: area.id,
-                nombreAreaAsignada: area.nombreArea || area.nombre 
-            }));
-        }
-    };
+    if (area) {
+        setAreaData(area);
+        setMemoData(prev => ({
+            ...prev,
+            idAreaAsignada: area.id,        // ← Number, no string
+            nombreAreaAsignada: area.nombreArea || area.nombre
+        }));
+    }
+};
 
+const handleConfirmarFinalizar = async () => {
+    if (!archivoFirmado || !areaData) return;
+    try {
+        // ✅ Pasas el Number desde areaData.id, no el string del select
+        await finalizarAsignacion(id, archivoFirmado, areaData.id);
+        alert("Memorándum Asignado y Enviado con Éxito");
+       navigate('/correspondencia/lista-memorandums-revision');
+    } catch (error) {
+        console.error("Error al finalizar:", error);
+        alert("Hubo un error al procesar el archivo.");
+    }
+};
     const handleArchivoChange = (e) => {
         const file = e.target.files[0];
         if (file?.type === 'application/pdf') {
@@ -65,55 +77,21 @@ export const AsignarAreaPage = () => {
         }
     };
 
-    const handleConfirmarFinalizar = async () => {
-        if (!archivoFirmado) return;
-        try {
-            await finalizarAsignacion(id, archivoFirmado);
-            alert("Memorándum Asignado y Enviado con Éxito");
-            navigate('/correspondencia/bitacora/' + id);
-        } catch (error) {
-            console.error("Error al finalizar:", error);
-            alert("Hubo un error al procesar el archivo.");
-        }
-    };
-
-  const handleDescargar = async () => {
-    try {
-        const elemento = document.getElementById('memorandum-pdf-content');
-        if (!elemento) return;
-
-        const canvas = await html2canvas(elemento, {
-            scale: 3, // Mayor escala = mayor nitidez
-            useCORS: true,
-            logging: false,
-            // LA CLAVE: Forzamos estilos que html2canvas entienda bien
-            onclone: (clonedDoc) => {
-                const el = clonedDoc.getElementById('memorandum-pdf-content');
-                el.style.letterSpacing = "0.5px"; // Forzamos espacio entre letras
-                el.style.wordSpacing = "2px";    // Forzamos espacio entre palabras
-                
-                // Quitamos cualquier transformación extraña que pueda romper el layout
-                const parrafos = el.getElementsByTagName('p');
-                for (let p of parrafos) {
-                    p.style.textAlign = "left"; 
-                    p.style.display = "block";
-                }
-            }
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'letter');
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`MEMO_${memoData?.folioUnico || 'DESC'}.pdf`);
-        
-        setFueDescargado(true);
-    } catch (error) {
-        console.error("Error:", error);
+  const handleDescargar = () => {
+    if (!memoData?.urlMemorandumGenerado) {
+        alert("No hay documento generado aún.");
+        return;
     }
+
+    const url = `http://localhost:8081/SIGCQAL_dev${memoData.urlMemorandumGenerado}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${memoData.folioUnico || 'MEMO'}.docx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setFueDescargado(true);
 };
 
     if (cargando) return <div className="p-5 text-center">Cargando datos...</div>;

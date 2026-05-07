@@ -1,280 +1,220 @@
-/* contestacion.css */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
 
-.contestacion-container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    padding-bottom: 2rem;
-}
-
-.contestacion-title {
-    color: #2c3e50;
-    font-weight: 700;
-    font-size: 1.8rem;
-    border-left: 5px solid #691C32; /* Guinda institucional */
-    padding-left: 15px;
-}
-
-/* Tarjetas (Cards) personalizadas */
-.custom-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease-in-out;
-}
-
-.custom-card-header {
-    background-color: #ffffff;
-    border-bottom: 1px solid #edf2f7;
-    padding: 1.5rem;
-    border-radius: 12px 12px 0 0 !important;
-}
-
-.custom-card-header h5 {
-    color: #691C32;
-    font-weight: 600;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Estilos específicos del formulario */
-.form-label-custom {
-    color: #4a5568;
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-}
-
-.form-control-custom {
-    border: 1px solid #cbd5e0;
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    transition: all 0.3s;
-}
-
-.form-control-custom:focus {
-    border-color: #691C32;
-    box-shadow: 0 0 0 3px rgba(105, 28, 50, 0.15);
-    outline: none;
-}
-
-/* Área de carga de archivos (Drag & Drop feel) */
-.file-upload-wrapper {
-    position: relative;
-    border: 2px dashed #cbd5e0;
-    border-radius: 10px;
-    padding: 2rem 1.5rem;
-    text-align: center;
-    background-color: #f8fafc;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.file-upload-wrapper:hover {
-    border-color: #691C32;
-    background-color: #fff9fa;
-}
-
-.file-upload-input {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.file-upload-icon {
-    font-size: 2.5rem;
-    color: #a0aec0;
-    margin-bottom: 10px;
-}
-
-.file-upload-success-icon {
-    font-size: 2.5rem;
-    color: #38a169;
-    margin-bottom: 10px;
-}
-
-/* Botón principal */
-.btn-guinda {
-    background-color: #691C32;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 20px;
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    transition: background-color 0.3s, transform 0.1s;
-}
-
-.btn-guinda:hover {
-    background-color: #4a1323;
-    color: white;
-}
-
-.btn-guinda:active {
-    transform: scale(0.98);
-}
-
-.btn-guinda:disabled {
-    background-color: #a0aec0;
-    cursor: not-allowed;
-}
-
-/* Scrollbar para la vista previa */
-.preview-scroll {
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: 1rem;
-    background: #e2e8f0;
-    border-radius: 8px;
-}
-
-.preview-scroll::-webkit-scrollbar {
-    width: 8px;
-}
-.preview-scroll::-webkit-scrollbar-track {
-    background: #f1f1f1; 
-    border-radius: 8px;
-}
-.preview-scroll::-webkit-scrollbar-thumb {
-    background: #cbd5e0; 
-    border-radius: 8px;
-}
-.preview-scroll::-webkit-scrollbar-thumb:hover {
-    background: #a0aec0; 
-}
-/* Estilo general para el contenedor principal */
+/* ─── Page ─────────────────────────────────────────────────── */
 .contestacion-page {
-    background-color: #f4f7f6;
-    min-height: calc(100vh - 60px); /* Ajuste según tu header */
-    padding: 20px;
+  font-family: 'DM Sans', sans-serif;
+  background: #f5f4f0;
+  min-height: 100vh;
+  padding-bottom: 40px;
 }
 
-/* Encabezado con acento institucional */
+/* ─── Header ────────────────────────────────────────────────── */
 .page-header-box {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e2e8f0;
+  padding: 28px 32px 22px;
+  border-bottom: 0.5px solid #dddbd3;
+  background: #fff;
+  margin-bottom: 28px;
 }
 
 .page-header-box h2 {
-    color: #1a202c;
-    font-weight: 800;
-    margin-bottom: 5px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px;
 }
 
-/* Grid de dos columnas */
+.page-header-box .text-muted {
+  font-size: 13px;
+  color: #888780;
+  margin: 0;
+}
+
+/* ─── Alert ─────────────────────────────────────────────────── */
+.alert-danger {
+  margin: 0 32px 20px;
+  padding: 10px 16px;
+  background: #FCEBEB;
+  border: 0.5px solid #F09595;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #A32D2D;
+}
+
+/* ─── Split layout ──────────────────────────────────────────── */
 .split-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
-    align-items: start;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 0 32px;
 }
 
-/* Estilo de las Tarjetas (Cards) */
+@media (max-width: 860px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Cards ─────────────────────────────────────────────────── */
 .card-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  background: #fff;
+  border: 0.5px solid #dddbd3;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .card-title-bar {
-    padding: 15px 20px;
-    background: #ffffff;
-    border-bottom: 1px solid #edf2f7;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 0.5px solid #dddbd3;
+  background: #fff;
+}
+
+.card-title-bar span {
+  font-size: 16px;
+  line-height: 1;
 }
 
 .card-title-bar h5 {
-    margin: 0;
-    color: #691C32; /* Tu guinda institucional */
-    font-size: 1.1rem;
-    font-weight: 700;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-/* Área de formulario */
+/* ─── Form body (scroll wrapper del doc original) ───────────── */
 .form-body {
-    padding: 25px;
+  padding: 20px;
 }
 
-.input-group-custom {
-    margin-bottom: 20px;
+/* ─── FormularioContestacion interno ────────────────────────── */
+.contestacion-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.input-group-custom label {
-    display: block;
-    font-weight: 600;
-    color: #4a5568;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
+.contestacion-form .field label,
+.contestacion-form label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #5F5E5A;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
-.form-input-styled {
-    width: 100%;
-    padding: 12px 15px;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    font-size: 0.95rem;
+.contestacion-form input[type="text"],
+.contestacion-form textarea {
+  width: 100%;
+  background: #f5f4f0;
+  border: 0.5px solid #c9c7bf;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: #1a1a1a;
+  outline: none;
+  resize: none;
+  transition: border-color 0.15s;
 }
 
-.form-input-styled:focus {
-    border-color: #691C32;
-    box-shadow: 0 0 0 3px rgba(105, 28, 50, 0.1);
-    outline: none;
+.contestacion-form input[type="text"]::placeholder,
+.contestacion-form textarea::placeholder {
+  color: #b4b2a9;
 }
 
-/* Dropzone de PDF mejorado */
-.pdf-upload-zone {
-    border: 2px dashed #cbd5e0;
-    border-radius: 10px;
-    padding: 30px;
-    text-align: center;
-    background: #f8fafc;
-    transition: all 0.3s;
-    cursor: pointer;
+.contestacion-form input[type="text"]:focus,
+.contestacion-form textarea:focus {
+  border-color: #7F77DD;
+  background: #fff;
 }
 
-.pdf-upload-zone:hover {
-    border-color: #691C32;
-    background: #fff5f7;
+.contestacion-form textarea {
+  height: 100px;
+}
+
+/* ─── Upload file ───────────────────────────────────────────── */
+.upload-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f5f4f0;
+  border: 0.5px dashed #c9c7bf;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  position: relative;
+}
+
+.upload-box:hover {
+  border-color: #7F77DD;
+}
+
+.upload-box input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .upload-icon {
-    font-size: 2rem;
-    color: #a0aec0;
-    margin-bottom: 10px;
+  width: 32px;
+  height: 32px;
+  background: #EEEDFE;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-/* Botón de acción */
-.btn-submit-action {
-    background: #691C32;
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 8px;
-    font-weight: 700;
-    width: 100%;
-    transition: transform 0.1s, background 0.3s;
-    margin-top: 10px;
+.upload-text p {
+  font-size: 13px;
+  color: #1a1a1a;
+  font-weight: 500;
+  margin: 0;
 }
 
-.btn-submit-action:hover {
-    background: #4a1323;
+.upload-text span {
+  font-size: 12px;
+  color: #888780;
 }
 
-.btn-submit-action:active {
-    transform: scale(0.98);
+.upload-success {
+  font-size: 12px;
+  color: #3B6D11;
+  margin-top: 4px;
+}
+
+/* ─── Botón enviar ──────────────────────────────────────────── */
+.btn-enviar {
+  width: 100%;
+  padding: 11px;
+  background: #3C3489;
+  border: none;
+  border-radius: 8px;
+  color: #EEEDFE;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+.btn-enviar:hover:not(:disabled) {
+  background: #534AB7;
+}
+
+.btn-enviar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

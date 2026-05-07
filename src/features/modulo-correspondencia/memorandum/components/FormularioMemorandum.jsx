@@ -2,51 +2,39 @@ import React from 'react';
 import '../styles/memorandum.css';
 
 export const FormularioMemorandum = ({ formData, setFormData, handleChange, handleSubmit, catalogos }) => {
-
   const { usuarios = [], plantillas = [], cargandoCatalogos = false } = catalogos || {};
 
   const getAreaUsuario = (userId) => {
     if (!userId) return "Sin asignar";
     const usuario = usuarios.find(u => u.id === Number(userId));
-    return usuario && usuario.nombreArea ? usuario.nombreArea : "Sin asignar";
+    return usuario?.nombreArea || "Sin asignar";
   };
-
 
   const handleEmisorChange = (e) => {
     const userId = e.target.value;
     const usuarioSeleccionado = usuarios.find(u => u.id === Number(userId));
-
     setFormData(prev => ({
       ...prev,
       idUsuarioEmisor: userId !== '' ? Number(userId) : '',
-      idArea: usuarioSeleccionado && usuarioSeleccionado.idArea ? Number(usuarioSeleccionado.idArea) : ''
+      idArea: usuarioSeleccionado?.idArea ? Number(usuarioSeleccionado.idArea) : ''
     }));
   };
 
   return (
     <form className="memorandum-form-container" onSubmit={handleSubmit}>
 
-      <div className="form-row">
-        <div className="form-group">
-          <label>Dependencia General</label>
-          <input 
-            type="text" 
-            value="DIRECCIÓN ADMINISTRATIVA DE LA COMISIÓN ESTATAL..." 
-            disabled 
-            className="input-readonly"
-          />
-        </div>
-        <div className="form-group">
-          <label>No. Oficio</label>
-          <input 
-            type="text" 
-            value={formData.folioUnico} 
-            disabled 
-            className="input-readonly"
-          />
-        </div>
-      </div>
-
+      {/* Folio — solo lectura */}
+     <div className="form-group full-width">
+  <label>No. Oficio</label>
+  <input
+    type="text"
+    value={formData.folioUnico || ''}
+    placeholder="Se generará al guardar"
+    disabled
+    className="input-readonly"
+  />
+</div>
+      {/* Asunto */}
       <div className="form-group full-width">
         <label>Asunto</label>
         <textarea
@@ -57,6 +45,7 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
         />
       </div>
 
+      {/* Observaciones */}
       <div className="form-group full-width">
         <label>Observaciones (Internas)</label>
         <textarea
@@ -67,6 +56,7 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
         />
       </div>
 
+      {/* Elaboró + Dependencia */}
       <div className="form-row">
         <div className="form-group">
           <label>Elaboró</label>
@@ -77,16 +67,17 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
         </div>
         <div className="form-group">
           <label>Dependencia</label>
-          <input 
-            type="text" 
-            value={getAreaUsuario(formData.idUsuarioEmisor)} 
-            disabled 
+          <input
+            type="text"
+            value={getAreaUsuario(formData.idUsuarioEmisor)}
+            disabled
             className="input-readonly"
             placeholder="Se cargará automáticamente"
           />
         </div>
       </div>
 
+      {/* Firmante + Dependencia */}
       <div className="form-row">
         <div className="form-group">
           <label>Firmante</label>
@@ -97,10 +88,10 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
         </div>
         <div className="form-group">
           <label>Dependencia</label>
-          <input 
-            type="text" 
-            value={getAreaUsuario(formData.idUsuarioFirmante)} 
-            disabled 
+          <input
+            type="text"
+            value={getAreaUsuario(formData.idUsuarioFirmante)}
+            disabled
             className="input-readonly"
             placeholder="Se cargará automáticamente"
           />
@@ -108,17 +99,15 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
       </div>
 
       {/* Plantilla */}
-      <div className="form-row">
-        <div className="form-group half-width">
-          <label>Plantilla</label>
-          <select name="idPlantilla" value={formData.idPlantilla} onChange={handleChange}>
-            <option value="">Seleccione...</option>
-            {plantillas.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-          </select>
-        </div>
+      <div className="form-group full-width">
+        <label>Plantilla</label>
+        <select name="idPlantilla" value={formData.idPlantilla} onChange={handleChange}>
+          <option value="">Seleccione...</option>
+          {plantillas.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+        </select>
       </div>
 
-      {/* Cuerpo del Documento */}
+      {/* Cuerpo */}
       <div className="form-group full-width rich-text-area">
         <div className="toolbar-mockup">
           <span className="tool-btn">B</span>

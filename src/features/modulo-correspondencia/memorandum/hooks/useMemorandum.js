@@ -1,51 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { generarMemorandum } from '../services/memorandumService';
 
-export const useMemorandum = (datosInicialesDB) => {
+export const useMemorandum = (correspondencia, catalogos) => { // ← recibe catalogos como parámetro
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    idCorrespondencia: 1, 
+    idCorrespondencia:      '',
     instruccionSeguimiento: '',
-    idUsuarioEmisor: '', 
-    idUsuarioFirmante: '',
-    idPlantilla: '',
-    idArea: '', 
-    observaciones: '',
-    folioUnico: `MEMO-${Date.now()}`, 
-    asuntoCorrespondencia: datosInicialesDB?.asunto || 'Sin asunto',
+    idUsuarioEmisor:        '',
+    idUsuarioFirmante:      '',
+    idPlantilla:            '',
+    idArea:                 '',
+    observaciones:          '',
+    folioUnico:             `MEMO-${Date.now()}`,
+    asuntoCorrespondencia:  '',
   });
+
+ useEffect(() => {
+  if (!correspondencia) return;
+  setFormData(prev => ({
+    ...prev,
+    idCorrespondencia:     correspondencia.id,
+    asuntoCorrespondencia: correspondencia.asunto || '',
+    folioUnico:            '', // ← vacío, el backend lo genera
+    idArea:                correspondencia.idArea || '',
+  }));
+}, [correspondencia]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
     const finalValue = (name.startsWith('id') && value !== '') ? Number(value) : value;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: finalValue
-    }));
+    setFormData(prev => ({ ...prev, [name]: finalValue }));
   };
 
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-        console.log("Enviando borrador de memorándum...", formData);
-      
-        const resultado = await generarMemorandum(formData);
+        const firmante = catalogos?.usuarios?.find(
+            u => u.id === Number(formData.idUsuarioFirmante)
+        );
+        const emisor = catalogos?.usuarios?.find(
+            u => u.id === Number(formData.idUsuarioEmisor)
+        );
+        const areaDestino = catalogos?.areas?.find(
+            a => a.id === Number(formData.idArea)
+        );
 
-        if (resultado && resultado.id) {
+        const payload = {
+            ...formData,
+            areaDestinatario: areaDestino?.nombre || areaDestino?.nombreArea || '',
+            nombreFirmante:   firmante?.usuarioLogin || '',
+            areaFirmante:     firmante?.nombreArea   || getAreaUsuario(formData.idUsuarioFirmante, catalogos.usuarios) || '',
+            nombreEmisor:     emisor?.usuarioLogin   || '', // ← agregar
+        };
+
+        const resultado = await generarMemorandum(payload);
+        if (resultado?.id) {
             navigate(`/correspondencia/asignar-area/${resultado.id}`);
-        } else {
-            console.error("El servidor no devolvió el ID del memorándum");
         }
-
     } catch (error) {
-        console.error("Error al guardar:", error);
-        alert("Error al guardar el borrador. Revisa la conexión con el servidor.");
+        console.error('Error al guardar:', error);
+        alert('Error al guardar el borrador.');
     }
-  };
+};
 
-  
-  return { formData, setFormData, handleChange, handleSubmit };
+// Helper para obtener área de un usuario
+const getAreaUsuario = (idUsuario, usuarios) => {
+    const u = usuarios?.find(u => u.id === Number(idUsuario));
+    return u?.nombreArea || '';
+};
+  return { formData, setFormData, handleChange, handleSubmit }; 
 };

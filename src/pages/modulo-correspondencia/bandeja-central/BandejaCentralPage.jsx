@@ -1,85 +1,118 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-// Importamos los servicios de los demás!
-//import { obtenerBandejaPorArea } from '../../features/modulo-correspondencia/memorandum/services/memorandumService';
-// import { obtenerCorrespondenciaExterna } from '../../features/.../correspondenciaService'; 
+// navegación no usada aquí
+import { listarSeguimientosMemo, listarSeguimientosCorr, guardarSeguimientoMemo, guardarSeguimientoCorr } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
+import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
+import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
+import axios from 'axios';
 
-import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css'; 
 export const BandejaCentralPage = () => {
-    const navigate = useNavigate();
+    // no usamos navegación directa desde la bandeja; abrimos modal en su lugar
     const [activeTab, setActiveTab] = useState('memorandums');
     const [datosTabla, setDatosTabla] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
 
-    // Cada que cambia la pestaña, vamos al servicio correspondiente
     useEffect(() => {
         cargarDatos(activeTab);
     }, [activeTab]);
 
-    const cargarDatos = async (tab) => {
-        setIsLoading(true);
-        try {
-            if (tab === 'memorandums') {
-                // Descomentar cuando el back esté listo:
-                // const acuses = await obtenerBandejaPorArea(ID_DEL_AREA);
-                // setDatosTabla(acuses);
-                
-                // MOCK para probar el diseño:
-                setDatosTabla([
-                    { id: 1, folio: 'MEM-2026-001', asunto: 'Revisión de Servidores', fecha: '04/05/2026', estatus: 'EN SEGUIMIENTO' },
-                    { id: 2, folio: 'MEM-2026-042', asunto: 'Aprobación de Presupuesto', fecha: '03/05/2026', estatus: 'PENDIENTE' }
-                ]);
-            } else if (tab === 'correspondencia') {
-                // Descomentar cuando el back esté listo:
-                // const externos = await obtenerCorrespondenciaExterna(ID_DEL_AREA);
-                // setDatosTabla(externos);
-                
-                // MOCK para probar el diseño:
-                setDatosTabla([
-                    { id: 10, folio: 'CORR-EXT-089', asunto: 'Notificación de Auditoría', fecha: '02/05/2026', estatus: 'PENDIENTE' }
-                ]);
-            }
-        } catch (error) {
-            console.error("Error al cargar la información", error);
-        } finally {
-            setIsLoading(false);
+   const cargarDatos = async (tab) => {
+    setIsLoading(true);
+    try {
+        if (tab === 'memorandums') {
+            // Traemos los datos de la tabla seguimiento_memorandum
+            const data = await listarSeguimientosMemo();
+             console.log('>>> data del back:', data);
+            
+            setDatosTabla(data.map(item => ({
+            id:      item.idSeguimientoMemorandum,  
+            idMemo:  item.idMemo,
+            folio:   item.folioRespuesta,
+            asunto:  item.respuestaSeguimientoMemorandum,
+            fecha:   item.fechaResolucion,
+            estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+            archivo: item.archivoAdjunto,
+            tipo:    'memorandum'
+        })));
+        } else {
+            // Traemos los datos de la tabla seguimiento_correspondencia
+            const data = await listarSeguimientosCorr();
+            setDatosTabla(data.map(item => ({
+                id:      item.idSeguimientoMemorandum,  // ← ID único del seguimiento
+                idMemo:  item.idMemo,
+                folio:   item.folioRespuesta,
+                asunto:  item.respuestaSeguimientoMemorandum,
+                fecha:   item.fechaResolucion,
+                estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO', // ← leer del back
+                archivo: item.archivoAdjunto,
+                tipo:    'memorandum'
+            })));
         }
+    } catch (error) {
+        console.error("Error", error);
+        setDatosTabla([]);
+    } finally {
+        setIsLoading(false);
+    }
+};
+    const handleAbrirDetalle = (item) => {
+        setSelectedItem(item);
+        setModalOpen(true);
     };
 
-    const handleAtenderClick = (id) => {
-        // Redirige al formulario de contestación correspondiente
-        if (activeTab === 'memorandums') {
-            navigate(`/memorandum/seguimiento/${id}`); 
+  const handleCerrarSeguimiento = async (item, comentario) => {
+    try {
+        if (!item) return;
+
+        if (item.tipo === 'memorandum') {
+            // ← PUT al nuevo endpoint, NO guardarSeguimientoMemo
+            await axios.put(
+                `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-memorandum/concluir/${item.id}`,
+                { respuestaSeguimientoMemorandum: comentario || 'Cierre desde bandeja' }
+            );
         } else {
-            navigate(`/correspondencia/seguimiento/${id}`);
+            await axios.put(
+                `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia/concluir/${item.id}`,
+                { respuestaSeguimientoCorrespondencia: comentario || 'Cierre desde bandeja' }
+            );
         }
-    };
+
+        setDatosTabla(prev =>
+            prev.map(d =>
+                d.id === item.id ? { ...d, estatus: 'CONCLUIDO' } : d
+            )
+        );
+        return true;
+    } catch (error) {
+        console.error('Error al cerrar:', error);
+        throw error;
+    }
+};
 
     return (
         <div className="bandeja-wrapper">
             <div className="bandeja-header">
-                <h1 className="bandeja-title">Bandeja de Trámites</h1>
+                <h1 className="bandeja-title">Bandeja de Contestación</h1>
                 <p className="bandeja-subtitle">Gestiona y da seguimiento a los documentos asignados a tu área.</p>
             </div>
 
             <div className="bandeja-card">
-                {/* Navegación de Pestañas Personalizada */}
                 <div className="bandeja-tabs-container">
-                    <button 
+                    <button
                         className={`bandeja-tab ${activeTab === 'memorandums' ? 'active' : ''}`}
                         onClick={() => setActiveTab('memorandums')}
                     >
-                        📄 Memorándums Internos
+                        📄 Memorándums
                     </button>
-                    <button 
+                    <button
                         className={`bandeja-tab ${activeTab === 'correspondencia' ? 'active' : ''}`}
                         onClick={() => setActiveTab('correspondencia')}
                     >
-                        📨 Correspondencia Externa
+                        📨 Correspondencia
                     </button>
                 </div>
 
-                {/* Contenido Dinámico */}
                 <div className="bandeja-content">
                     {isLoading ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: '#a0aec0' }}>
@@ -104,16 +137,21 @@ export const BandejaCentralPage = () => {
                                             <td>{item.asunto}</td>
                                             <td>{item.fecha}</td>
                                             <td>
-                                                <span className={`status-badge ${item.estatus === 'PENDIENTE' ? 'status-pendiente' : 'status-seguimiento'}`}>
-                                                    {item.estatus}
-                                                </span>
+                                               <span className={`status-badge ${
+                                                item.estatus === 'PENDIENTE'   ? 'status-pendiente'  :
+                                                item.estatus === 'CONCLUIDO'   ? 'status-concluido'  :
+                                                item.estatus === 'CONTESTADO'  ? 'status-contestado' :
+                                                                                'status-seguimiento'
+                                            }`}>
+                                                {item.estatus}
+                                            </span>
                                             </td>
                                             <td style={{ textAlign: 'center' }}>
-                                                <button 
+                                                <button
                                                     className="btn-atender"
-                                                    onClick={() => handleAtenderClick(item.id)}
+                                                    onClick={() => handleAbrirDetalle(item)}
                                                 >
-                                                    Atender / Detalles
+                                                    Detalles
                                                 </button>
                                             </td>
                                         </tr>
@@ -130,6 +168,18 @@ export const BandejaCentralPage = () => {
                     )}
                 </div>
             </div>
+                    {selectedItem && (
+                        <DetalleBandejaModal
+                            isOpen={modalOpen}
+                            onClose={() => { setModalOpen(false); setSelectedItem(null); }}
+                            item={selectedItem}
+                            onCerrarSeguimiento={async (it, comentario) => {
+                                await handleCerrarSeguimiento(it, comentario);
+                                setModalOpen(false);
+                                setSelectedItem(null);
+                            }}
+                        />
+                    )}
         </div>
     );
 };
