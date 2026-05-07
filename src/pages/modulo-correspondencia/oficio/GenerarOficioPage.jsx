@@ -24,7 +24,7 @@ export const GenerarOficioPage = () => {
         .finally(() => setLoadingCorr(false));
 }, [idCorrespondencia]);
 
-  const { formData, setFormData, handleChange, handleSubmit } = useOficio(correspondencia);
+  const { formData, setFormData, handleChange, handleSubmit } = useOficio(correspondencia, catalogos);
 
   if (loadingCorr) {
     return <div className="sigcqal-page-container"><p>Cargando correspondencia...</p></div>;

@@ -256,3 +256,16 @@
     color: #d9534f;
     text-decoration: underline;
 }
+
+.btn-descargar-memo {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #691C32;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 12px;
+  transition: background 0.2s;
+}
+.btn-descargar-memo:hover { background: #4a1323; }

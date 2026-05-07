@@ -77,43 +77,21 @@ const handleConfirmarFinalizar = async () => {
         }
     };
 
-  const handleDescargar = async () => {
-    try {
-        const elemento = document.getElementById('memorandum-pdf-content');
-        if (!elemento) return;
-
-        const canvas = await html2canvas(elemento, {
-            scale: 3, // Mayor escala = mayor nitidez
-            useCORS: true,
-            logging: false,
-            // LA CLAVE: Forzamos estilos que html2canvas entienda bien
-            onclone: (clonedDoc) => {
-                const el = clonedDoc.getElementById('memorandum-pdf-content');
-                el.style.letterSpacing = "0.5px"; // Forzamos espacio entre letras
-                el.style.wordSpacing = "2px";    // Forzamos espacio entre palabras
-                
-                // Quitamos cualquier transformación extraña que pueda romper el layout
-                const parrafos = el.getElementsByTagName('p');
-                for (let p of parrafos) {
-                    p.style.textAlign = "left"; 
-                    p.style.display = "block";
-                }
-            }
-        });
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'letter');
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`MEMO_${memoData?.folioUnico || 'DESC'}.pdf`);
-        
-        setFueDescargado(true);
-    } catch (error) {
-        console.error("Error:", error);
+  const handleDescargar = () => {
+    if (!memoData?.urlMemorandumGenerado) {
+        alert("No hay documento generado aún.");
+        return;
     }
+
+    const url = `http://localhost:8081/SIGCQAL_dev${memoData.urlMemorandumGenerado}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${memoData.folioUnico || 'MEMO'}.docx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setFueDescargado(true);
 };
 
     if (cargando) return <div className="p-5 text-center">Cargando datos...</div>;

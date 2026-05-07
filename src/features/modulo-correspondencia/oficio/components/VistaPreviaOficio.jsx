@@ -1,4 +1,5 @@
 import React from 'react';
+import membreteImg from '@/assets/membrete.jpg';
 import '../styles/oficio.css';
 
 export const VistaPreviaOficio = ({ formData, usuarios = [], areaDestino }) => {
@@ -13,80 +14,70 @@ export const VistaPreviaOficio = ({ formData, usuarios = [], areaDestino }) => {
   const getAreaUsuario = (id) => {
     if (!id) return "_________________________";
     const usuario = usuarios.find(u => u.id === Number(id));
-    return usuario?.nombreArea || "Área sin asignar";
+    return usuario?.nombreArea || "_________________________";
   };
 
   const obtenerFechaActual = () => {
-    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const meses = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const fecha = new Date();
     return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
   };
 
-  const nombreAreaDestino = areaDestino?.nombreArea || areaDestino?.nombre || formData.nombreAreaAsignada;
+  // Valores dinámicos — igual que los marcadores de la plantilla
+  const folio           = formData.folioUnico || '{{FOLIO}}';
+  const asunto          = formData.asuntoCorrespondencia || formData.observaciones || '{{ASUNTO}}';
+  const fecha           = obtenerFechaActual();
+  const areaDestinatario = areaDestino?.nombre || areaDestino?.nombreArea || null;
+  const areaEmisor = getAreaUsuario(formData.idUsuarioEmisor) || '[Sin Área Asignada]';
+  const nombreEmisor    = getNombreUsuario(formData.idUsuarioEmisor);
+  const instruccion     = formData.instruccionSeguimiento || '';
+  const nombreFirmante  = getNombreUsuario(formData.idUsuarioFirmante);
+  const areaFirmante    = getAreaUsuario(formData.idUsuarioFirmante);
 
   return (
     <div className="hoja-membretada-container">
       <div className="hoja-membretada-papel" id="oficio-pdf-content">
-        
-        <header className="membrete-header">
-          <div className="membrete-logo-box">
-            <div className="logo-circulo-guinda"></div>
-            <div className="membrete-institucion">
-              <p>COMISIÓN ESTATAL DE LA</p>
-              <p>DEFENSA DEL CONTRIBUYENTE</p>
-              <p>ESTADO DE ZACATECAS</p>
-            </div>
-          </div>
-          
+
+        <img src={membreteImg} alt="membrete" className="membrete-fondo" />
+
+        <div className="membrete-contenido">
+
+          {/* META INFO — esquina superior derecha */}
           <div className="membrete-meta-info">
             <p className="meta-folio">
-              <strong>{formData.folioUnico || 'OFICIO-XXXXXXXX'}</strong>
-            </p>
-            <p><strong>Asunto:</strong> {formData.asuntoCorrespondencia || 'Sin asunto asignado'}</p>
-            <p>Guadalupe, Zacatecas, a {obtenerFechaActual()}.</p>
-          </div>
-        </header>
-
-        <main className="cuerpo-memorandum">
-          <div className="area-responsable-preview mb-4">
-            {nombreAreaDestino ? (
-              <h5 className="text-uppercase mb-0" style={{ fontSize: '1.1rem', color: '#2c3e50', fontWeight: 'bold' }}>
-                {nombreAreaDestino}
-              </h5>
-            ) : (
-              <h5 className="text-muted italic">[Área No Asignada]</h5>
-            )}
+            <strong>Oficio: {formData.folioUnico || 'XXXXXXXX'}</strong>
+          </p>
+            <p>Guadalupe, Zacatecas, a {fecha}.</p>
           </div>
 
-          <p className="texto-presente"><strong>P R E S E N T E .</strong></p>
-          
-          <div className="texto-contenido">
-            <p className="parrafo-introductorio">
-              De conformidad al oficio marcado con el Número <strong>{formData.folioUnico || "______"}</strong> emitido por <strong>{getNombreUsuario(formData.idUsuarioEmisor)}</strong>, perteneciente a la dependencia: <strong>{getAreaUsuario(formData.idUsuarioEmisor)}</strong>.
-            </p>
-            
-            {formData.instruccionSeguimiento ? (
-              formData.instruccionSeguimiento.split('\n').map((parrafo, index) => (
-                parrafo.trim() !== "" && <p key={index} style={{ marginBottom: '1em' }}>{parrafo}</p>
-              ))
-            ) : (
-              <p className="text-muted">[Sin instrucciones de seguimiento]</p>
-            )}
-          </div>
-        </main>
+          {/* DESTINATARIO */}
+          <div className="cuerpo-memorandum">
+            <p className="area-destinatario"><strong>{areaDestinatario}</strong></p>
+            <p className="texto-presente"><strong>P R E S E N T E.</strong></p>
 
-        <footer className="membrete-footer">
-          <div className="bloque-firma">
+            {/* Texto del cuerpo — idéntico a la plantilla Word */}
+            <div className="texto-contenido">
+              <p>
+                Por este conducto, remito a Usted el oficio <strong>{folio}</strong>,
+                emitido por <strong>{nombreEmisor}</strong>, Encargado(a)
+                de <strong>{areaEmisor}</strong>{' '}
+                {instruccion || <span className="placeholder-muted">[Sin instrucciones de seguimiento]</span>}
+              </p>
+              <p>Sin más por el momento, aprovecho la ocasión para enviarle un cordial saludo.</p>
+            </div>
+          </div>
+
+          {/* FIRMA */}
+          <div className="membrete-footer-firma">
             <p><strong>Atentamente</strong></p>
-            <p><strong>{getNombreUsuario(formData.idUsuarioFirmante)}</strong></p>
-            <p>{getAreaUsuario(formData.idUsuarioFirmante)}</p>
+            <div className="bloque-firma">
+              <p><strong>{nombreFirmante}</strong></p>
+              <p>{areaFirmante}</p>
+            </div>
+            <p className="texto-ccp">C.c.p.- Archivo.</p>
           </div>
-          <p className="texto-ccp">C.c.p.- Archivo.</p>
-        </footer>
 
-        <div className="cenefa-inferior-guinda">
-          <p>Boulevard José López Portillo, número 60, Dependencias Federales, C.P. 98600,</p>
-          <p>Guadalupe, Zac. Tel. (492)9279703.</p>
         </div>
       </div>
     </div>
