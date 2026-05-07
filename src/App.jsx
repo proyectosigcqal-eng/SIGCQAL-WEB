@@ -13,6 +13,7 @@ import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-centr
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 import { ListaOficiosPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPage';
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
+import { ContestacionCorrespondenciaPage } from './pages/modulo-correspondencia/contestacion-correspondencia/ContestacionCorrespondenciaPage';
 import { CorrespondenciaPendienteRevisionPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage';
 import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
@@ -33,6 +34,7 @@ function App() {
           <Route path="correspondencia/registradas" element={<CorrespondenciasRegistradasPage />} />
           <Route path="correspondencia/generar-oficio/:id" element={<GenerarOficioCorrespondenciaPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
+          <Route path="correspondencia/contestacion-correspondencia/:id" element={<ContestacionCorrespondenciaPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
           <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
