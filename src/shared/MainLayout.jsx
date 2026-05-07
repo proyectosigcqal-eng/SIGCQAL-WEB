@@ -35,6 +35,11 @@ export const MainLayout = () => {
             to: '/correspondencia/memorandums-por-area',
             icon: <CheckSquare size={16} />
         },
+        {
+            label: 'Acuses de Oficio por Área',
+            to: '/correspondencia/acuses-oficio-por-area',
+            icon: <FolderCheck size={16} />
+        },
    
           {
             label: 'Contestación',

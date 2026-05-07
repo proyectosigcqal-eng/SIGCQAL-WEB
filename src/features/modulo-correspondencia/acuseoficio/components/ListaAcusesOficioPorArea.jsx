@@ -1,4 +1,4 @@
-import { useListaAcusesOficioPorArea } from '../hooks/useListaAcusesOficioPorArea';
+import { useListaAcusesOficioPorArea } from '../hooks/useListaAcusesOficioPorArea'; 
 import '@/features/modulo-correspondencia/acuseoficio/styles/listaAcusesOficio.css';
 
 export const ListaAcusesOficioPorArea = () => {
@@ -58,24 +58,26 @@ export const ListaAcusesOficioPorArea = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>ID Oficio</th>
-                <th>Usuario Revisor</th>
-                <th>Es del Área</th>
-                <th>Fecha Respuesta</th>
+                <th>Num Oficio</th>
+                <th>Fecha Emisión</th>
+                <th>Folio Único</th>
+                <th>Nombre Area</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {acuses.map((acuse, index) => (
                 <tr key={acuse.id || index}>
                   <td className="num-index">{index + 1}</td>
-                  <td>{acuse.idOficio || '-'}</td>
-                  <td>{acuse.idUsuarioRevisor || '-'}</td>
+                  <td>{acuse.numOficio || '-'}</td>
+                  <td>{formatearFecha(acuse.fechaEmision)}</td>
+                  <td>{acuse.folioUnico || '-'}</td>
+                  <td>{acuse.nombreArea || '-'}</td>
                   <td>
-                    <span className={`status-badge ${acuse.esDelArea ? 'status-si' : 'status-no'}`}>
-                      {acuse.esDelArea ? 'Sí' : 'No'}
-                    </span>
+                    <button className="btn-contestacion-acuse-oficio">
+                      Contestacion
+                    </button>
                   </td>
-                  <td>{formatearFecha(acuse.fechaRespuesta)}</td>
                 </tr>
               ))}
             </tbody>
