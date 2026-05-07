@@ -7,10 +7,13 @@ import { AdminViewCorrespondencias } from '@/features/modulo-correspondencia/cor
 import { FormularioRegistrarCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/components/FormularioRegistrarCorrespondencia';
 import { ModalAsignarArea } from '@/features/modulo-correspondencia/correspondencia/components/ModalAsignarArea';
 import { usePostRegistroCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/hooks/usePostRegistroCorrespondencia';
+import { useCatalogos } from '@/shared/hooks/useCatalogos';
 import '@/features/modulo-correspondencia/correspondencia/styles/correspondencia.css';
 
 export const RegistrarCorrespondenciaPage = () => {
   const navigate = useNavigate();
+
+  const { tiposCorrespondencia } = useCatalogos();
 
   const {
     fase,
@@ -65,7 +68,10 @@ export const RegistrarCorrespondenciaPage = () => {
 
       {fase === 'FORMULARIO' ? (
         <div style={{ padding: '1.5rem' }}>
-          <FormularioRegistrarCorrespondencia onRegistroExitoso={onFormularioGuardado} />
+          <FormularioRegistrarCorrespondencia
+            onRegistroExitoso={onFormularioGuardado}
+            tiposCorrespondencia={tiposCorrespondencia}
+          />
         </div>
       ) : null}
 

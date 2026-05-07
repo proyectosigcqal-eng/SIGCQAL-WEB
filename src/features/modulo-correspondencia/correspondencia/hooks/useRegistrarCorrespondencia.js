@@ -26,6 +26,7 @@ export const useRegistrarCorrespondencia = () => {
   const hoy = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const [formData, setFormData] = useState({
+    idTipoCorrespondencia: '',
     numeroOficio: '',
     fechaExpedicion: '',
     dependenciaRemitente: '',
@@ -160,6 +161,7 @@ export const useRegistrarCorrespondencia = () => {
       titularDependencia: (formData.titularDependencia || '').trim() || null,
       asunto,
       fechaRecibido,
+      idTipoCorrespondencia: formData.idTipoCorrespondencia ? Number(formData.idTipoCorrespondencia) : 1,
       idEstatus: 1,
       idUsuarioCaptura: 1,
       idArea: null,
