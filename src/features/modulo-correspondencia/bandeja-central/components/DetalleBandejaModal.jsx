@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { obtenerBitacoraCompletaMemo } from '../services/bandejaService';
+import { obtenerBitacoraCompletaMemo, obtenerBitacoraCompletaOficio } from '../services/bandejaService';
 import { obtenerBitacoraPorCorrespondencia } from '../../bitacora-historica/services/bitacoraService';
+
 import '../styles/detalleBandejaModal.css';
 
 // Mapa visual por estatus
@@ -33,25 +34,26 @@ export default function DetalleBandejaModal({ isOpen, onClose, item, onCerrarSeg
  useEffect(() => {
     if (!isOpen || !item) return;
     setYaConcluido(item.estatus === 'CONCLUIDO' || item.estatus === 'CERRADO');
-
-    const cargar = async () => {
-        setLoadingLogs(true);
-        try {
-            if (item.tipo === 'memorandum') {
-                // ← item.idMemo, NO item.id
-                const data = await obtenerBitacoraCompletaMemo(item.idMemo);
-                setLogs(data || []);
-            } else {
-                const data = await obtenerBitacoraPorCorrespondencia(item.id);
-                setLogs(data || []);
-            }
-        } catch (e) {
-            console.error('Error bitácora:', e);
-            setLogs([]);
-        } finally {
-            setLoadingLogs(false);
+const cargar = async () => {
+    setLoadingLogs(true);
+    try {
+        if (item.tipo === 'memorandum') {
+            const data = await obtenerBitacoraCompletaMemo(item.idMemo);
+            setLogs(data || []);
+        } else if (item.tipo === 'oficio') {
+            const data = await obtenerBitacoraCompletaOficio(item.idMemo); // idMemo aquí es idOficio
+            setLogs(data || []);
+        } else {
+            const data = await obtenerBitacoraPorCorrespondencia(item.id);
+            setLogs(data || []);
         }
-    };
+    } catch (e) {
+        console.error('Error bitácora:', e);
+        setLogs([]);
+    } finally {
+        setLoadingLogs(false);
+    }
+};
 
     cargar();
     return () => setLogs([]);
@@ -81,7 +83,11 @@ export default function DetalleBandejaModal({ isOpen, onClose, item, onCerrarSeg
         <div className="modal-header">
           <div>
             <h3 className="modal-title">{item.folio || 'Detalle del trámite'}</h3>
-            <span className="modal-tipo">{item.tipo === 'memorandum' ? '📄 Memorándum' : '📨 Correspondencia'}</span>
+            <span className="modal-tipo">
+              {item.tipo === 'memorandum' ? '📄 Memorándum' : 
+              item.tipo === 'oficio'     ? '📋 Oficio' : 
+                                            '📨 Correspondencia'}
+          </span>
           </div>
           <button className="modal-close-btn" onClick={onClose}>✖</button>
         </div>

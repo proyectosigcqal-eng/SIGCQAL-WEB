@@ -16,35 +16,38 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
     }
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     if (!respuesta) {
-      onError && onError('El informe de atención es obligatorio.');
-      return;
+        onError && onError('El informe de atención es obligatorio.');
+        return;
     }
     setGuardando(true);
     try {
-      const idOficio = acuse?.idOficio || acuse?.id || acuse?.id_oficio;
-      if (!idOficio) throw new Error('No se encontró id de oficio en el acuse');
+        const idOficio = acuse?.idOficio || acuse?.id || acuse?.id_oficio;
+        if (!idOficio) throw new Error('No se encontró id de oficio en el acuse');
 
-      const datos = {
-        folioRespuesta: folioGenerado ?? null,
-        respuestaSeguimiento: respuesta,
-        archivoAdjunto: archivo || null,
-      };
+        // Obtener usuario del localStorage/sessionStorage
+        const idUsuario = JSON.parse(localStorage.getItem('user'))?.id 
+                       || JSON.parse(sessionStorage.getItem('user'))?.id;
 
-      const seguimientoResp = await registrarSeguimiento(idOficio, datos);
+        const datos = {
+            folioRespuesta: undefined, // el backend lo genera, omitir en lugar de null
+            respuestaSeguimiento: respuesta,
+            archivoAdjunto: archivo || null,
+            idUsuario: 1,
+            idEstatus: 5,
+        };
 
-      // Si el backend retorna información del seguimiento, úsala para mostrar folio
-      setFolioGenerado(seguimientoResp?.folioFormateado ?? seguimientoResp?.folioRespuesta ?? (folioGenerado ?? 'OK'));
-      onGuardado && onGuardado();
+        const seguimientoResp = await registrarSeguimiento(idOficio, datos);
+        setFolioGenerado(seguimientoResp?.folioRespuesta ?? 'OK');
+        onGuardado && onGuardado();
     } catch (err) {
-      onError && onError(err.message || 'Error al guardar seguimiento de oficio');
+        onError && onError(err.message || 'Error al guardar seguimiento de oficio');
     } finally {
-      setGuardando(false);
+        setGuardando(false);
     }
-  };
-
+};
   return (
     <form className="contestacion-form" onSubmit={handleSubmit}>
       <div className="mb-3">

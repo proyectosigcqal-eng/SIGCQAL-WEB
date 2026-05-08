@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-// navegación no usada aquí
-import { listarSeguimientosMemo, listarSeguimientosCorr, guardarSeguimientoMemo, guardarSeguimientoCorr } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
+import { listarSeguimientosMemo, listarSeguimientosCorr, listarSeguimientosOficio } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
 import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
 import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
 import axios from 'axios';
 
 export const BandejaCentralPage = () => {
-    // no usamos navegación directa desde la bandeja; abrimos modal en su lugar
     const [activeTab, setActiveTab] = useState('memorandums');
     const [datosTabla, setDatosTabla] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -17,78 +15,89 @@ export const BandejaCentralPage = () => {
         cargarDatos(activeTab);
     }, [activeTab]);
 
-   const cargarDatos = async (tab) => {
-    setIsLoading(true);
-    try {
-        if (tab === 'memorandums') {
-            // Traemos los datos de la tabla seguimiento_memorandum
-            const data = await listarSeguimientosMemo();
-             console.log('>>> data del back:', data);
-            
-            setDatosTabla(data.map(item => ({
-            id:      item.idSeguimientoMemorandum,  
-            idMemo:  item.idMemo,
-            folio:   item.folioRespuesta,
-            asunto:  item.respuestaSeguimientoMemorandum,
-            fecha:   item.fechaResolucion,
-            estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-            archivo: item.archivoAdjunto,
-            tipo:    'memorandum'
-        })));
-        } else {
-            // Traemos los datos de la tabla seguimiento_correspondencia
-            const data = await listarSeguimientosCorr();
-            setDatosTabla(data.map(item => ({
-                id:      item.idSeguimientoMemorandum,  // ← ID único del seguimiento
-                idMemo:  item.idMemo,
-                folio:   item.folioRespuesta,
-                asunto:  item.respuestaSeguimientoMemorandum,
-                fecha:   item.fechaResolucion,
-                estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO', // ← leer del back
-                archivo: item.archivoAdjunto,
-                tipo:    'memorandum'
-            })));
+    const cargarDatos = async (tab) => {
+        setIsLoading(true);
+        try {
+            if (tab === 'memorandums') {
+                const data = await listarSeguimientosMemo();
+                setDatosTabla(data.map(item => ({
+                    id:      item.idSeguimientoMemorandum,
+                    idMemo:  item.idMemo,
+                    folio:   item.folioRespuesta,
+                    asunto:  item.respuestaSeguimientoMemorandum,
+                    fecha:   item.fechaResolucion,
+                    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+                    archivo: item.archivoAdjunto,
+                    tipo:    'memorandum'
+                })));
+            } else if (tab === 'oficios') {
+                const data = await listarSeguimientosOficio();
+                setDatosTabla(data.map(item => ({
+                    id:      item.idSeguimientoOficio,
+                    idMemo:  item.idOficio,
+                    folio:   item.folioRespuesta,
+                    asunto:  item.respuestasSeguimientoOficio,
+                    fecha:   item.fechaResolucion,
+                    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+                    archivo: item.archivoAdjunto,
+                    tipo:    'oficio'
+                })));
+            } else {
+                const data = await listarSeguimientosCorr();
+                setDatosTabla(data.map(item => ({
+                    id:      item.idSeguimientoCorrespondencia,
+                    idMemo:  item.idCorrespondencia,
+                    folio:   item.folioRespuesta,
+                    asunto:  item.respuestaSeguimientoCorrespondencia,
+                    fecha:   item.fechaResolucion,
+                    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+                    archivo: item.archivoAdjunto,
+                    tipo:    'correspondencia'
+                })));
+            }
+        } catch (error) {
+            console.error("Error", error);
+            setDatosTabla([]);
+        } finally {
+            setIsLoading(false);
         }
-    } catch (error) {
-        console.error("Error", error);
-        setDatosTabla([]);
-    } finally {
-        setIsLoading(false);
-    }
-};
+    };
+
     const handleAbrirDetalle = (item) => {
         setSelectedItem(item);
         setModalOpen(true);
     };
 
-  const handleCerrarSeguimiento = async (item, comentario) => {
-    try {
-        if (!item) return;
+    const handleCerrarSeguimiento = async (item, comentario) => {
+        try {
+            if (!item) return;
 
-        if (item.tipo === 'memorandum') {
-            // ← PUT al nuevo endpoint, NO guardarSeguimientoMemo
-            await axios.put(
-                `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-memorandum/concluir/${item.id}`,
-                { respuestaSeguimientoMemorandum: comentario || 'Cierre desde bandeja' }
+            if (item.tipo === 'memorandum') {
+                await axios.put(
+                    `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-memorandum/concluir/${item.id}`,
+                    { respuestaSeguimientoMemorandum: comentario || 'Cierre desde bandeja' }
+                );
+            } else if (item.tipo === 'correspondencia') {
+                await axios.put(
+                    `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia/concluir/${item.id}`,
+                    { respuestaSeguimientoCorrespondencia: comentario || 'Cierre desde bandeja' }
+                );
+            } else {
+                await axios.put(
+                    `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-oficio/concluir/${item.id}`,
+                    { respuestaSeguimientoOficio: comentario || 'Cierre desde bandeja' }
+                );
+            }
+
+            setDatosTabla(prev =>
+                prev.map(d => d.id === item.id ? { ...d, estatus: 'CONCLUIDO' } : d)
             );
-        } else {
-            await axios.put(
-                `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia/concluir/${item.id}`,
-                { respuestaSeguimientoCorrespondencia: comentario || 'Cierre desde bandeja' }
-            );
+            return true;
+        } catch (error) {
+            console.error('Error al cerrar:', error);
+            throw error;
         }
-
-        setDatosTabla(prev =>
-            prev.map(d =>
-                d.id === item.id ? { ...d, estatus: 'CONCLUIDO' } : d
-            )
-        );
-        return true;
-    } catch (error) {
-        console.error('Error al cerrar:', error);
-        throw error;
-    }
-};
+    };
 
     return (
         <div className="bandeja-wrapper">
@@ -99,17 +108,14 @@ export const BandejaCentralPage = () => {
 
             <div className="bandeja-card">
                 <div className="bandeja-tabs-container">
-                    <button
-                        className={`bandeja-tab ${activeTab === 'memorandums' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('memorandums')}
-                    >
+                    <button className={`bandeja-tab ${activeTab === 'memorandums' ? 'active' : ''}`} onClick={() => setActiveTab('memorandums')}>
                         📄 Memorándums
                     </button>
-                    <button
-                        className={`bandeja-tab ${activeTab === 'correspondencia' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('correspondencia')}
-                    >
+                    <button className={`bandeja-tab ${activeTab === 'correspondencia' ? 'active' : ''}`} onClick={() => setActiveTab('correspondencia')}>
                         📨 Correspondencia
+                    </button>
+                    <button className={`bandeja-tab ${activeTab === 'oficios' ? 'active' : ''}`} onClick={() => setActiveTab('oficios')}>
+                        📋 Oficios
                     </button>
                 </div>
 
@@ -137,20 +143,17 @@ export const BandejaCentralPage = () => {
                                             <td>{item.asunto}</td>
                                             <td>{item.fecha}</td>
                                             <td>
-                                               <span className={`status-badge ${
-                                                item.estatus === 'PENDIENTE'   ? 'status-pendiente'  :
-                                                item.estatus === 'CONCLUIDO'   ? 'status-concluido'  :
-                                                item.estatus === 'CONTESTADO'  ? 'status-contestado' :
-                                                                                'status-seguimiento'
-                                            }`}>
-                                                {item.estatus}
-                                            </span>
+                                                <span className={`status-badge ${
+                                                    item.estatus === 'PENDIENTE'  ? 'status-pendiente'  :
+                                                    item.estatus === 'CONCLUIDO'  ? 'status-concluido'  :
+                                                    item.estatus === 'CONTESTADO' ? 'status-contestado' :
+                                                    'status-seguimiento'
+                                                }`}>
+                                                    {item.estatus}
+                                                </span>
                                             </td>
                                             <td style={{ textAlign: 'center' }}>
-                                                <button
-                                                    className="btn-atender"
-                                                    onClick={() => handleAbrirDetalle(item)}
-                                                >
+                                                <button className="btn-atender" onClick={() => handleAbrirDetalle(item)}>
                                                     Detalles
                                                 </button>
                                             </td>
@@ -168,18 +171,19 @@ export const BandejaCentralPage = () => {
                     )}
                 </div>
             </div>
-                    {selectedItem && (
-                        <DetalleBandejaModal
-                            isOpen={modalOpen}
-                            onClose={() => { setModalOpen(false); setSelectedItem(null); }}
-                            item={selectedItem}
-                            onCerrarSeguimiento={async (it, comentario) => {
-                                await handleCerrarSeguimiento(it, comentario);
-                                setModalOpen(false);
-                                setSelectedItem(null);
-                            }}
-                        />
-                    )}
+
+            {selectedItem && (
+                <DetalleBandejaModal
+                    isOpen={modalOpen}
+                    onClose={() => { setModalOpen(false); setSelectedItem(null); }}
+                    item={selectedItem}
+                    onCerrarSeguimiento={async (it, comentario) => {
+                        await handleCerrarSeguimiento(it, comentario);
+                        setModalOpen(false);
+                        setSelectedItem(null);
+                    }}
+                />
+            )}
         </div>
     );
 };

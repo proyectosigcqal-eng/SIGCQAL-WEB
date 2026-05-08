@@ -27,6 +27,12 @@ export const listarSeguimientosCorr = async () => {
     return res.data;
 };
 
+// --- SEGUIMIENTO OFICIO ---
+export const listarSeguimientosOficio = async () => {
+    const res = await axios.get(`${API_BASE}/seguimiento-oficio/listar`);
+    return res.data;
+};
+
 export const obtenerBitacoraCompletaMemo = async (idMemo) => {
 
    // Primero obtenemos el memo para saber el idCorrespondencia
@@ -105,6 +111,95 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
       fecha:       seg.fechaResolucion,
       usuario:     `Usuario ${seg.idUsuario}`,
       descripcion: seg.respuestaSeguimientoMemorandum || '',
+      folio:       seg.folioRespuesta,
+    });
+  });
+
+  return eventos.sort((a, b) => {
+    const da = a.fecha ? new Date(a.fecha) : new Date(0);
+    const db = b.fecha ? new Date(b.fecha) : new Date(0);
+    return da - db;
+  });
+
+  
+};
+
+export const obtenerBitacoraCompletaOficio = async (idOficio) => {
+
+  const oficio = await axios.get(`${API_BASE}/oficios/${idOficio}`)
+    .then(r => r.data).catch(() => null);
+
+  const [correspondencia, acuses, seguimientos] = await Promise.all([
+    oficio?.idCorrespondencia
+      ? axios.get(`${API_BASE}/correspondencias/entrada/${oficio.idCorrespondencia}`)
+          .then(r => r.data).catch(() => null)
+      : Promise.resolve(null),
+    axios.get(`${API_BASE}/acuse-oficio/oficio/${idOficio}`)
+      .then(r => r.data).catch(() => []),
+    axios.get(`${API_BASE}/seguimiento-oficio/oficio/${idOficio}`)
+      .then(r => r.data).catch(() => []),
+  ]);
+
+  const eventos = [];
+
+  // 0️⃣ CORRESPONDENCIA RECIBIDA
+  if (correspondencia) {
+    eventos.push({
+      idLog:       `corr-${correspondencia.id}`,
+      estatus:     'CORRESPONDENCIA RECIBIDA',
+      fecha:       correspondencia.fechaRecibido || correspondencia.fechaRegistro,
+      usuario:     correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
+      descripcion: correspondencia.asunto || '',
+      folio:       correspondencia.folioUnico,
+    });
+  }
+
+  // 1️⃣ OFICIO GENERADO
+  if (oficio) {
+    eventos.push({
+      idLog:       `oficio-${oficio.id}`,
+      estatus:     'MEMORANDUM GENERADO',
+      fecha:       oficio.fechaEmision,
+      usuario:     oficio.nombreUsuarioEmisor || `Usuario ${oficio.idUsuarioEmisor}`,
+      descripcion: oficio.asuntoCorrespondencia || '',
+      folio:       oficio.folioUnico,
+    });
+  }
+
+  // 2️⃣ ASIGNADO
+  if (oficio?.idArea) {
+    eventos.push({
+      idLog:       `asignado-${oficio.id}`,
+      estatus:     'ASIGNADO',
+      fecha:       oficio.fechaEmision,
+      usuario:     oficio.nombreUsuarioFirmante || `Usuario ${oficio.idUsuarioFirmante}`,
+      descripcion: `Oficio asignado al área: ${oficio.nombreArea || `Área ${oficio.idArea}`}`,
+      folio:       oficio.folioUnico,
+    });
+  }
+
+  // 3️⃣ EN SEGUIMIENTO
+  (acuses || []).forEach((acuse, i) => {
+    eventos.push({
+      idLog:       `acuse-${acuse.idAcuseOficio || i}`,
+      estatus:     acuse.objetesDelArea ? 'EN SEGUIMIENTO' : 'REASIGNADO',
+      fecha:       acuse.fechaAceptacion,
+      usuario:     `Usuario ${acuse.idUsuarioRevisor}`,
+      descripcion: acuse.objetesDelArea
+        ? 'El área confirmó recepción del oficio.'
+        : 'Oficio enviado a reasignación.',
+      folio:       null,
+    });
+  });
+
+  // 4️⃣ CONTESTADO
+  (seguimientos || []).forEach((seg, i) => {
+    eventos.push({
+      idLog:       `seg-${seg.idSeguimientoOficio || i}`,
+      estatus:     'CONTESTADO',
+      fecha:       seg.fechaResolucion,
+      usuario:     `Usuario ${seg.idUsuario}`,
+      descripcion: seg.respuestasSeguimientoOficio || '',
       folio:       seg.folioRespuesta,
     });
   });
