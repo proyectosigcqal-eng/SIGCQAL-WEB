@@ -77,23 +77,45 @@ const handleConfirmarFinalizar = async () => {
         }
     };
 
-  const handleDescargar = () => {
-    if (!memoData?.urlMemorandumGenerado) {
-        alert("No hay documento generado aún.");
-        return;
+ const handleDescargar = async () => {
+    try {
+        const elemento = document.getElementById('memorandum-pdf-content');
+        console.log('elemento encontrado:', elemento);
+        if (!elemento) {
+            alert("No se encontró el contenido del memorándum.");
+            return;
+        }
+
+        const canvas = await html2canvas(elemento, {
+            scale: 3,
+            useCORS: true,
+            logging: false,
+            onclone: (clonedDoc) => {
+                const el = clonedDoc.getElementById('memorandum-pdf-content');
+                el.style.letterSpacing = "0.5px";
+                el.style.wordSpacing = "2px";
+                const parrafos = el.getElementsByTagName('p');
+                for (let p of parrafos) {
+                    p.style.textAlign = "left";
+                    p.style.display = "block";
+                }
+            }
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'letter');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`MEMO_${memoData?.folioUnico || 'DESC'}.pdf`);
+
+        setFueDescargado(true);
+    } catch (error) {
+        console.error("Error al generar PDF:", error);
+        alert("Error al generar el PDF.");
     }
-
-    const url = `http://localhost:8081/SIGCQAL_dev${memoData.urlMemorandumGenerado}`;
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${memoData.folioUnico || 'MEMO'}.docx`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    setFueDescargado(true);
 };
-
     if (cargando) return <div className="p-5 text-center">Cargando datos...</div>;
 
     return (

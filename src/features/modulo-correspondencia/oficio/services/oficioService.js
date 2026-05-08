@@ -101,3 +101,16 @@ export const registrarSeguimiento = async (idOficio, datosSeguimiento) => {
     }
     return await response.json();
 };
+
+export const crearAcuseOficio = async ({ idOficio, idUsuarioRevisor, esDelArea }) => {
+    try {
+        const response = await axios.post(
+            'http://localhost:8081/SIGCQAL_dev/api/v1/acuse-oficio/crear',
+            { idOficio, idUsuarioRevisor, esDelArea }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error al crear acuse de oficio:", error.response?.data || error.message);
+        throw error;
+    }
+};
