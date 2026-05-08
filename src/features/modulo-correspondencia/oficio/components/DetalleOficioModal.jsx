@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
+
 import { obtenerOficioPorId, crearAcuseOficio } from '../services/oficioService';
 import { responderAcuse } from '../../acuserecibointerno/services/acuserecibointernoService';
+
+import { obtenerOficioPorId } from '../services/oficioService';
+import { crearAcuseOficio } from '../../acuseoficio/services/acuseoficioService';
+
 import '../styles/detalleOficioModal.css';
 
 export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => {
@@ -31,6 +36,7 @@ export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => 
 const handleSiEsDelArea = async () => {
     if (!oficio || respondiendo) return;
     try {
+
         setRespondiendo(true);
         await crearAcuseOficio({
             idOficio:         oficio.idOficio || oficio.id,
@@ -43,6 +49,22 @@ const handleSiEsDelArea = async () => {
     } catch (error) {
         console.error('Error al responder acuse:', error);
         alert('Error al confirmar el acuse de recibo');
+
+      setRespondiendo(true);
+      const request = {
+        idOficio: oficio.idOficio || oficio.id,
+        idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
+        esDelArea: true
+      };
+
+      await crearAcuseOficio(request);
+      alert('Acuse de oficio creado correctamente.');
+      if (onActualizarLista) onActualizarLista();
+      if (onClose) onClose();
+    } catch (error) {
+      console.error('Error al crear acuse de oficio:', error);
+      alert('Error al crear el acuse de oficio.');
+
     } finally {
         setRespondiendo(false);
     }
@@ -50,34 +72,22 @@ const handleSiEsDelArea = async () => {
 
   const handleNoEsDelArea = async () => {
     if (!oficio || respondiendo) return;
+
     try {
       setRespondiendo(true);
-      const now = new Date();
       const request = {
-        idAcuse: oficio.idAcuse || oficio.id,
-        esDelArea: false,
-        fechaAceptacion: now.toISOString().split('T')[0],
-        horaAceptacion: now.toTimeString().slice(0, 8),
-        idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
         idOficio: oficio.idOficio || oficio.id,
-        idCorrespondencia: oficio.idCorrespondencia,
-        numOficio: oficio.numOficio || oficio.folioUnico,
-        fechaEmision: oficio.fechaEmision,
-        idUsuarioEmisor: oficio.idUsuarioEmisor,
-        folioUnico: oficio.folioUnico,
-        observaciones: oficio.observaciones,
-        urlOficioGenerado: oficio.urlOficioGenerado,
-        idPlantilla: oficio.idPlantilla,
-        idArea: oficio.idArea,
-        idUsuarioFirmante: oficio.idUsuarioFirmante
+        idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
+        esDelArea: false
       };
-      await responderAcuse(request);
-      alert('Se notificó que NO es del área.');
+
+      await crearAcuseOficio(request);
+      alert('Se registró que no es del área.');
       if (onActualizarLista) onActualizarLista();
       if (onClose) onClose();
     } catch (error) {
-      console.error('Error al responder acuse (no es del área):', error);
-      alert('Error al notificar que no es del área');
+      console.error('Error al crear acuse de oficio (no es del área):', error);
+      alert('Error al registrar que no es del área.');
     } finally {
       setRespondiendo(false);
     }

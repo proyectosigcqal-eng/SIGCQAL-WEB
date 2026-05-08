@@ -33,3 +33,10 @@ export const getRoles = async () => {
         return response.data;
 
 };
+
+export const getTiposCorrespondencia = async () => {
+    const response = await axios.get(
+      `${API_BASE_URL}/tipos-correspondencia`
+    );
+    return response.data;
+};

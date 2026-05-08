@@ -26,3 +26,10 @@ export const obtenerCorrespondenciaPendientePorArea = async (idArea) => {
   const response = await axios.get(`${API_URL}/pendienteacuse/area/${idArea}`);
   return response.data;
 };
+
+export const listarCorrespondenciasPorTipo = async (idNatural) => {
+  const response = await axios.get(
+    `${API_URL}/tipo/${idNatural}`
+  );
+  return response.data;
+};
