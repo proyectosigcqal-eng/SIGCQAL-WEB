@@ -8,13 +8,14 @@ import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/Asign
 import { AsignarAreaOficioPage } from './pages/modulo-correspondencia/oficio/AsignarAreaOficioPage'; 
 import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica';
 import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-memorandum/ContestacionPage';
+import { ContestacionOficioPage } from './pages/modulo-correspondencia/contestacion-oficio/ContestacionOficioPage';
 import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-central/BandejaCentralPage';
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 import { ListaOficiosPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPage';
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
 import { CorrespondenciaPendienteRevisionPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage';
 import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage';
-
+import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 
 function App() {
   return (
@@ -30,11 +31,12 @@ function App() {
           <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
           <Route path="correspondencia/registradas" element={<CorrespondenciasRegistradasPage />} />
           <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
+          <Route path="correspondencia/contestacion-oficio/:id" element={<ContestacionOficioPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
           <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
           <Route path="correspondencia/acuses-correspondencia" element={<ListaAcusesCorrespondenciaPage />} />
-          
+            
           {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
           
           {/* 2. Nueva ruta para Asignar Área (Paso posterior a la generación) */}
@@ -50,7 +52,7 @@ function App() {
 
           {/* Lista de Memorandums por Área (Acuse Recibo Interno) */}
           <Route path="correspondencia/memorandums-por-area" element={<ListaMemorandumsPorAreaPage />} />
-          <Route path="correspondencia/oficios-por-area" element={<ListaOficiosPage />} />
+          <Route path="correspondencia/oficios-por-area" element={<ListaOficiosPorAreaPage />} />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>

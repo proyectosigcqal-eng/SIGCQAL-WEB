@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { obtenerOficioPorId } from '../services/oficioService';
+import { obtenerOficioPorId, crearAcuseOficio } from '../services/oficioService';
 import { responderAcuse } from '../../acuserecibointerno/services/acuserecibointernoService';
 import '../styles/detalleOficioModal.css';
 
@@ -28,43 +28,25 @@ export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => 
   const fecha = oficio?.fechaEmision ? new Date(oficio.fechaEmision) : null;
   const fechaStr = fecha ? fecha.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
   const horaStr = fecha ? fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '-';
-
-  const handleSiEsDelArea = async () => {
+const handleSiEsDelArea = async () => {
     if (!oficio || respondiendo) return;
-
     try {
-      setRespondiendo(true);
-      const now = new Date();
-      const request = {
-        idAcuse: oficio.idAcuse || oficio.id,
-        esDelArea: true,
-        fechaAceptacion: now.toISOString().split('T')[0],
-        horaAceptacion: now.toTimeString().slice(0, 8),
-        idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
-        idOficio: oficio.idOficio || oficio.id,
-        idCorrespondencia: oficio.idCorrespondencia,
-        numOficio: oficio.numOficio || oficio.folioUnico,
-        fechaEmision: oficio.fechaEmision,
-        idUsuarioEmisor: oficio.idUsuarioEmisor,
-        folioUnico: oficio.folioUnico,
-        observaciones: oficio.observaciones,
-        urlOficioGenerado: oficio.urlOficioGenerado,
-        idPlantilla: oficio.idPlantilla,
-        idArea: oficio.idArea,
-        idUsuarioFirmante: oficio.idUsuarioFirmante
-      };
-
-      await responderAcuse(request);
-      alert('Acuse de recibo confirmado correctamente');
-      if (onActualizarLista) onActualizarLista();
-      if (onClose) onClose();
+        setRespondiendo(true);
+        await crearAcuseOficio({
+            idOficio:         oficio.idOficio || oficio.id,
+            idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
+            esDelArea:        true,
+        });
+        alert('Acuse de recibo confirmado correctamente');
+        if (onActualizarLista) onActualizarLista();
+        if (onClose) onClose();
     } catch (error) {
-      console.error('Error al responder acuse:', error);
-      alert('Error al confirmar el acuse de recibo');
+        console.error('Error al responder acuse:', error);
+        alert('Error al confirmar el acuse de recibo');
     } finally {
-      setRespondiendo(false);
+        setRespondiendo(false);
     }
-  };
+};
 
   const handleNoEsDelArea = async () => {
     if (!oficio || respondiendo) return;
@@ -99,6 +81,7 @@ export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => 
     } finally {
       setRespondiendo(false);
     }
+
   };
 
   return (

@@ -218,3 +218,35 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ─── Split layout ──────────────────────────────────────────── */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 0 32px;
+  /* ✅ Alinea las cards por altura */
+  align-items: start;
+}
+
+/* ─── Card del documento — altura que respira ───────────────── */
+.split-layout section:first-child .card-container {
+  height: calc(100vh - 220px);
+  display: flex;
+  flex-direction: column;
+}
+
+.split-layout section:first-child .form-body {
+  flex: 1;
+  padding: 16px;
+  overflow: hidden; /* sin scroll externo */
+}
+
+/* ─── iframe ocupa todo el espacio disponible ───────────────── */
+.split-layout section:first-child iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  border-radius: 6px;
+}
