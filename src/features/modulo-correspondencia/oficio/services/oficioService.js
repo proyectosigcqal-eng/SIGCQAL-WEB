@@ -84,21 +84,23 @@ export const finalizarAsignacion = async (id, archivo, idArea) => {
     return true;
 };
 
-export const registrarSeguimiento = async (idOficio, datosSeguimiento) => {
+export const registrarSeguimiento = async (idOficio, datos) => {
     const formData = new FormData();
-    formData.append('folio_respuesta', datosSeguimiento.folioRespuesta);
-    formData.append('respuesta_seguimiento_oficio', datosSeguimiento.respuestaSeguimiento);
-    formData.append('archivo_adjunto', datosSeguimiento.archivoAdjunto);
+    formData.append('idOficio',                    idOficio);
+    formData.append('respuestasSeguimientoOficio', datos.respuestaSeguimiento);
+    formData.append('idEstatus',                   datos.idEstatus || 5);
+    formData.append('idUsuario',                   datos.idUsuario || 1);
 
-    const response = await fetch(`${API_URL}/oficios/${idOficio}/seguimiento`, {
-        method: 'POST',
-        body: formData 
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar el seguimiento en la base de datos');
+    if (datos.archivoAdjunto) {
+        formData.append('archivoAdjunto', datos.archivoAdjunto);
     }
+
+    const response = await fetch(
+        'http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-oficio/guardar',
+        { method: 'POST', body: formData }
+    );
+
+    if (!response.ok) throw new Error('Error al registrar el seguimiento de oficio');
     return await response.json();
 };
 
