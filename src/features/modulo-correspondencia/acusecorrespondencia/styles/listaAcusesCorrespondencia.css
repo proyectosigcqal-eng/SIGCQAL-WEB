@@ -162,3 +162,22 @@
   color: #718096;
   font-size: 0.9rem;
 }
+
+
+.btn-contestacion-acuse-correspondencia {
+  background: transparent;
+  color: #3b82f6;
+  border: 1px solid #3b82f6;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  line-height: normal;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-contestacion-acuse-correspondencia:hover {
+  background: #3b82f6;
+  color: white;
+}

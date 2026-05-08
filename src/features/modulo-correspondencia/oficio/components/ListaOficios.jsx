@@ -61,9 +61,9 @@ export const ListaOficios = () => {
             <thead>
               <tr>
                 <th>#</th>
+                <th>Folio Oficio</th>
                 <th>Folio Correspondencia</th>
                 <th>Asunto</th>
-                <th>Folio Oficio</th>
                 <th>Emisor</th>
                 <th>Fecha Emisión</th>
                 <th>Acciones</th>
@@ -73,9 +73,9 @@ export const ListaOficios = () => {
               {oficios.map((of, index) => (
                 <tr key={of.id}>
                   <td>{index + 1}</td>
+                  <td>{of.folioUnico || of.id || '-'}</td>
                   <td>{of.folioUnicoCorrespondencia || of.folioCorrespondencia || '-'}</td>
                   <td>{of.asuntoCorrespondencia || of.asunto || '-'}</td>
-                  <td>{of.folioUnico || of.id || '-'}</td>
                   <td>{of.nombreUsuarioEmisor || of.remitente || of.nombreRemitente || '-'}</td>
                   <td>{formatearFecha(of.fechaEmision)}</td>
                   <td>

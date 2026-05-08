@@ -58,24 +58,28 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>ID Correspondencia</th>
-                <th>Usuario Revisor</th>
-                <th>Es del Área</th>
-                <th>Fecha Respuesta</th>
+                <th>Folio Unico</th>
+                <th>Dependencia Remitente</th>
+                <th>Asunto</th>
+                <th>Fecha Expedicion</th>
+                <th>Fecha Aceptacion</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {acuses.map((acuse, index) => (
                 <tr key={acuse.id || index}>
                   <td className="num-index">{index + 1}</td>
-                  <td>{acuse.idCorrespondencia || '-'}</td>
-                  <td>{acuse.idUsuarioRevisor || '-'}</td>
+                  <td>{acuse.folioUnico || '-'}</td>
+                  <td>{acuse.dependenciaRemitente || '-'}</td>
+                  <td>{acuse.asunto || '-'}</td>
+                  <td>{acuse.fechaExpedicion || '-'}</td>
+                  <td>{acuse.fechaAceptacion || '-'}</td>
                   <td>
-                    <span className={`status-badge ${acuse.esDelArea ? 'status-si' : 'status-no'}`}>
-                      {acuse.esDelArea ? 'Sí' : 'No'}
-                    </span>
+                    <button className="btn-contestacion-acuse-correspondencia">
+                      Contestacion
+                    </button>
                   </td>
-                  <td>{formatearFecha(acuse.fechaRespuesta)}</td>
                 </tr>
               ))}
             </tbody>

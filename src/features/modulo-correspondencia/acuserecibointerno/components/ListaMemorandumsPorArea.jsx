@@ -72,10 +72,10 @@ export const ListaMemorandumsPorArea = () => {
               <tr>
                 <th>#</th>
                 <th>Folio Correspondencia</th>
-                <th>Asunto</th>
                 <th>Folio Memorandum</th>
-                <th>Emisor</th>
+                <th>Asunto</th>
                 <th>Fecha Emisión</th>
+                <th>Fecha Aceptación</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -84,10 +84,10 @@ export const ListaMemorandumsPorArea = () => {
                 <tr key={memo.idAcuse}>
                   <td className="num-index">{index + 1}</td>
                   <td>{memo.folioUnico || '-'}</td>
-                  <td className="asunto-cell">{memo.observaciones || '-'}</td>
                   <td className="num-memo">{memo.numMemo || '-'}</td>
-                  <td>{obtenerNombreUsuario(memo.idUsuarioEmisor)}</td>
+                  <td className="asunto-cell">{memo.observaciones || '-'}</td>
                   <td>{formatearFecha(memo.fechaEmision)}</td>
+                  <td>{formatearFecha(memo.fechaAceptacion)}</td>
                   <td>
                     <button 
                       className="btn-accion btn-contestacion"

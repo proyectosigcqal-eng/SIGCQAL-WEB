@@ -39,7 +39,7 @@ export const ListaAcusesOficioPorArea = () => {
   return (
     <div className="lista-acuses-oficio-container">
       <div className="lista-header">
-        <h2>Acuses de oficio asignados</h2>
+        <h2>Oficios asignados</h2>
         <div className="header-info">
           <span className="area-badge">Área: {areaForzada}</span>
           <button onClick={recargar} className="btn-actualizar-acuse">
@@ -58,10 +58,11 @@ export const ListaAcusesOficioPorArea = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Num Oficio</th>
-                <th>Fecha Emisión</th>
+                <th>Número de Oficio</th>
                 <th>Folio Único</th>
                 <th>Nombre Area</th>
+                <th>Fecha Emisión</th>
+                <th>Fecha Aceptación</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -70,9 +71,11 @@ export const ListaAcusesOficioPorArea = () => {
                 <tr key={acuse.id || index}>
                   <td className="num-index">{index + 1}</td>
                   <td>{acuse.numOficio || '-'}</td>
-                  <td>{formatearFecha(acuse.fechaEmision)}</td>
+                  
                   <td>{acuse.folioUnico || '-'}</td>
                   <td>{acuse.nombreArea || '-'}</td>
+                  <td>{formatearFecha(acuse.fechaEmision)}</td>
+                  <td>{formatearFecha(acuse.fechaAceptacion)}</td>
                   <td>
                     <button className="btn-contestacion-acuse-oficio">
                       Contestacion
