@@ -90,6 +90,8 @@ export const registrarSeguimiento = async (idOficio, datos) => {
     formData.append('respuestasSeguimientoOficio', datos.respuestaSeguimiento);
     formData.append('idEstatus',                   datos.idEstatus || 5);
     formData.append('idUsuario',                   datos.idUsuario || 1);
+    formData.append('fechaResolucion', new Date().toISOString().split('T')[0]);
+    formData.append('horaResolucion',  new Date().toTimeString().split(' ')[0]);
 
     if (datos.archivoAdjunto) {
         formData.append('archivoAdjunto', datos.archivoAdjunto);

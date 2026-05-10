@@ -17,10 +17,10 @@ import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acus
 import { ContestacionCorrespondenciaPage } from './pages/modulo-correspondencia/contestacion-correspondencia/ContestacionCorrespondenciaPage';
 import { CorrespondenciaPendienteRevisionPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage';
 import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage';
-
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
-
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
+import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
+
 
 
 function App() {
@@ -41,7 +41,7 @@ function App() {
 
           <Route path="correspondencia/contestacion-oficio/:id" element={<ContestacionOficioPage />} />
           <Route path="correspondencia/contestacion-correspondencia/:id" element={<ContestacionCorrespondenciaPage />} />
-
+          <Route path="correspondencia/nuevo-oficio-contestacion" element={<GenerarOficioContestacionPage />} />
           <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
           <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
           <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
