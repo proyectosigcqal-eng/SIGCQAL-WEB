@@ -14,6 +14,7 @@ const ESTATUS_CONFIG = {
   'EN SEGUIMIENTO': { color: '#805ad5', bg: '#faf5ff', icon: '👁️' },
   'CONTESTADO':       { color: '#2b6cb0', bg: '#ebf8ff', icon: '📨' },
   'CONCLUIDO':      { color: '#276749', bg: '#f0fff4', icon: '🏁' },
+  'OFICIO GENERADO': { color: '#6b46c1', bg: '#faf5ff', icon: '📋' },
 };
 
 const formatFecha = (fecha) => {
@@ -33,6 +34,7 @@ export default function DetalleBandejaModal({ isOpen, onClose, item, onCerrarSeg
 
  useEffect(() => {
     if (!isOpen || !item) return;
+    console.log('>>> item completo:', item);
     setYaConcluido(item.estatus === 'CONCLUIDO' || item.estatus === 'CERRADO');
 const cargar = async () => {
     setLoadingLogs(true);

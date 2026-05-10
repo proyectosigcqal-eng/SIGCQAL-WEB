@@ -1,0 +1,62 @@
+.modal-oficio-pregunta {
+  background: white;
+  border-radius: 14px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+.modal-oficio-pregunta h3 {
+  color: #276749;
+  margin-bottom: 12px;
+  font-size: 1.2rem;
+}
+
+.modal-oficio-pregunta p {
+  color: #4a5568;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.modal-oficio-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-si-oficio {
+  background: #691C32;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-si-oficio:hover { background: #4a1323; }
+
+.btn-no-oficio {
+  background: #edf2f7;
+  color: #4a5568;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-no-oficio:hover { background: #e2e8f0; }
+
+/* Asegura que el overlay cubra toda la pantalla */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* ← asegura que esté sobre todo */
+}
