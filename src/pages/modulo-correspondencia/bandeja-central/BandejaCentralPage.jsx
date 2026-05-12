@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { listarSeguimientosMemo, listarSeguimientosCorr, listarSeguimientosOficio } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
 import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
 import axios from 'axios';
@@ -25,7 +26,7 @@ export const BandejaCentralPage = () => {
                     idMemo:  item.idMemo,
                     folio:   item.folioRespuesta,
                     asunto:  item.respuestaSeguimientoMemorandum,
-                    fecha:   item.fechaResolucion,
+                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
                     estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
                     archivo: item.archivoAdjunto,
                     tipo:    'memorandum'
@@ -37,7 +38,7 @@ export const BandejaCentralPage = () => {
                     idMemo:  item.idOficio,
                     folio:   item.folioRespuesta,
                     asunto:  item.respuestasSeguimientoOficio,
-                    fecha:   item.fechaResolucion,
+                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
                     estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
                     archivo: item.archivoAdjunto,
                     tipo:    'oficio'
@@ -49,7 +50,7 @@ export const BandejaCentralPage = () => {
                     idMemo:  item.idCorrespondencia,
                     folio:   item.folioRespuesta,
                     asunto:  item.respuestaSeguimientoCorrespondencia,
-                    fecha:   item.fechaResolucion,
+                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
                     estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
                     archivo: item.archivoAdjunto,
                     tipo:    'correspondencia'
@@ -141,7 +142,7 @@ export const BandejaCentralPage = () => {
                                         <tr key={index}>
                                             <td className="folio-cell">{item.folio}</td>
                                             <td>{item.asunto}</td>
-                                            <td>{item.fecha}</td>
+                                                                    <td>{formatDateDisplay(item.fecha)}</td>
                                             <td>
                                                 <span className={`status-badge ${
                                                     item.estatus === 'PENDIENTE'  ? 'status-pendiente'  :

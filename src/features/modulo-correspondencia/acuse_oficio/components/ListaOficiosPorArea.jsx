@@ -1,17 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useListaOficiosPorArea } from '../hooks/useListaOficiosPorArea';
 import '@/features/modulo-correspondencia/oficio/styles/listaOficiosPorArea.css';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaOficiosPorArea = () => {
   const { oficios, loading, error, recargar, areaForzada } = useListaOficiosPorArea();
   const navigate = useNavigate();
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '-';
-    return new Date(fecha).toLocaleDateString('es-MX', {
-      day: '2-digit', month: 'short', year: 'numeric'
-    });
-  };
+  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
   if (loading) return <div className="lista-memorandums-area-container"><div className="loading-state"><div className="spinner"></div><p>Cargando oficios...</p></div></div>;
   if (error) return <div className="lista-memorandums-area-container"><div className="error-state"><p>Error: {error}</p><button onClick={recargar} className="btn-reintentar">Reintentar</button></div></div>;
@@ -48,7 +44,7 @@ export const ListaOficiosPorArea = () => {
                   <td>{oficio.folioUnico || '-'}</td>
                   <td>{oficio.observaciones || '-'}</td>
                   <td>{`Usuario ${oficio.idUsuarioEmisor}`}</td>
-                  <td>{formatearFecha(oficio.fechaEmision)}</td>
+                  <td>{formatFecha(oficio, oficio.fechaEmision)}</td>
                   <td>
                     <button
                       className="btn-accion btn-contestacion"

@@ -1,5 +1,6 @@
 // seguimientoService.js
 import axios from 'axios';
+import { pickFecha } from '@/shared/utils/dateUtils';
 
 const API_BASE = 'http://localhost:8081/SIGCQAL_dev/api/v1';
 
@@ -58,7 +59,7 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     eventos.push({
       idLog:       `corr-${correspondencia.id}`,
       estatus:     'CORRESPONDENCIA RECIBIDA',
-      fecha:       correspondencia.fechaRecibido || correspondencia.fechaRegistro,
+      fecha:       pickFecha(correspondencia) || correspondencia.fechaRecibido || correspondencia.fechaRegistro,
       usuario:     correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
       descripcion: correspondencia.asunto || '',
       folio:       correspondencia.folioUnico,
@@ -82,7 +83,7 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     eventos.push({
       idLog:       `asignado-${memo.idMemo}`,
       estatus:     'ASIGNADO',
-      fecha:       memo.fechaEmision,
+      fecha:       pickFecha(memo) || memo.fechaEmision,
       usuario:     memo.nombreUsuarioFirmante || `Usuario ${memo.idUsuarioFirmante}`,
       descripcion: `Memorándum asignado al área: ${memo.nombreArea || `Área ${memo.idArea}`}`,
       folio:       memo.folioUnico,
@@ -108,18 +109,22 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     eventos.push({
       idLog:       `seg-${seg.idSeguimientoMemorandum || i}`,
       estatus:     'CONTESTADO',
-      fecha:       seg.fechaResolucion,
+      fecha:       pickFecha(seg) || seg.fechaResolucion,
       usuario:     `Usuario ${seg.idUsuario}`,
       descripcion: seg.respuestaSeguimientoMemorandum || '',
       folio:       seg.folioRespuesta,
     });
   });
 
-  return eventos.sort((a, b) => {
-    const da = a.fecha ? new Date(a.fecha) : new Date(0);
-    const db = b.fecha ? new Date(b.fecha) : new Date(0);
+ return eventos.sort((a, b) => {
+    if (a.estatus === 'CORRESPONDENCIA RECIBIDA') return -1;
+    if (b.estatus === 'CORRESPONDENCIA RECIBIDA') return 1;
+    if (a.estatus === 'MEMORANDUM GENERADO' || a.estatus === 'OFICIO GENERADO') return -1;
+    if (b.estatus === 'MEMORANDUM GENERADO' || b.estatus === 'OFICIO GENERADO') return 1;
+    const da = a.fecha ? new Date(a.fecha) : new Date(8640000000000000);
+    const db = b.fecha ? new Date(b.fecha) : new Date(8640000000000000);
     return da - db;
-  });
+});
 
   
 };
@@ -159,7 +164,7 @@ export const obtenerBitacoraCompletaOficio = async (idOficio) => {
     eventos.push({
       idLog:       `corr-${correspondencia.id}`,
       estatus:     'CORRESPONDENCIA RECIBIDA',
-      fecha:       correspondencia.fechaRecibido || correspondencia.fechaOficio || correspondencia.fechaRegistro,
+      fecha:       pickFecha(correspondencia) || correspondencia.fechaRecibido || correspondencia.fechaOficio || correspondencia.fechaRegistro,
       usuario:     correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
       descripcion: correspondencia.asunto || '',
       folio:       correspondencia.folioUnico,
@@ -195,7 +200,7 @@ export const obtenerBitacoraCompletaOficio = async (idOficio) => {
     eventos.push({
       idLog:       `acuse-${acuse.idAcuseOficio || i}`,
       estatus:     acuse.esDelArea ? 'EN SEGUIMIENTO' : 'REASIGNADO', // ← fix
-      fecha:       acuse.fechaAceptacion,
+      fecha:       pickFecha(acuse) || acuse.fechaAceptacion,
       usuario:     `Usuario ${acuse.idUsuarioRevisor}`,
       descripcion: acuse.esDelArea
         ? 'El área confirmó recepción del oficio.'
@@ -221,7 +226,7 @@ export const obtenerBitacoraCompletaOficio = async (idOficio) => {
     eventos.push({
       idLog:       `oficio-contest-${oc.id || i}`,
       estatus:     'OFICIO GENERADO',
-      fecha:       oc.fechaEmision,
+      fecha:       pickFecha(oc) || oc.fechaEmision,
       usuario:     oc.nombreUsuarioFirmante || `Usuario ${oc.idUsuarioFirmante}`,
       descripcion: `Oficio de contestación generado: ${oc.folioUnico}`,
       folio:       oc.folioUnico,
@@ -239,8 +244,8 @@ return eventos.sort((a, b) => {
     if (b.estatus === 'CORRESPONDENCIA RECIBIDA') return 1;
     if (a.estatus === 'MEMORANDUM GENERADO' || a.estatus === 'OFICIO GENERADO') return -1;
     if (b.estatus === 'MEMORANDUM GENERADO' || b.estatus === 'OFICIO GENERADO') return 1;
-    const da = a.fecha ? new Date(a.fecha) : new Date(8640000000000000);
-    const db = b.fecha ? new Date(b.fecha) : new Date(8640000000000000);
+    const da = a.fecha ? new Date(a.fecha) : new Date(0);
+    const db = b.fecha ? new Date(b.fecha) : new Date(0);
     return da - db;
 });
 };
