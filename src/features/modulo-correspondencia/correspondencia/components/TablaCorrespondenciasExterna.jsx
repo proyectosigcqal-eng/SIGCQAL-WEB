@@ -33,6 +33,7 @@ const getIdArea = (item) => item?.idArea ?? item?.id_area ?? null;
 
 const getAreaLabel = (item) =>
   item?.nombreArea ??
+  item?.nombre_area ??
   item?.areaAsignada ??
   item?.area_asignada ??
   item?.area?.nombre ??
@@ -42,17 +43,12 @@ const getAreaLabel = (item) =>
 const getIdEstatus = (item) => item?.idEstatus ?? item?.id_estatus ?? null;
 
 const getEstatusLabel = (item) => {
-  const raw = item?.estatus ?? item?.estatusNombre ?? item?.nombreEstatus ?? item?.descripcionEstatus ?? getIdEstatus(item);
-  if (raw == null) return 'Sin estatus';
-  if (typeof raw === 'number') {
-    if (raw === 1) return 'Registrado';
-    if (raw === 2) return 'Asignado';
-    if (raw === 3) return 'En seguimiento';
-    if (raw === 4) return 'Concluido';
-    return `Estatus ${raw}`;
-  }
-  const label = String(raw).trim();
-  return label.length ? label : 'Sin estatus';
+  const raw = item?.idEstatus ?? item?.id_estatus;
+  if (raw === 1 || raw === null || raw === undefined) return 'Registrado';
+  if (raw === 2) return 'Asignado';
+  if (raw === 3) return 'En Seguimiento';
+  if (raw === 4) return 'Concluido';
+  return String(raw);
 };
 
 const getEstatusColors = (label) => {
@@ -116,10 +112,8 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
 
     return rows.filter((item) => {
       if (q) {
-        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? item?.folio ?? '');
-        const remitente = normalizeText(
-          item?.dependenciaRemitente ?? item?.dependencia_remitente ?? item?.dependencia ?? item?.nombreRemitente ?? item?.nombre_remitente ?? ''
-        );
+        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? '');
+        const remitente = normalizeText(item?.dependenciaRemitente ?? item?.dependencia_remitente ?? '');
         const asunto = normalizeText(item?.asunto ?? '');
         if (!folio.includes(q) && !remitente.includes(q) && !asunto.includes(q)) return false;
       }
@@ -262,22 +256,18 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
               ) : (
                 paged.map((item, idx) => {
                   const id = getId(item);
-                  const folio = item?.folioUnico ?? item?.folio_unico ?? item?.folio ?? '';
-                  const oficio =
-                    item?.numOficioExterno ??
-                    item?.num_oficio_externo ??
-                    item?.numeroOficio ??
-                    item?.numOficio ??
-                    '';
-                  const remitente =
-                    item?.dependenciaRemitente ?? item?.dependencia_remitente ?? item?.dependencia ?? item?.nombreRemitente ?? item?.nombre_remitente ?? '';
-                  const destinatario = item?.titularDependencia ?? item?.destinatario ?? '';
-                  const asunto = item?.asunto ?? '';
-                  const fechaRecibido = safeDateLabel(item?.fechaRecibido ?? item?.fecha_recibido ?? item?.fecha ?? '');
+                  const folio = item?.folioUnico ?? item?.folio_unico ?? '—';
+                  const oficio = item?.numeroOficio ?? item?.num_oficio_externo ?? '—';
+                  const remitente = item?.dependenciaRemitente ?? item?.dependencia_remitente ?? '—';
+                  const destinatario = item?.titularDependencia ?? item?.nombre_remitente ?? '—';
+                  const asunto = item?.asunto ?? '—';
+                  const fecha = item?.fechaRecibido ?? item?.fecha_recibido ?? '—';
+                  const fechaRecibido = safeDateLabel(fecha);
 
-                  const idArea = getIdArea(item);
+                  const nombreArea = item?.nombreArea ?? item?.nombre_area ?? null;
+                  const idArea = item?.idArea ?? item?.id_area ?? null;
                   const hasArea = idArea !== null && idArea !== undefined && String(idArea).trim() !== '';
-                  const areaLabelRaw = getAreaLabel(item);
+                  const areaLabelRaw = nombreArea ?? getAreaLabel(item);
                   const areaLabel = hasArea ? areaLabelRaw || `Área ${idArea}` : 'Sin asignar';
 
                   const estatusLabel = getEstatusLabel(item);
@@ -286,15 +276,15 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
                   return (
                     <tr key={id ?? `${idx}`}> 
                       <td style={{ whiteSpace: 'nowrap' }}>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{folio || '—'}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{oficio || '—'}</td>
-                      <td>{remitente || '—'}</td>
-                      <td>{destinatario || '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{folio}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{oficio}</td>
+                      <td>{remitente}</td>
+                      <td>{destinatario}</td>
                       <td
                         title={asunto || ''}
                         style={{ maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                       >
-                        {asunto || '—'}
+                        {asunto}
                       </td>
                       <td style={{ whiteSpace: 'nowrap' }}>{fechaRecibido || '—'}</td>
                       <td>
@@ -313,14 +303,24 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
                           {estatusLabel}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ padding: '10px 12px' }}>
                         <div className="acciones-cell">
-                          {hasArea ? (
-                            <button type="button" className="btn-generar-memo" onClick={() => onGenerarMemo?.(item)}>
+                          {(!idArea && idArea !== 0) && (
+                            <button
+                              type="button"
+                              className="btn-generar-memo"
+                              onClick={() => onGenerarMemo?.(item)}
+                              title="Generar Memorándum"
+                            >
                               Generar Memo
                             </button>
-                          ) : null}
-                          <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
+                          )}
+                          <button
+                            type="button"
+                            className="btn-generar-oficio"
+                            onClick={() => onGenerarOficio?.(item)}
+                            title="Generar Oficio de Contestación"
+                          >
                             Generar Oficio
                           </button>
                         </div>

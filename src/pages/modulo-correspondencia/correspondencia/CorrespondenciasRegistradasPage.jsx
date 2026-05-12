@@ -26,12 +26,9 @@ export const CorrespondenciasRegistradasPage = () => {
       const data = await listarCorrespondenciasPorTipo('EXTERNA');
       setCorrExterna(Array.isArray(data) ? data : []);
     } catch (err) {
-      const mensaje =
-        err?.response?.data?.message ||
-        err?.response?.data?.mensaje ||
-        err?.message ||
-        'Ocurrió un error al cargar la correspondencia externa.';
-      setError(mensaje);
+      const msg = err?.response?.data?.message || err?.message || 'Error al cargar correspondencia externa';
+      setError(msg);
+      setCorrExterna([]);
     } finally {
       setLoadingExt(false);
     }
@@ -44,12 +41,9 @@ export const CorrespondenciasRegistradasPage = () => {
       const data = await listarCorrespondenciasPorTipo('INTERNA');
       setCorrInterna(Array.isArray(data) ? data : []);
     } catch (err) {
-      const mensaje =
-        err?.response?.data?.message ||
-        err?.response?.data?.mensaje ||
-        err?.message ||
-        'Ocurrió un error al cargar la correspondencia interna.';
-      setError(mensaje);
+      const msg = err?.response?.data?.message || err?.message || 'Error al cargar correspondencia interna';
+      setError(msg);
+      setCorrInterna([]);
     } finally {
       setLoadingInt(false);
     }
@@ -113,13 +107,21 @@ export const CorrespondenciasRegistradasPage = () => {
         </button>
       </div>
 
-      {error ? (
-        <div style={{ padding: '1rem 1.5rem 0 1.5rem' }}>
-          <div className="alerta-error" style={{ marginBottom: 0 }}>
-            {error}
-          </div>
+      {error && (
+        <div
+          style={{
+            background: '#fef2f2',
+            border: '1px solid #fca5a5',
+            borderRadius: '6px',
+            padding: '0.75rem 1rem',
+            color: '#dc2626',
+            margin: '0 1.5rem 1rem',
+            fontSize: '0.875rem'
+          }}
+        >
+          ⚠️ {error}
         </div>
-      ) : null}
+      )}
 
       {vistaActual === 'EXTERNA' ? (
         <TablaCorrespondenciasExterna

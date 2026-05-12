@@ -32,17 +32,12 @@ const getId = (item) =>
 const getIdEstatus = (item) => item?.idEstatus ?? item?.id_estatus ?? null;
 
 const getEstatusLabel = (item) => {
-  const raw = item?.estatus ?? item?.estatusNombre ?? item?.nombreEstatus ?? item?.descripcionEstatus ?? getIdEstatus(item);
-  if (raw == null) return 'Sin estatus';
-  if (typeof raw === 'number') {
-    if (raw === 1) return 'Registrado';
-    if (raw === 2) return 'Asignado';
-    if (raw === 3) return 'En seguimiento';
-    if (raw === 4) return 'Concluido';
-    return `Estatus ${raw}`;
-  }
-  const label = String(raw).trim();
-  return label.length ? label : 'Sin estatus';
+  const raw = item?.idEstatus ?? item?.id_estatus;
+  if (raw === 1 || raw === null || raw === undefined) return 'Registrado';
+  if (raw === 2) return 'Asignado';
+  if (raw === 3) return 'En Seguimiento';
+  if (raw === 4) return 'Concluido';
+  return String(raw);
 };
 
 const getEstatusColors = (label) => {
@@ -80,7 +75,7 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
 
     return rows.filter((item) => {
       if (q) {
-        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? item?.folio ?? '');
+        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? '');
         const asunto = normalizeText(item?.asunto ?? '');
         if (!folio.includes(q) && !asunto.includes(q)) return false;
       }
@@ -200,25 +195,21 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
               ) : (
                 paged.map((item, idx) => {
                   const id = getId(item);
-                  const folio = item?.folioUnico ?? item?.folio_unico ?? item?.folio ?? '';
-                  const oficio =
-                    item?.numOficioExterno ??
-                    item?.num_oficio_externo ??
-                    item?.numeroOficio ??
-                    item?.numOficio ??
-                    '';
-                  const asunto = item?.asunto ?? '';
-                  const fechaRecibido = safeDateLabel(item?.fechaRecibido ?? item?.fecha_recibido ?? item?.fecha ?? '');
+                  const folio = item?.folioUnico ?? item?.folio_unico ?? '—';
+                  const oficio = item?.numeroOficio ?? item?.num_oficio_externo ?? '—';
+                  const asunto = item?.asunto ?? '—';
+                  const fecha = item?.fechaRecibido ?? item?.fecha_recibido ?? '—';
+                  const fechaRecibido = safeDateLabel(fecha);
                   const estatusLabel = getEstatusLabel(item);
                   const badge = getEstatusColors(estatusLabel);
 
                   return (
                     <tr key={id ?? `${idx}`}>
                       <td style={{ whiteSpace: 'nowrap' }}>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{folio || '—'}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{oficio || '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{folio}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{oficio}</td>
                       <td title={asunto || ''} style={{ maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {asunto || '—'}
+                        {asunto}
                       </td>
                       <td style={{ whiteSpace: 'nowrap' }}>{fechaRecibido || '—'}</td>
                       <td style={{ whiteSpace: 'nowrap' }}>
