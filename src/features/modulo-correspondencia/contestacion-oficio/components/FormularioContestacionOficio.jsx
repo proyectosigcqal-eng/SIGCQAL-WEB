@@ -11,6 +11,8 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
   const [archivo, setArchivo]                       = useState(null);
   const [guardando, setGuardando]                   = useState(false);
   const [folioGenerado, setFolioGenerado]           = useState(null);
+  const [folioManual, setFolioManual]               = useState('');
+  const [numeroUsuario, setNumeroUsuario]           = useState('1');
   const [mostrarModalOficio, setMostrarModalOficio] = useState(false);
   const [idCorrespondencia, setIdCorrespondencia]   = useState(null);
 
@@ -37,12 +39,15 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
       const datos = {
         respuestaSeguimiento: respuesta,
         archivoAdjunto:       archivo || null,
-        idUsuario:            1,
+        idUsuario:            numeroUsuario ? parseInt(numeroUsuario, 10) : 1,
         idEstatus:            5,
       };
 
       const seguimientoResp = await registrarSeguimiento(idOficio, datos);
       setFolioGenerado(seguimientoResp?.folioRespuesta ?? 'OK');
+
+      // Si el usuario no proporcionó un folio manual, prellenarlo con el folio generado
+      if (!folioManual) setFolioManual(seguimientoResp?.folioRespuesta ?? '');
 
       // Guardamos el idCorrespondencia para heredarlo al oficio
       setIdCorrespondencia(acuse?.idCorrespondencia || null);
@@ -66,6 +71,8 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
         firmante:          'ana_admin',
         areaFirmante:      'Administración',
         textoSugerido:     respuesta,
+        folioOficio:       folioManual || folioGenerado,
+        numeroUsuario:     numeroUsuario ? parseInt(numeroUsuario, 10) : 1,
       }
     });
   };
@@ -87,6 +94,17 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
             value={respuesta}
             onChange={(e) => setRespuesta(e.target.value)}
             placeholder="Describa las acciones tomadas..."
+          />
+        </div>
+
+        <div className="mb-3">
+          <label className="fw-bold small text-uppercase">Número de usuario</label>
+          <input
+            type="number"
+            className="form-control"
+            value={numeroUsuario}
+            onChange={(e) => setNumeroUsuario(e.target.value)}
+            placeholder="Ej. 5"
           />
         </div>
 
@@ -123,6 +141,18 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
                 Folio registrado: <strong>{folioGenerado}</strong>
               </p>
             )}
+
+            <div style={{ marginBottom: 12 }}>
+              <label className="fw-bold small text-uppercase">Folio para Oficio (manual)</label>
+              <input
+                type="text"
+                className="form-control"
+                value={folioManual}
+                onChange={(e) => setFolioManual(e.target.value)}
+                placeholder="Introduce folio para el oficio (puedes editar)"
+              />
+              <small style={{ color: '#6b7280' }}>Si queda vacío se usará el folio registrado automáticamente.</small>
+            </div>
             <div className="modal-oficio-btns">
               <button className="btn-si-oficio" onClick={handleGenerarOficio}>
                 Sí, generar oficio

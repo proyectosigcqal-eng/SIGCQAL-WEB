@@ -16,6 +16,10 @@ export const GenerarOficioContestacionPage = () => {
   const [instruccion, setInstruccion] = useState(heredado.textoSugerido || '');
   const [guardando, setGuardando]     = useState(false);
   const [error, setError]             = useState(null);
+  const [folioOficio, setFolioOficio] = useState(heredado.folioOficio || '');
+  const [numeroUsuarioState, setNumeroUsuarioState] = useState(
+    heredado.numeroUsuario ? String(heredado.numeroUsuario) : String(FIRMANTE_FIJO)
+  );
 
   const formData = {
     idCorrespondencia: heredado.idCorrespondencia,
@@ -33,6 +37,8 @@ export const GenerarOficioContestacionPage = () => {
     if (!instruccion) { setError('El cuerpo del oficio es obligatorio.'); return; }
     setGuardando(true);
     try {
+      const idUsuarioNumber = numeroUsuarioState ? parseInt(numeroUsuarioState, 10) : FIRMANTE_FIJO;
+
       const payload = {
         ...formData,
         instruccionSeguimiento: instruccion,
@@ -41,7 +47,11 @@ export const GenerarOficioContestacionPage = () => {
         areaFirmante:           heredado.areaFirmante || 'Administración',
         areaDestinatario:       '',
         nombreEmisor:           heredado.firmante    || 'ana_admin',
+        idUsuarioFirmante:      idUsuarioNumber,
+        idUsuarioEmisor:        idUsuarioNumber,
+        folioUnico:             folioOficio || formData.folioUnico || '',
       };
+
       await generarOficio(payload);
       navigate('/correspondencia/bandeja');
     } catch (err) {
@@ -78,6 +88,28 @@ export const GenerarOficioContestacionPage = () => {
               />
             </div>
 
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
+              <label>Número de usuario</label>
+              <input
+                type="number"
+                className="form-control"
+                value={numeroUsuarioState}
+                onChange={(e) => setNumeroUsuarioState(e.target.value)}
+                placeholder="Ej. 5"
+              />
+            </div>
+
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
+              <label>Folio (manual)</label>
+              <input
+                type="text"
+                className="form-control"
+                value={folioOficio}
+                onChange={(e) => setFolioOficio(e.target.value)}
+                placeholder="Introduce folio para el oficio (opcional)"
+              />
+            </div>
+
             {/* Cuerpo del oficio */}
             <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">
@@ -103,7 +135,13 @@ export const GenerarOficioContestacionPage = () => {
         {/* DERECHA — vista previa */}
         <section className="panel-vista-previa">
           <VistaPreviaOficio
-            formData={{ ...formData, instruccionSeguimiento: instruccion }}
+            formData={{
+              ...formData,
+              instruccionSeguimiento: instruccion,
+              folioUnico: folioOficio || formData.folioUnico || '',
+              idUsuarioFirmante: numeroUsuarioState ? Number(numeroUsuarioState) : formData.idUsuarioFirmante,
+              idUsuarioEmisor: numeroUsuarioState ? Number(numeroUsuarioState) : formData.idUsuarioEmisor,
+            }}
             usuarios={catalogos.usuarios}
             areaDestino={null}
           />
