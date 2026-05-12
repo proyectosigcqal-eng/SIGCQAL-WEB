@@ -104,10 +104,11 @@ export const registrarSeguimiento = async (idMemo, datosSeguimiento) => {
     // exactamente con los @RequestParam o el modelo de tu backend en Java.
     formData.append('folio_respuesta', datosSeguimiento.folioRespuesta);
     formData.append('respuesta_seguimiento_memorandum', datosSeguimiento.respuestaSeguimiento);
-    formData.append('archivo_adjunto', datosSeguimiento.archivoAdjunto); 
-    
-    // NOTA: id_usuario, fecha_resolucion, hora_resolucion y estatus 
-    // lo debe calcular y asignar tu backend en automático.
+    formData.append('archivo_adjunto', datosSeguimiento.archivoAdjunto);
+    // Añadimos fecha/hora de resolución para consistencia entre endpoints
+    formData.append('fechaResolucion', new Date().toISOString().split('T')[0]);
+    formData.append('horaResolucion', new Date().toTimeString().split(' ')[0]);
+    // NOTA: id_usuario y estatus idealmente lo maneja el backend, pero se pueden enviar si es necesario.
 
     const response = await fetch(`${API_URL}/memorandums/${idMemo}/seguimiento`, {
         method: 'POST',

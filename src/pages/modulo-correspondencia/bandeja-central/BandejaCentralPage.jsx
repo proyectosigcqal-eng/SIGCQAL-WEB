@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { listarSeguimientosMemo, listarSeguimientosCorr, listarSeguimientosOficio } from '../../../features/modulo-correspondencia/bandeja-central/services/bandejaService';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
 import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
 import axios from 'axios';
@@ -10,6 +11,9 @@ export const BandejaCentralPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    
+    // Switch de filtrado: true = con archivo, false = sin archivo
+    const [verConArchivo, setVerConArchivo] = useState(true);
 
     useEffect(() => {
         cargarDatos(activeTab);
@@ -25,7 +29,7 @@ export const BandejaCentralPage = () => {
                     idMemo:  item.idMemo,
                     folio:   item.folioRespuesta,
                     asunto:  item.respuestaSeguimientoMemorandum,
-                    fecha:   item.fechaResolucion,
+                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
                     estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
                     archivo: item.archivoAdjunto,
                     tipo:    'memorandum'
@@ -37,7 +41,7 @@ export const BandejaCentralPage = () => {
                     idMemo:  item.idOficio,
                     folio:   item.folioRespuesta,
                     asunto:  item.respuestasSeguimientoOficio,
-                    fecha:   item.fechaResolucion,
+                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
                     estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
                     archivo: item.archivoAdjunto,
                     tipo:    'oficio'
@@ -49,7 +53,7 @@ export const BandejaCentralPage = () => {
                     idMemo:  item.idCorrespondencia,
                     folio:   item.folioRespuesta,
                     asunto:  item.respuestaSeguimientoCorrespondencia,
-                    fecha:   item.fechaResolucion,
+                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
                     estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
                     archivo: item.archivoAdjunto,
                     tipo:    'correspondencia'
@@ -62,6 +66,12 @@ export const BandejaCentralPage = () => {
             setIsLoading(false);
         }
     };
+
+    // Lógica de filtrado excluyente
+    const datosAMostrar = datosTabla.filter(item => {
+        const tieneArchivo = item.archivo !== null && item.archivo !== undefined && item.archivo !== '';
+        return verConArchivo ? tieneArchivo : !tieneArchivo;
+    });
 
     const handleAbrirDetalle = (item) => {
         setSelectedItem(item);
@@ -119,6 +129,23 @@ export const BandejaCentralPage = () => {
                     </button>
                 </div>
 
+                {/* Filtro Switch */}
+                <div className="bandeja-filters-bar" style={{ padding: '1rem', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e2e8f0' }}>
+                    <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span className="switch-label" style={{ fontWeight: '600' }}>
+                            {verConArchivo ? 'Con archivo adjunto' : 'Sin archivo adjunto'}
+                        </span>
+                        <label className="switch">
+                            <input 
+                                type="checkbox" 
+                                checked={verConArchivo} 
+                                onChange={(e) => setVerConArchivo(e.target.checked)} 
+                            />
+                            <span className="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
                 <div className="bandeja-content">
                     {isLoading ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: '#a0aec0' }}>
@@ -136,12 +163,12 @@ export const BandejaCentralPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {datosTabla.length > 0 ? (
-                                    datosTabla.map((item, index) => (
+                                {datosAMostrar.length > 0 ? (
+                                    datosAMostrar.map((item, index) => (
                                         <tr key={index}>
                                             <td className="folio-cell">{item.folio}</td>
                                             <td>{item.asunto}</td>
-                                            <td>{item.fecha}</td>
+                                                                    <td>{formatDateDisplay(item.fecha)}</td>
                                             <td>
                                                 <span className={`status-badge ${
                                                     item.estatus === 'PENDIENTE'  ? 'status-pendiente'  :

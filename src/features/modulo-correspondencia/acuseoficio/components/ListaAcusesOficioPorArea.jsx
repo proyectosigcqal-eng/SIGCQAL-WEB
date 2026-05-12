@@ -1,18 +1,11 @@
 import { useListaAcusesOficioPorArea } from '../hooks/useListaAcusesOficioPorArea'; 
 import '@/features/modulo-correspondencia/acuseoficio/styles/listaAcusesOficio.css';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaAcusesOficioPorArea = () => {
   const { acuses, loading, error, recargar, areaForzada } = useListaAcusesOficioPorArea();
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '-';
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
   if (loading) {
     return (
@@ -74,8 +67,8 @@ export const ListaAcusesOficioPorArea = () => {
                   
                   <td>{acuse.folioUnico || '-'}</td>
                   <td>{acuse.nombreArea || '-'}</td>
-                  <td>{formatearFecha(acuse.fechaEmision)}</td>
-                  <td>{formatearFecha(acuse.fechaAceptacion)}</td>
+                  <td>{formatFecha(acuse, acuse.fechaEmision)}</td>
+                  <td>{formatFecha(acuse, acuse.fechaAceptacion)}</td>
                   <td>
                     <button className="btn-contestacion-acuse-oficio">
                       Contestacion

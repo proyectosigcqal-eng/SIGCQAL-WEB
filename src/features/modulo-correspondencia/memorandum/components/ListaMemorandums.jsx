@@ -2,20 +2,14 @@ import { useListaMemorandums } from '../hooks/useListaMemorandums';
 import '@/features/modulo-correspondencia/memorandum/styles/listaMemorandums.css';
 import { useState } from 'react';
 import { DetalleMemorandumModal } from './DetalleMemorandumModal';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaMemorandums = () => {
   const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandums();
   const [detalleId, setDetalleId] = useState(null);
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '-';
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  // Utiliza helpers compartidos para normalizar y mostrar fechas
+  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
   if (loading) {
     return (
@@ -77,7 +71,7 @@ export const ListaMemorandums = () => {
                   <td>{memo.asuntoCorrespondencia || memo.asunto || '-'}</td>
                   <td>{memo.folioUnico || memo.id || '-'}</td>
                   <td>{memo.nombreUsuarioEmisor || memo.remitente || memo.nombreRemitente || '-'}</td>
-                  <td>{formatearFecha(memo.fechaEmision)}</td>
+                  <td>{formatFecha(memo, memo.fechaEmision)}</td>
                   <td>
                     <button 
                       className="btn-ver-detalle"

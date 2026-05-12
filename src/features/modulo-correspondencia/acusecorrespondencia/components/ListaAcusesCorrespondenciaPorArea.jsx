@@ -1,18 +1,11 @@
 import { useListaAcusesCorrespondenciaPorArea } from '../hooks/useListaAcusesCorrespondenciaPorArea';
 import '@/features/modulo-correspondencia/acusecorrespondencia/styles/listaAcusesCorrespondencia.css';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaAcusesCorrespondenciaPorArea = () => {
   const { acuses, loading, error, recargar, areaForzada } = useListaAcusesCorrespondenciaPorArea();
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '-';
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
   if (loading) {
     return (
@@ -73,8 +66,8 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
                   <td>{acuse.folioUnico || '-'}</td>
                   <td>{acuse.dependenciaRemitente || '-'}</td>
                   <td>{acuse.asunto || '-'}</td>
-                  <td>{acuse.fechaExpedicion || '-'}</td>
-                  <td>{acuse.fechaAceptacion || '-'}</td>
+                  <td>{formatFecha(acuse, acuse.fechaExpedicion)}</td>
+                  <td>{formatFecha(acuse, acuse.fechaAceptacion)}</td>
                   <td>
                     <button className="btn-contestacion-acuse-correspondencia">
                       Contestacion
