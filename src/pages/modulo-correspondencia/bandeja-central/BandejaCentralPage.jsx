@@ -10,6 +10,9 @@ export const BandejaCentralPage = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    
+    // Switch de filtrado: true = con archivo, false = sin archivo
+    const [verConArchivo, setVerConArchivo] = useState(true);
 
     useEffect(() => {
         cargarDatos(activeTab);
@@ -62,6 +65,12 @@ export const BandejaCentralPage = () => {
             setIsLoading(false);
         }
     };
+
+    // Lógica de filtrado excluyente
+    const datosAMostrar = datosTabla.filter(item => {
+        const tieneArchivo = item.archivo !== null && item.archivo !== undefined && item.archivo !== '';
+        return verConArchivo ? tieneArchivo : !tieneArchivo;
+    });
 
     const handleAbrirDetalle = (item) => {
         setSelectedItem(item);
@@ -119,6 +128,23 @@ export const BandejaCentralPage = () => {
                     </button>
                 </div>
 
+                {/* Filtro Switch */}
+                <div className="bandeja-filters-bar" style={{ padding: '1rem', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e2e8f0' }}>
+                    <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span className="switch-label" style={{ fontWeight: '600' }}>
+                            {verConArchivo ? 'Con archivo adjunto' : 'Sin archivo adjunto'}
+                        </span>
+                        <label className="switch">
+                            <input 
+                                type="checkbox" 
+                                checked={verConArchivo} 
+                                onChange={(e) => setVerConArchivo(e.target.checked)} 
+                            />
+                            <span className="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
                 <div className="bandeja-content">
                     {isLoading ? (
                         <div style={{ textAlign: 'center', padding: '3rem', color: '#a0aec0' }}>
@@ -136,8 +162,8 @@ export const BandejaCentralPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {datosTabla.length > 0 ? (
-                                    datosTabla.map((item, index) => (
+                                {datosAMostrar.length > 0 ? (
+                                    datosAMostrar.map((item, index) => (
                                         <tr key={index}>
                                             <td className="folio-cell">{item.folio}</td>
                                             <td>{item.asunto}</td>
