@@ -12,7 +12,6 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
   const [guardando, setGuardando]                   = useState(false);
   const [folioGenerado, setFolioGenerado]           = useState(null);
   const [folioManual, setFolioManual]               = useState('');
-  const [numeroUsuario, setNumeroUsuario]           = useState('1');
   const [mostrarModalOficio, setMostrarModalOficio] = useState(false);
   const [idCorrespondencia, setIdCorrespondencia]   = useState(null);
 
@@ -44,7 +43,7 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
       };
 
       const seguimientoResp = await registrarSeguimiento(idOficio, datos);
-      setFolioGenerado(seguimientoResp?.folioRespuesta ?? 'OK');
+      setFolioGenerado(seguimientoResp?.folioRespuesta ?? '');
 
       // Si el usuario no proporcionó un folio manual, prellenarlo con el folio generado
       if (!folioManual) setFolioManual(seguimientoResp?.folioRespuesta ?? '');
@@ -94,17 +93,6 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
             value={respuesta}
             onChange={(e) => setRespuesta(e.target.value)}
             placeholder="Describa las acciones tomadas..."
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="fw-bold small text-uppercase">Número de usuario</label>
-          <input
-            type="number"
-            className="form-control"
-            value={numeroUsuario}
-            onChange={(e) => setNumeroUsuario(e.target.value)}
-            placeholder="Ej. 5"
           />
         </div>
 

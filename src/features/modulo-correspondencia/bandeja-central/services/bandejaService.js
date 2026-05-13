@@ -143,120 +143,156 @@ return eventos.sort((a, b) => {
   
 };
 
-export const obtenerBitacoraCompletaOficio = async (idOficio) => {
-
-  const oficio = await axios.get(`${API_BASE}/oficios/${idOficio}`)
-    .then(r => r.data).catch(() => null);
+export const obtenerBitacoraCompletaOficio = async (idSeguimientoOficio, idOficio) => {
+  const oficio = await axios
+    .get(`${API_BASE}/oficios/${idOficio}`)
+    .then(r => r.data)
+    .catch(() => null);
 
   const [correspondencia, acuses, seguimientos, oficiosContestacion] = await Promise.all([
-    oficio?.idCorrespondencia                                          // ✅ oficio, no memo
+    oficio?.idCorrespondencia
       ? axios.get(`${API_BASE}/correspondencias/entrada/${oficio.idCorrespondencia}`)
-          .then(r => r.data).catch(() => null)
+          .then(r => r.data)
+          .catch(() => null)
       : Promise.resolve(null),
+
     axios.get(`${API_BASE}/acuse-oficio/oficio/${idOficio}`)
-    .then(r => r.data).catch(() => []), // ✅ acuse-oficio, no acuse-interno
-    axios.get(`${API_BASE}/seguimiento-oficio/oficio/${idOficio}`)     // ✅ idOficio, no idMemo
-      .then(r => r.data).catch(() => []),
+      .then(r => r.data)
+      .catch(() => []),
+
+    axios.get(`${API_BASE}/seguimiento-oficio/oficio/${idOficio}`)
+      .then(r => r.data)
+      .catch(() => []),
+
     oficio?.idCorrespondencia
       ? axios.get(`${API_BASE}/oficios/listar`)
-          .then(r => r.data.filter(o =>
-            o.idCorrespondencia === oficio.idCorrespondencia &&
-            o.id !== Number(idOficio)
-          )).catch(() => [])
+          .then(r =>
+            r.data.filter(o =>
+              Number(o.idCorrespondencia) === Number(oficio.idCorrespondencia) &&
+              Number(o.id) !== Number(idOficio) &&
+              o.idArea === null
+            )
+          )
+          .catch(() => [])
       : Promise.resolve([]),
   ]);
 
   const eventos = [];
 
+  const seguimientoActual = (seguimientos || []).find(seg =>
+    Number(seg.idSeguimientoOficio) === Number(idSeguimientoOficio)
+  ) || null;
+
+  const acuseActual = (acuses || [])
+    .slice()
+    .sort((a, b) => new Date(b.fechaAceptacion || 0) - new Date(a.fechaAceptacion || 0))[0] || null;
+
+  const oficioContestacionActual = (() => {
+    if (!oficiosContestacion || oficiosContestacion.length === 0) return null;
+
+    // Si tu backend manda alguna relación al seguimiento, úsala aquí
+    const porSeguimiento = oficiosContestacion.find(oc =>
+      Number(oc.idSeguimientoOficio) === Number(idSeguimientoOficio) ||
+      Number(oc.idSeguimiento) === Number(idSeguimientoOficio)
+    );
+
+    if (porSeguimiento) return porSeguimiento;
+
+    // Si no hay relación explícita, toma solo el más reciente
+    return oficiosContestacion
+      .slice()
+      .sort((a, b) => new Date(b.fechaEmision || b.fechaRegistro || 0) - new Date(a.fechaEmision || a.fechaRegistro || 0))[0] || null;
+  })();
+
   // 0️⃣ CORRESPONDENCIA RECIBIDA
   if (correspondencia) {
     eventos.push({
-      idLog:       `corr-${correspondencia.id}`,
-      estatus:     'CORRESPONDENCIA RECIBIDA',
-      fecha:       pickFecha(correspondencia) || correspondencia.fechaRecibido || correspondencia.fechaOficio,
-      usuario:     correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
+      idLog: `corr-${correspondencia.id}`,
+      estatus: 'CORRESPONDENCIA RECIBIDA',
+      fecha: pickFecha(correspondencia) || correspondencia.fechaRecibido || correspondencia.fechaOficio,
+      usuario: correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
       descripcion: correspondencia.asunto || '',
-      folio:       correspondencia.folioUnico,
+      folio: correspondencia.folioUnico,
     });
   }
 
   // 1️⃣ OFICIO GENERADO
   if (oficio) {
     eventos.push({
-      idLog:       `oficio-${oficio.id}`,
-      estatus:     'MEMORANDUM GENERADO',
-      fecha:       oficio.fechaEmision,
-      usuario:     oficio.nombreUsuarioEmisor || `Usuario ${oficio.idUsuarioEmisor}`,
+      idLog: `oficio-${oficio.id}`,
+      estatus: 'OFICIO GENERADO',
+      fecha: oficio.fechaEmision,
+      usuario: oficio.nombreUsuarioEmisor || `Usuario ${oficio.idUsuarioEmisor}`,
       descripcion: oficio.asuntoCorrespondencia || oficio.observaciones || '',
-      folio:       oficio.folioUnico,
+      folio: oficio.folioUnico,
     });
   }
 
   // 2️⃣ ASIGNADO
   if (oficio?.idArea) {
     eventos.push({
-      idLog:       `asignado-${oficio.id}`,
-      estatus:     'ASIGNADO',
-      fecha:       oficio.fechaEmision,
-      usuario:     oficio.nombreUsuarioFirmante || `Usuario ${oficio.idUsuarioFirmante}`,
+      idLog: `asignado-${oficio.id}`,
+      estatus: 'ASIGNADO',
+      fecha: oficio.fechaEmision,
+      usuario: oficio.nombreUsuarioFirmante || `Usuario ${oficio.idUsuarioFirmante}`,
       descripcion: `Oficio asignado al área: ${oficio.nombreArea || `Área ${oficio.idArea}`}`,
-      folio:       oficio.folioUnico,
+      folio: oficio.folioUnico,
     });
   }
 
-  // 3️⃣ EN SEGUIMIENTO o REASIGNADO
-  (acuses || []).forEach((acuse, i) => {
+  // 3️⃣ SOLO EL ACUSE MÁS RECIENTE
+  if (acuseActual) {
     eventos.push({
-      idLog:       `acuse-${acuse.idAcuseOficio || i}`,
-      estatus:     acuse.esDelArea ? 'EN SEGUIMIENTO' : 'REASIGNADO',
-      fecha:       pickFecha(acuse) || acuse.fechaAceptacion,
-      usuario:     `Usuario ${acuse.idUsuarioRevisor}`,
-      descripcion: acuse.esDelArea
+      idLog: `acuse-${acuseActual.idAcuseOficio || acuseActual.id || 'actual'}`,
+      estatus: acuseActual.esDelArea ? 'EN SEGUIMIENTO' : 'REASIGNADO',
+      fecha: pickFecha(acuseActual) || acuseActual.fechaAceptacion,
+      usuario: `Usuario ${acuseActual.idUsuarioRevisor}`,
+      descripcion: acuseActual.esDelArea
         ? 'El área confirmó recepción del oficio.'
         : 'Oficio enviado a reasignación.',
-      folio:       null,
+      folio: null,
     });
-  });
+  }
 
-  // 4️⃣ CONTESTADO
-  (seguimientos || []).forEach((seg, i) => {
+  // 4️⃣ SOLO EL SEGUIMIENTO ACTUAL
+  if (seguimientoActual) {
     eventos.push({
-      idLog:       `seg-${seg.idSeguimientoOficio || i}`,
-      estatus:     'CONTESTADO',
-      fecha:       seg.fechaResolucion,
-      usuario:     `Usuario ${seg.idUsuario}`,
-      descripcion: seg.respuestasSeguimientoOficio || '',
-      folio:       seg.folioRespuesta,
+      idLog: `seg-${seguimientoActual.idSeguimientoOficio}`,
+      estatus: 'CONTESTADO',
+      fecha: pickFecha(seguimientoActual) || seguimientoActual.fechaResolucion,
+      usuario: `Usuario ${seguimientoActual.idUsuario}`,
+      descripcion: seguimientoActual.respuestasSeguimientoOficio || '',
+      folio: seguimientoActual.folioRespuesta,
     });
-  });
+  }
 
-  // 5️⃣ OFICIO DE CONTESTACIÓN GENERADO
-  (oficiosContestacion || []).forEach((oc, i) => {
+  // 5️⃣ SOLO EL OFICIO DE CONTESTACIÓN CORRESPONDIENTE
+  if (oficioContestacionActual) {
     eventos.push({
-      idLog:       `oficio-contest-${oc.id || i}`,
-      estatus:     'OFICIO GENERADO',
-      fecha:       pickFecha(oc) || oc.fechaEmision,
-      usuario:     oc.nombreUsuarioFirmante || `Usuario ${oc.idUsuarioFirmante}`,
-      descripcion: `Oficio de contestación generado: ${oc.folioUnico}`,
-      folio:       oc.folioUnico,
+      idLog: `oficio-contest-${oficioContestacionActual.id}`,
+      estatus: 'OFICIO GENERADO',
+      fecha: pickFecha(oficioContestacionActual) || oficioContestacionActual.fechaEmision,
+      usuario: oficioContestacionActual.nombreUsuarioFirmante || `Usuario ${oficioContestacionActual.idUsuarioFirmante}`,
+      descripcion: `Oficio de contestación generado: ${oficioContestacionActual.folioUnico}`,
+      folio: oficioContestacionActual.folioUnico,
     });
-  });
+  }
 
   const ORDEN_ESTATUS = {
     'CORRESPONDENCIA RECIBIDA': 0,
-    'MEMORANDUM GENERADO':      1,
-    'ASIGNADO':                 2,
-    'EN SEGUIMIENTO':           3,
-    'REASIGNADO':               3,
-    'CONTESTADO':               4,
-    'OFICIO GENERADO':          5,
-    'CONCLUIDO':                6,
+    'OFICIO GENERADO': 1,
+    'ASIGNADO': 2,
+    'EN SEGUIMIENTO': 3,
+    'REASIGNADO': 3,
+    'CONTESTADO': 4,
+    'CONCLUIDO': 5,
   };
 
   return eventos.sort((a, b) => {
     const ordenA = ORDEN_ESTATUS[a.estatus] ?? 99;
     const ordenB = ORDEN_ESTATUS[b.estatus] ?? 99;
     if (ordenA !== ordenB) return ordenA - ordenB;
+
     const da = a.fecha ? new Date(a.fecha) : new Date(0);
     const db = b.fecha ? new Date(b.fecha) : new Date(0);
     return da - db;
