@@ -60,6 +60,29 @@ const cargar = async () => {
     cargar();
     return () => setLogs([]);
 }, [isOpen, item]);
+  const archivoUrl = item?.archivoAdjunto || item?.archivo || null;
+
+  const handleDescargarAdjunto = async () => {
+  if (!archivoUrl) return;
+  
+  try {
+    const respuesta = await fetch(archivoUrl);
+    const blob = await respuesta.blob(); 
+    const urlLocal = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = urlLocal;
+    link.download = `OficioContestacion-${item.folio || 'doc'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    
+    window.URL.revokeObjectURL(urlLocal);
+    link.remove();
+  } catch (error) {
+    window.open(archivoUrl, '_blank');
+  }
+};
+
   const handleConcluir = async () => {
     if (!window.confirm('¿Confirmas marcar este trámite como CONCLUIDO?')) return;
     setCerrando(true);
@@ -170,6 +193,14 @@ const cargar = async () => {
             </div>
           )}
         </div>
+
+        {archivoUrl && (
+          <div className="modal-download-btns" style={{ justifyContent: 'center', padding: '0 0 8px', marginTop: 0 }}>
+            <button className="btn-descargar" onClick={handleDescargarAdjunto}>
+              📥 Descargar Oficio Contestacion
+            </button>
+          </div>
+        )}
 
         {/* ACCIÓN: CONCLUIR (solo si no está concluido) */}
         {!yaConcluido && (

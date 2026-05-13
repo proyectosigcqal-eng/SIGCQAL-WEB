@@ -133,7 +133,7 @@ export const BandejaCentralPage = () => {
                 <div className="bandeja-filters-bar" style={{ padding: '1rem', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e2e8f0' }}>
                     <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span className="switch-label" style={{ fontWeight: '600' }}>
-                            {verConArchivo ? 'Con archivo adjunto' : 'Sin archivo adjunto'}
+                            {verConArchivo ? 'Con oficio de contestación' : 'Sin oficio de contestación'}
                         </span>
                         <label className="switch">
                             <input 
