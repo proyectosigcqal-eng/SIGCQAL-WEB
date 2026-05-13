@@ -37,30 +37,26 @@ export const GenerarOficioContestacionPage = () => {
     if (!instruccion) { setError('El cuerpo del oficio es obligatorio.'); return; }
     setGuardando(true);
     try {
-      const idUsuarioNumber = numeroUsuarioState ? parseInt(numeroUsuarioState, 10) : FIRMANTE_FIJO;
-
-      const payload = {
-        ...formData,
-        instruccionSeguimiento: instruccion,
-        observaciones:          instruccion,
-        nombreFirmante:         heredado.firmante    || 'ana_admin',
-        areaFirmante:           heredado.areaFirmante || 'Administración',
-        areaDestinatario:       '',
-        nombreEmisor:           heredado.firmante    || 'ana_admin',
-        idUsuarioFirmante:      idUsuarioNumber,
-        idUsuarioEmisor:        idUsuarioNumber,
-        folioUnico:             folioOficio || formData.folioUnico || '',
-      };
-
-      await generarOficio(payload);
-      navigate('/correspondencia/bandeja');
+        const payload = {
+            ...formData,
+            instruccionSeguimiento: instruccion,
+            observaciones:          instruccion,
+            nombreFirmante:         heredado.firmante    || 'ana_admin',
+            areaFirmante:           heredado.areaFirmante || 'Administración',
+            areaDestinatario:       '',
+            nombreEmisor:           heredado.firmante    || 'ana_admin',
+        };
+        console.log('>>> payload oficio contestacion:', payload); // ← agregar
+        const resultado = await generarOficio(payload);
+        console.log('>>> resultado:', resultado); // ← agregar
+        navigate('/correspondencia/bandeja');
     } catch (err) {
-      setError('Error al generar el oficio: ' + err.message);
+        console.error('>>> error completo:', err.response?.data || err.message); // ← agregar
+        setError('Error al generar el oficio: ' + err.message);
     } finally {
-      setGuardando(false);
+        setGuardando(false);
     }
-  };
-
+};
   return (
     <div className="sigcqal-page-container">
       <div className="split-view-container">

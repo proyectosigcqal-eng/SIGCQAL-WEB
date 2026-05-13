@@ -43,7 +43,7 @@ const cargar = async () => {
             const data = await obtenerBitacoraCompletaMemo(item.idMemo);
             setLogs(data || []);
         } else if (item.tipo === 'oficio') {
-            const data = await obtenerBitacoraCompletaOficio(item.idMemo); // idMemo aquí es idOficio
+            const data = await obtenerBitacoraCompletaOficio(item.id, item.idMemo); // idMemo aquí es idOficio
             setLogs(data || []);
         } else {
             const data = await obtenerBitacoraPorCorrespondencia(item.id);
@@ -194,13 +194,21 @@ const cargar = async () => {
           )}
         </div>
 
-        {archivoUrl && (
-          <div className="modal-download-btns" style={{ justifyContent: 'center', padding: '0 0 8px', marginTop: 0 }}>
-            <button className="btn-descargar" onClick={handleDescargarAdjunto}>
-              📥 Descargar Oficio Contestacion
-            </button>
-          </div>
-        )}
+       {item.archivo && (
+  <div
+    className="modal-download-btns"
+    style={{ justifyContent: 'center', padding: '0 0 8px', marginTop: 0 }}
+  >
+    <a
+      href={`http://localhost:8081/SIGCQAL_dev${item.archivo}`}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-descargar"
+    >
+      📥 Descargar Oficio Contestación
+    </a>
+  </div>
+)}
 
         {/* ACCIÓN: CONCLUIR (solo si no está concluido) */}
         {!yaConcluido && (

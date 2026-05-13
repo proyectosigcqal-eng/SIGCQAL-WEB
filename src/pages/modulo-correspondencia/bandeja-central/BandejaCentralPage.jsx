@@ -4,6 +4,8 @@ import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
 import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
 import axios from 'axios';
+import { listarOficios } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
+import { listarMemorandums } from '../../../features/modulo-correspondencia/memorandum/services/memorandumService';
 
 export const BandejaCentralPage = () => {
     const [activeTab, setActiveTab] = useState('memorandums');
@@ -19,59 +21,98 @@ export const BandejaCentralPage = () => {
         cargarDatos(activeTab);
     }, [activeTab]);
 
-    const cargarDatos = async (tab) => {
-        setIsLoading(true);
-        try {
-            if (tab === 'memorandums') {
-                const data = await listarSeguimientosMemo();
-                setDatosTabla(data.map(item => ({
-                    id:      item.idSeguimientoMemorandum,
-                    idMemo:  item.idMemo,
-                    folio:   item.folioRespuesta,
-                    asunto:  item.respuestaSeguimientoMemorandum,
-                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
-                    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-                    archivo: item.archivoAdjunto,
-                    tipo:    'memorandum'
-                })));
-            } else if (tab === 'oficios') {
-                const data = await listarSeguimientosOficio();
-                setDatosTabla(data.map(item => ({
-                    id:      item.idSeguimientoOficio,
-                    idMemo:  item.idOficio,
-                    folio:   item.folioRespuesta,
-                    asunto:  item.respuestasSeguimientoOficio,
-                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
-                    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-                    archivo: item.archivoAdjunto,
-                    tipo:    'oficio'
-                })));
-            } else {
-                const data = await listarSeguimientosCorr();
-                setDatosTabla(data.map(item => ({
-                    id:      item.idSeguimientoCorrespondencia,
-                    idMemo:  item.idCorrespondencia,
-                    folio:   item.folioRespuesta,
-                    asunto:  item.respuestaSeguimientoCorrespondencia,
-                    fecha:   pickFecha(item) || item.fechaResolucion || item.fecha || item.fechaEmision || item.fechaAceptacion || item.fechaRegistro,
-                    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-                    archivo: item.archivoAdjunto,
-                    tipo:    'correspondencia'
-                })));
-            }
-        } catch (error) {
-            console.error("Error", error);
-            setDatosTabla([]);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+   const normalizeId = (v) => v != null ? Number(v) : null;
 
+  
+
+const cargarDatos = async (tab) => {
+
+  setIsLoading(true);
+  try {
+    const oficios = await listarOficios().catch(() => []);
+
+    const tieneOficio = (idCorrespondencia) =>
+    oficios.some(o => normalizeId(o.idCorrespondencia) === normalizeId(idCorrespondencia));
+
+
+
+if (tab === 'memorandums') {
+
+  const [data, memorandums] = await Promise.all([
+    listarSeguimientosMemo(),
+    listarMemorandums()
+  ]);
+
+  setDatosTabla(data.map(item => {
+
+    const memoOriginal = memorandums.find(
+      m => Number(m.idMemo) === Number(item.idMemo)
+    );
+
+   const oficioOriginal = oficios.find(
+  o => Number(o.correspondencia?.id) === Number(item.idCorrespondencia)
+);
+
+    return {
+      id: item.idSeguimientoMemorandum,
+      idMemo: item.idMemo,
+    idCorrespondencia: item.idCorrespondencia,
+      folio: item.folioRespuesta,
+      asunto: item.respuestaSeguimientoMemorandum,
+      fecha: pickFecha(item) || item.fechaResolucion,
+      estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+      archivo: oficioOriginal?.urlMemorandumGenerado || null,
+      nombreArchivo: oficioOriginal?.folioUnico || null,
+      tieneOficioContestacion: !!oficioOriginal,
+      tipo: 'memorandum'
+    };
+  }));
+
+
+    } else if (tab === 'oficios') {
+     const data = await listarSeguimientosOficio();
+
+setDatosTabla(data.map(item => {
+  
+const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
+  return {
+    id: item.idSeguimientoOficio,
+    idMemo: item.idOficio,
+    folio: item.folioRespuesta,
+    asunto: item.respuestasSeguimientoOficio,
+    fecha: pickFecha(item) || item.fechaResolucion,
+    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+    archivo: oficioOriginal?.urlMemorandumGenerado || null,
+    nombreArchivo: oficioOriginal?.folioUnico || null,
+    tipo: 'oficio',
+    tieneOficioContestacion: !!oficioOriginal
+  };
+}));
+    } else {
+      const data = await listarSeguimientosCorr();
+      setDatosTabla(data.map(item => ({
+        id: item.idSeguimientoCorrespondencia,
+        idMemo: item.idCorrespondencia,
+        folio: item.folioRespuesta,
+        asunto: item.respuestaSeguimientoCorrespondencia,
+        fecha: pickFecha(item) || item.fechaResolucion,
+        estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+        archivo: item.archivoAdjunto,
+        tieneOficioContestacion: tieneOficio(item.idCorrespondencia),
+        tipo: 'correspondencia'
+      })));
+    }
+  } catch (error) {
+    console.error("Error", error);
+    setDatosTabla([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
     // Lógica de filtrado excluyente
-    const datosAMostrar = datosTabla.filter(item => {
-        const tieneArchivo = item.archivo !== null && item.archivo !== undefined && item.archivo !== '';
-        return verConArchivo ? tieneArchivo : !tieneArchivo;
-    });
+   const datosAMostrar = datosTabla.filter(item =>
+    verConArchivo ? item.tieneOficioContestacion : !item.tieneOficioContestacion
+);
 
     const handleAbrirDetalle = (item) => {
         setSelectedItem(item);
@@ -132,9 +173,9 @@ export const BandejaCentralPage = () => {
                 {/* Filtro Switch */}
                 <div className="bandeja-filters-bar" style={{ padding: '1rem', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e2e8f0' }}>
                     <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span className="switch-label" style={{ fontWeight: '600' }}>
-                            {verConArchivo ? 'Con oficio de contestación' : 'Sin oficio de contestación'}
-                        </span>
+                       <span className="switch-label" style={{ fontWeight: '600' }}>
+                        {verConArchivo ? '📋 Con oficio de contestación' : '📋 Sin oficio de contestación'}
+                    </span>
                         <label className="switch">
                             <input 
                                 type="checkbox" 
