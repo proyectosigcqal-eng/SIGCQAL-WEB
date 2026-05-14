@@ -39,7 +39,12 @@ export const ContestacionOficioPage = () => {
             <h5>Formulario de Captura de Respuesta</h5>
           </div>
           {!loading && acuse && (
-            <FormularioContestacionOficio acuse={acuse} onGuardado={handleGuardado} onError={() => {}} />
+            <FormularioContestacionOficio
+              acuse={acuse}
+              oficio={oficio}
+              onGuardado={handleGuardado}
+              onError={() => {}}
+            />
           )}
         </section>
       </div>

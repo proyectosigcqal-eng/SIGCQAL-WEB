@@ -46,6 +46,7 @@ export const ContestacionPage = () => {
           {!loading && acuse && (
             <FormularioContestacion
               acuse={acuse}
+              memorandum={memorandum}
               onGuardado={handleGuardado}
               onError={setErrorForm}
             />

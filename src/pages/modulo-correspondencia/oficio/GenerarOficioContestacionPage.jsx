@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { generarOficio } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
+import { obtenerCorrespondenciaPorId } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
 import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
@@ -13,23 +14,38 @@ export const GenerarOficioContestacionPage = () => {
   const catalogos = useCatalogos();
   const heredado  = location.state || {};
 
-  const [instruccion, setInstruccion] = useState(heredado.textoSugerido || '');
-  const [guardando, setGuardando]     = useState(false);
-  const [error, setError]             = useState(null);
-  const [folioOficio, setFolioOficio] = useState(heredado.folioOficio || '');
-  const [numeroUsuarioState, setNumeroUsuarioState] = useState(
-    heredado.numeroUsuario ? String(heredado.numeroUsuario) : String(FIRMANTE_FIJO)
-  );
+  const fuente =
+    heredado.oficio || heredado.memorandum || heredado.oficioOriginal || heredado.memoOriginal || heredado.memorandumOriginal || heredado.correspondencia || heredado;
+
+  const idCorrespondenciaH = fuente?.idCorrespondencia ?? heredado.idCorrespondencia ?? fuente?.id ?? null;
+  const firmanteH = fuente?.firmante || fuente?.nombreFirmante || heredado.firmante || 'ana_admin';
+  const areaFirmanteH = fuente?.areaFirmante || fuente?.area || heredado.areaFirmante || 'Administración';
+  const textoSugeridoH = heredado.textoSugerido || fuente?.textoSugerido || fuente?.respuestaSeguimiento || '';
+  const folioHeredado = heredado.folioOficio || fuente?.folioOficio || fuente?.folioUnico || '';
+
+  const [instruccion, setInstruccion]       = useState(textoSugeridoH);
+  const [guardando, setGuardando]           = useState(false);
+  const [error, setError]                   = useState(null);
+  const [folioOficio, setFolioOficio]       = useState(folioHeredado || '');
+  const [correspondencia, setCorrespondencia] = useState(null);
+
+  // ← Carga la correspondencia para heredar asunto y área remitente
+  useEffect(() => {
+    if (!idCorrespondenciaH) return;
+    obtenerCorrespondenciaPorId(idCorrespondenciaH)
+      .then(data => setCorrespondencia(data))
+      .catch(err => console.error('Error al cargar correspondencia:', err));
+  }, [idCorrespondenciaH]);
 
   const formData = {
-    idCorrespondencia: heredado.idCorrespondencia,
-    idUsuarioFirmante: FIRMANTE_FIJO,
-    idUsuarioEmisor:   FIRMANTE_FIJO,
+    idCorrespondencia:      idCorrespondenciaH,
+    idUsuarioFirmante:      FIRMANTE_FIJO,
+    idUsuarioEmisor:        FIRMANTE_FIJO,
     instruccionSeguimiento: instruccion,
-    observaciones:     instruccion,
-    idPlantilla:       2, // plantilla_oficio
-    idArea:            null, // sin asignación de área
-    folioUnico:        '',
+    observaciones:          instruccion,
+    idPlantilla:            null,
+    idArea:                 null,
+    folioUnico:             '',
   };
 
   const handleGuardar = async (e) => {
@@ -37,31 +53,30 @@ export const GenerarOficioContestacionPage = () => {
     if (!instruccion) { setError('El cuerpo del oficio es obligatorio.'); return; }
     setGuardando(true);
     try {
-        const payload = {
-            ...formData,
-            instruccionSeguimiento: instruccion,
-            observaciones:          instruccion,
-            nombreFirmante:         heredado.firmante    || 'ana_admin',
-            areaFirmante:           heredado.areaFirmante || 'Administración',
-            areaDestinatario:       '',
-            nombreEmisor:           heredado.firmante    || 'ana_admin',
-        };
-        console.log('>>> payload oficio contestacion:', payload); // ← agregar
-        const resultado = await generarOficio(payload);
-        console.log('>>> resultado:', resultado); // ← agregar
-        navigate('/correspondencia/bandeja');
+      const payload = {
+        ...formData,
+        instruccionSeguimiento: instruccion,
+        // Preferir asunto del memorandum/oficio si viene en el state
+        observaciones:    fuente?.asunto || correspondencia?.asunto || instruccion,
+        nombreFirmante:   firmanteH,
+        areaFirmante:     areaFirmanteH,
+        // Área destinataria viene preferentemente del objeto original
+        areaDestinatario: fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '',
+        nombreEmisor:     firmanteH,
+      };
+      const resultado = await generarOficio(payload);
+      navigate('/correspondencia/bandeja');
     } catch (err) {
-        console.error('>>> error completo:', err.response?.data || err.message); // ← agregar
-        setError('Error al generar el oficio: ' + err.message);
+      setError('Error al generar el oficio: ' + err.message);
     } finally {
-        setGuardando(false);
+      setGuardando(false);
     }
-};
+  };
+
   return (
     <div className="sigcqal-page-container">
       <div className="split-view-container">
 
-        {/* IZQUIERDA — formulario simplificado */}
         <section className="panel-formulario">
           <h3 style={{ marginBottom: '1rem', color: '#691C32' }}>
             Oficio de Contestación Interna
@@ -70,28 +85,27 @@ export const GenerarOficioContestacionPage = () => {
             El firmante y los datos de referencia se heredan automáticamente.
           </p>
 
+          {(fuente?.asunto || correspondencia) && (
+            <div style={{ background: '#f0f4f8', borderRadius: 8, padding: '12px 16px', marginBottom: '1.5rem', borderLeft: '3px solid #691C32' }}>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#4a5568' }}>
+                <strong>Asunto:</strong> {fuente?.asunto || correspondencia?.asunto}
+              </p>
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#4a5568' }}>
+                <strong>Remitente:</strong> {fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente}
+              </p>
+            </div>
+          )}
+
           {error && <div className="alert-danger">{error}</div>}
 
           <form onSubmit={handleGuardar}>
-            {/* Firmante fijo — solo lectura */}
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Firmante</label>
               <input
                 type="text"
-                value={heredado.firmante || 'ana_admin'}
+                value={firmanteH}
                 disabled
                 className="input-readonly"
-              />
-            </div>
-
-            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
-              <label>Número de usuario</label>
-              <input
-                type="number"
-                className="form-control"
-                value={numeroUsuarioState}
-                onChange={(e) => setNumeroUsuarioState(e.target.value)}
-                placeholder="Ej. 5"
               />
             </div>
 
@@ -106,7 +120,6 @@ export const GenerarOficioContestacionPage = () => {
               />
             </div>
 
-            {/* Cuerpo del oficio */}
             <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">
                 <span className="tool-btn">B</span>
@@ -128,18 +141,16 @@ export const GenerarOficioContestacionPage = () => {
           </form>
         </section>
 
-        {/* DERECHA — vista previa */}
         <section className="panel-vista-previa">
           <VistaPreviaOficio
             formData={{
               ...formData,
               instruccionSeguimiento: instruccion,
-              folioUnico: folioOficio || formData.folioUnico || '',
-              idUsuarioFirmante: numeroUsuarioState ? Number(numeroUsuarioState) : formData.idUsuarioFirmante,
-              idUsuarioEmisor: numeroUsuarioState ? Number(numeroUsuarioState) : formData.idUsuarioEmisor,
+              asuntoCorrespondencia:  fuente?.asunto || correspondencia?.asunto || '',
+              folioUnico:             folioOficio || '',
             }}
             usuarios={catalogos.usuarios}
-            areaDestino={null}
+            areaDestino={{ nombre: fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '' }}
           />
         </section>
 
