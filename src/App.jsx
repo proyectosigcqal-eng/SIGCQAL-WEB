@@ -20,6 +20,7 @@ import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/a
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
+import { Login } from './pages/auth/login/LoginPage';
 
 
 
@@ -27,8 +28,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+         <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="correspondencia/registrar" replace />} />
+          <Route index element={<Navigate to="/login" replace />} />
+
+         
           
           {/* Flujo de creación de Memorándum */}
           <Route path="correspondencia/nuevo-memorandum/:idCorrespondencia" element={<GenerarMemorandumPage />} />
