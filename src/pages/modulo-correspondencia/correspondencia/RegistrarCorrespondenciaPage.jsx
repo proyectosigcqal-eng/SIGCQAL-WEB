@@ -22,7 +22,6 @@ export const RegistrarCorrespondenciaPage = () => {
     areas,
     todasCorrespondencias,
     correspondenciasSinArea,
-    todasCorrespondencias,
     loading,
     error,
     onFormularioGuardado,
