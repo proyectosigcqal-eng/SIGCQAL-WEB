@@ -4,7 +4,7 @@ import { guardarSeguimientoMemorandum, subirPdfFirmado, obtenerProximoFolio } fr
 
 const FIRMANTE_FIJO = 5; // ana_admin
 
-export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
+export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError }) => {
   const [folioGenerado, setFolioGenerado] = useState(null);
   const [folioPreview, setFolioPreview]   = useState(null); // ← agregado
   const [respuesta, setRespuesta]         = useState('');
@@ -74,10 +74,12 @@ export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia,
+        memorandum,
         idUsuarioFirmante: FIRMANTE_FIJO,
         firmante:          'ana_admin',
         areaFirmante:      'Administración',
         textoSugerido:     respuesta,
+        folioOficio:       folioGenerado || folioPreview || ''
       }
     });
   };

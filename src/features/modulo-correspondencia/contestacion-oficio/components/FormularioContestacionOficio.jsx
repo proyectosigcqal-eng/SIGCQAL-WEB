@@ -5,12 +5,13 @@ import '../styles/contestacion-oficio.css';
 
 const FIRMANTE_FIJO = 5; // ana_admin
 
-export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => {
+export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onError }) => {
   const navigate = useNavigate();
   const [respuesta, setRespuesta]                   = useState('');
   const [archivo, setArchivo]                       = useState(null);
   const [guardando, setGuardando]                   = useState(false);
   const [folioGenerado, setFolioGenerado]           = useState(null);
+  const [folioManual, setFolioManual]               = useState('');
   const [mostrarModalOficio, setMostrarModalOficio] = useState(false);
   const [idCorrespondencia, setIdCorrespondencia]   = useState(null);
 
@@ -37,17 +38,14 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
       const datos = {
         respuestaSeguimiento: respuesta,
         archivoAdjunto:       archivo || null,
-        idUsuario:            1,
+        idUsuario:            1, // ← fijo, sin depender de numeroUsuario
         idEstatus:            5,
       };
 
       const seguimientoResp = await registrarSeguimiento(idOficio, datos);
-      setFolioGenerado(seguimientoResp?.folioRespuesta ?? 'OK');
-
-      // Guardamos el idCorrespondencia para heredarlo al oficio
+      setFolioGenerado(seguimientoResp?.folioRespuesta ?? '');
+      if (!folioManual) setFolioManual(seguimientoResp?.folioRespuesta ?? '');
       setIdCorrespondencia(acuse?.idCorrespondencia || null);
-
-      // Mostramos el modal en lugar de llamar onGuardado directamente
       setMostrarModalOficio(true);
 
     } catch (err) {
@@ -62,10 +60,12 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia,
+        oficio,
         idUsuarioFirmante: FIRMANTE_FIJO,
         firmante:          'ana_admin',
         areaFirmante:      'Administración',
         textoSugerido:     respuesta,
+        folioOficio:       folioManual || folioGenerado,
       }
     });
   };
@@ -78,7 +78,6 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
   return (
     <>
       <form className="contestacion-form" onSubmit={handleSubmit}>
-
         <div className="mb-3">
           <label className="fw-bold small text-uppercase">Informe de Atención</label>
           <textarea
@@ -106,10 +105,8 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
         <button type="submit" className="btn-enviar" disabled={guardando}>
           {guardando ? 'Guardando...' : 'Enviar Contestación (Oficio)'}
         </button>
-
       </form>
 
-      {/* Modal ¿Generar Oficio de Contestación? */}
       {mostrarModalOficio && (
         <div className="modal-overlay">
           <div className="modal-oficio-pregunta">
@@ -123,6 +120,19 @@ export const FormularioContestacionOficio = ({ acuse, onGuardado, onError }) => 
                 Folio registrado: <strong>{folioGenerado}</strong>
               </p>
             )}
+            <div style={{ marginBottom: 12 }}>
+              <label className="fw-bold small text-uppercase">Folio para Oficio (manual)</label>
+              <input
+                type="text"
+                className="form-control"
+                value={folioManual}
+                onChange={(e) => setFolioManual(e.target.value)}
+                placeholder="Introduce folio para el oficio (puedes editar)"
+              />
+              <small style={{ color: '#6b7280' }}>
+                Si queda vacío se usará el folio registrado automáticamente.
+              </small>
+            </div>
             <div className="modal-oficio-btns">
               <button className="btn-si-oficio" onClick={handleGenerarOficio}>
                 Sí, generar oficio
