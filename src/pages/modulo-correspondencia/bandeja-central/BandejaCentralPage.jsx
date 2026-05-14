@@ -44,50 +44,65 @@ if (tab === 'memorandums') {
   ]);
 
   setDatosTabla(data.map(item => {
-
+    // 1. Encuentra el memorándum original por idMemo
     const memoOriginal = memorandums.find(
-      m => Number(m.idMemo) === Number(item.idMemo)
+        m => Number(m.id) === Number(item.idMemo) // ← usa m.id no m.idMemo
     );
 
-   const oficioOriginal = oficios.find(
-  o => Number(o.correspondencia?.id) === Number(item.idCorrespondencia)
-);
+    // 2. Con el idCorrespondencia del memo, busca si hay oficio de contestación
+    const idCorrDelMemo = memoOriginal?.idCorrespondencia;
+    const oficioContestacion = idCorrDelMemo
+        ? oficios.find(o =>
+            Number(o.idCorrespondencia) === Number(idCorrDelMemo) &&
+            o.idArea === null // ← sin área = es contestación
+          )
+        : null;
 
     return {
-      id: item.idSeguimientoMemorandum,
-      idMemo: item.idMemo,
-    idCorrespondencia: item.idCorrespondencia,
-      folio: item.folioRespuesta,
-      asunto: item.respuestaSeguimientoMemorandum,
-      fecha: pickFecha(item) || item.fechaResolucion,
-      estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-      archivo: oficioOriginal?.urlMemorandumGenerado || null,
-      nombreArchivo: oficioOriginal?.folioUnico || null,
-      tieneOficioContestacion: !!oficioOriginal,
-      tipo: 'memorandum'
+        id:                      item.idSeguimientoMemorandum,
+        idMemo:                  item.idMemo,
+        idCorrespondencia:       idCorrDelMemo || null,
+        folio:                   item.folioRespuesta,
+        asunto:                  item.respuestaSeguimientoMemorandum,
+        fecha:                   pickFecha(item) || item.fechaResolucion,
+        estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+        archivo:                 oficioContestacion?.urlMemorandumGenerado || null,
+        nombreArchivo:           oficioContestacion?.folioUnico || null,
+        tieneOficioContestacion: !!oficioContestacion,
+        tipo:                    'memorandum'
     };
-  }));
-
-
-    } else if (tab === 'oficios') {
-     const data = await listarSeguimientosOficio();
-
-setDatosTabla(data.map(item => {
-  
-const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
-  return {
-    id: item.idSeguimientoOficio,
-    idMemo: item.idOficio,
-    folio: item.folioRespuesta,
-    asunto: item.respuestasSeguimientoOficio,
-    fecha: pickFecha(item) || item.fechaResolucion,
-    estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-    archivo: oficioOriginal?.urlMemorandumGenerado || null,
-    nombreArchivo: oficioOriginal?.folioUnico || null,
-    tipo: 'oficio',
-    tieneOficioContestacion: !!oficioOriginal
-  };
 }));
+
+  } else if (tab === 'oficios') {
+    const data = await listarSeguimientosOficio();
+
+    // Oficios de contestación = los que tienen idArea null
+    const oficiosContestacion = oficios.filter(o => o.idArea === null);
+
+    setDatosTabla(data.map(item => {
+        // Encuentra el oficio original del seguimiento
+        const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
+        
+        // Busca si existe un oficio de contestación con la misma correspondencia
+        const oficioContest = oficioOriginal
+            ? oficiosContestacion.find(o =>
+                Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia)
+              )
+            : null;
+
+        return {
+            id:                      item.idSeguimientoOficio,
+            idMemo:                  item.idOficio,
+            folio:                   item.folioRespuesta,
+            asunto:                  item.respuestasSeguimientoOficio,
+            fecha:                   pickFecha(item) || item.fechaResolucion,
+            estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+            archivo:                 oficioContest?.urlMemorandumGenerado || null,
+            nombreArchivo:           oficioContest?.folioUnico || null,
+            tieneOficioContestacion: !!oficioContest,
+            tipo:                    'oficio'
+        };
+    }));
     } else {
       const data = await listarSeguimientosCorr();
       setDatosTabla(data.map(item => ({

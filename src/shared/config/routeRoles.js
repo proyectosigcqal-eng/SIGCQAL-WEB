@@ -1,0 +1,26 @@
+// Centralized route → roles mapping for RBAC
+export const ROUTE_ROLES = {
+  '/correspondencia/nuevo-memorandum': ['Administrador', 'Capturista'],
+  '/correspondencia/nuevo-oficio': ['Administrador', 'Capturista'],
+  '/correspondencia/registrar': ['Administrador', 'Capturista'],
+  '/correspondencia/registradas': ['Administrador', 'Revisor', 'Capturista'],
+  '/correspondencia/generar-oficio': ['Administrador', 'Capturista'],
+  '/correspondencia/contestacion': ['Administrador', 'Revisor'],
+  '/correspondencia/contestacion-oficio': ['Administrador', 'Revisor'],
+  '/correspondencia/contestacion-correspondencia': ['Administrador', 'Revisor'],
+  '/correspondencia/nuevo-oficio-contestacion': ['Administrador', 'Revisor'],
+  '/correspondencia/seguimiento': ['Administrador', 'Revisor'],
+  '/correspondencia/bandeja': ['Administrador', 'Revisor', 'Capturista'],
+  '/correspondencia/pendiente-revision-area': ['Revisor'],
+  '/correspondencia/acuses-correspondencia': ['Administrador', 'Revisor', 'Capturista'],
+  '/correspondencia/acuses-oficio-por-area': ['Revisor'],
+  '/correspondencia/asignar-area': ['Administrador', 'Revisor'],
+  '/correspondencia/asignar-area-oficio': ['Administrador', 'Revisor'],
+  '/correspondencia/bitacora': ['Administrador', 'Revisor'],
+  '/correspondencia/lista-memorandums-revision': ['Administrador', 'Revisor'],
+  '/correspondencia/lista-oficios-revision': ['Administrador', 'Revisor'],
+  '/correspondencia/memorandums-por-area': ['Revisor'],
+  '/correspondencia/oficios-por-area': ['Revisor'],
+};
+
+export default ROUTE_ROLES;
