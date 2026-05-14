@@ -699,6 +699,26 @@
   color: white;
 }
 
+.btn-descargar-doc {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-descargar-doc:hover {
+  background: #15803d;
+}
+
 .acciones-cell {
   display: flex;
   gap: 6px;

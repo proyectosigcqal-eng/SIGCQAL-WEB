@@ -61,7 +61,7 @@ const buildEstatusOptions = (items) => {
   return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
 };
 
-export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarOficio, loading }) => {
+export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarOficio, oficiosGuardados = {}, loading }) => {
   const [texto, setTexto] = useState('');
   const [filtroEstatus, setFiltroEstatus] = useState('');
   const [page, setPage] = useState(1);
@@ -182,13 +182,15 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                 <th>Asunto</th>
                 <th>Fecha Recibido</th>
                 <th>Estatus</th>
+                <th>No. Oficio Salida</th>
+                <th>Doc. Adjunto</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '1rem', color: '#64748b' }}>
+                  <td colSpan={9} style={{ padding: '1rem', color: '#64748b' }}>
                     No hay correspondencias con los filtros actuales.
                   </td>
                 </tr>
@@ -202,6 +204,10 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                   const fechaRecibido = safeDateLabel(fecha);
                   const estatusLabel = getEstatusLabel(item);
                   const badge = getEstatusColors(estatusLabel);
+                  const oficioGuardado = id ? oficiosGuardados[id] : null;
+                  const tieneOficio = oficioGuardado != null;
+                  const numOficioSalida = oficioGuardado?.numOficioSalida ?? null;
+                  const urlPdfFinal = oficioGuardado?.urlPdfFinal ?? null;
 
                   return (
                     <tr key={id ?? `${idx}`}>
@@ -217,11 +223,34 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                           {estatusLabel}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {numOficioSalida ? (
+                          <span style={{ fontWeight: 600 }}>{numOficioSalida}</span>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Pendiente</span>
+                        )}
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {urlPdfFinal ? (
+                          <a
+                            href={`http://localhost:8081/SIGCQAL_dev${urlPdfFinal}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-descargar-doc"
+                          >
+                            ⬇ Descargar
+                          </a>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Sin documento</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '10px 12px' }}>
                         <div className="acciones-cell">
-                          <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
-                            Generar Oficio
-                          </button>
+                          {!tieneOficio ? (
+                            <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
+                              Generar Oficio
+                            </button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>
