@@ -14,7 +14,6 @@
     background-repeat: no-repeat;
 }
 
-/* Nueva clase para el nombre del sistema */
 .system-logo {
     position: absolute;
     top: 2rem;
@@ -22,7 +21,6 @@
     font-size: 3rem;
     font-weight: 800;
     letter-spacing: 1px;
-    /* Color igual al background-color de .login-form-container */
     color: #121729; 
     z-index: 10;
 }

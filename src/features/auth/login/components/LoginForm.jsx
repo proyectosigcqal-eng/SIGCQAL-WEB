@@ -15,7 +15,7 @@ export const LoginForm = () => {
             // Llamamos al servicio (actualmente simulado)
             await loginService(username, password);
             
-            // Al ser exitoso, redirigimos a la ruta solicitada
+            // Al ser exitoso, redirigimos a la ruta 
             navigate('/correspondencia/registrar');
         } catch (error) {
             console.error("Error al iniciar sesión", error);
