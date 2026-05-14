@@ -7,10 +7,9 @@ export const Login = () => {
         <div className="login-page">
             <div className="system-logo">SIGCQAL</div>
             
-            <div className="login-left">
+            {/* El formulario ahora es el elemento central directo */}
+            <div className="login-container">
                 <LoginForm />
-            </div>
-            <div className="login-right">
             </div>
         </div>
     );

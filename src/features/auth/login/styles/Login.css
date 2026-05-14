@@ -1,9 +1,9 @@
 /* Layout Principal */
 .login-page {
-    position: relative; /* Importante para posicionar el logo internamente */
+    position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* Centrado horizontal */
+    align-items: center;     /* Centrado vertical */
     height: 100vh;
     width: 100vw;
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -25,9 +25,16 @@
     z-index: 10;
 }
 
+/* Nuevo contenedor centrado (reemplaza a login-left/right) */
+.login-container {
+    width: 100%;
+    max-width: 500px;
+    z-index: 5;
+    padding: 20px; /* Espacio de seguridad para móviles */
+}
+
 .login-form-container {
     width: 100%;
-    max-width: 500px; 
     padding: 3rem; 
     background-color: #121729; 
     backdrop-filter: blur(10px); 
@@ -102,7 +109,7 @@
     border: none;
     border-radius: 15px;
     background-color: #ffffff;
-    color: rgba(18, 23, 41, 0.85);
+    color: #121729;
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
@@ -111,4 +118,5 @@
 
 .login-button:hover {
     transform: translateY(-2px);
+    background-color: #f0f0f0;
 }
