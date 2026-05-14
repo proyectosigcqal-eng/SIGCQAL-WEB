@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useState, useEffect } from 'react';
 import { generarOficio } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
 import { obtenerCorrespondenciaPorId } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
 import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
+import { guardarOficioContestacion } from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
 
 const FIRMANTE_FIJO = 5; // ana_admin
@@ -14,6 +16,36 @@ export const GenerarOficioContestacionPage = () => {
   const catalogos = useCatalogos();
   const heredado  = location.state || {};
 
+  const [formData, setFormData] = useState({
+    numOficioSalida: heredado.numOficioSalida || '',
+  });
+  const [instruccion, setInstruccion] = useState(heredado.textoSugerido || '');
+  const [guardando, setGuardando]     = useState(false);
+  const [error, setError]             = useState(null);
+  const [errorNumOficio, setErrorNumOficio] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const resolveIdUsuarioEmisor = () => {
+    const usuario =
+      heredado?.usuario ||
+      heredado?.sessionUser ||
+      heredado?.user ||
+      null;
+
+    const id =
+      usuario?.id ??
+      usuario?.idUsuario ??
+      heredado?.idUsuarioEmisor ??
+      heredado?.idUsuario ??
+      null;
+
+    if (id == null) return FIRMANTE_FIJO;
+    const n = Number(id);
+    return Number.isFinite(n) ? n : FIRMANTE_FIJO;
   const fuente =
     heredado.oficio || heredado.memorandum || heredado.oficioOriginal || heredado.memoOriginal || heredado.memorandumOriginal || heredado.correspondencia || heredado;
 
@@ -50,9 +82,27 @@ export const GenerarOficioContestacionPage = () => {
 
   const handleGuardar = async (e) => {
     e.preventDefault();
+    if (!formData.numOficioSalida?.trim()) {
+      setErrorNumOficio(true);
+      document.getElementById('numOficioSalida')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    setErrorNumOficio(false);
     if (!instruccion) { setError('El cuerpo del oficio es obligatorio.'); return; }
     setGuardando(true);
     try {
+      const dto = {
+        idCorrespondencia: Number(heredado.idCorrespondencia),
+        idUsuarioEmisor: resolveIdUsuarioEmisor(),
+        numOficioSalida: formData.numOficioSalida.trim(),
+        asuntoContestacion: heredado?.asunto || null,
+        cuerpoOficioTexto: instruccion || null,
+        urlPdfFinal: null
+      };
+      await guardarOficioContestacion(dto);
+      navigate('/correspondencia/registradas', {
+        state: { refreshInterna: true, tabActivo: 'INTERNA' }
+      });
       const payload = {
         ...formData,
         instruccionSeguimiento: instruccion,
@@ -67,7 +117,7 @@ export const GenerarOficioContestacionPage = () => {
       const resultado = await generarOficio(payload);
       navigate('/correspondencia/bandeja');
     } catch (err) {
-      setError('Error al generar el oficio: ' + err.message);
+      setError(err?.response?.data?.message || err?.message || 'Error al generar el oficio');
     } finally {
       setGuardando(false);
     }
@@ -110,6 +160,28 @@ export const GenerarOficioContestacionPage = () => {
             </div>
 
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
+              <label htmlFor="numOficioSalida">
+                NO. OFICIO SALIDA <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input
+                id="numOficioSalida"
+                type="text"
+                name="numOficioSalida"
+                value={formData.numOficioSalida || ''}
+                onChange={handleChange}
+                placeholder="Ej: OFICIO/001/2026"
+                required
+                className=""
+                style={{ borderColor: errorNumOficio ? '#dc2626' : undefined }}
+              />
+              {errorNumOficio && (
+                <span style={{ color: '#dc2626', fontSize: '0.78rem' }}>
+                  El número de oficio es obligatorio
+                </span>
+              )}
+            </div>
+
+            {/* Cuerpo del oficio */}
               <label>Folio (manual)</label>
               <input
                 type="text"
@@ -143,6 +215,7 @@ export const GenerarOficioContestacionPage = () => {
 
         <section className="panel-vista-previa">
           <VistaPreviaOficio
+            formData={{ folioUnico: formData.numOficioSalida, instruccionSeguimiento: instruccion }}
             formData={{
               ...formData,
               instruccionSeguimiento: instruccion,

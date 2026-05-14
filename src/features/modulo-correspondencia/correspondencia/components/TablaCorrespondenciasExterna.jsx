@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { hasAreaAsignada } from '../utils/correspondenciaUtils';
 
 const PAGE_SIZE = 10;
 
@@ -305,24 +306,16 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         <div className="acciones-cell">
-                          {(!idArea && idArea !== 0) && (
-                            <button
-                              type="button"
-                              className="btn-generar-memo"
-                              onClick={() => onGenerarMemo?.(item)}
-                              title="Generar Memorándum"
-                            >
-                              Generar Memo
-                            </button>
+                          {!hasAreaAsignada(item) && (
+                            <>
+                              <button type="button" className="btn-generar-memo" onClick={() => onGenerarMemo?.(item)}>
+                                Generar Memo
+                              </button>
+                              <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
+                                Generar Oficio
+                              </button>
+                            </>
                           )}
-                          <button
-                            type="button"
-                            className="btn-generar-oficio"
-                            onClick={() => onGenerarOficio?.(item)}
-                            title="Generar Oficio de Contestación"
-                          >
-                            Generar Oficio
-                          </button>
                         </div>
                       </td>
                     </tr>

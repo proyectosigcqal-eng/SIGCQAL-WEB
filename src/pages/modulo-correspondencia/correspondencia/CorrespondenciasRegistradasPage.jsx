@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { listarCorrespondenciasPorTipo } from '@/features/modulo-correspondencia/correspondencia/services/correspondenciaService';
+import { buscarOficioPorCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
 import { TablaCorrespondenciasExterna } from '@/features/modulo-correspondencia/correspondencia/components/TablaCorrespondenciasExterna';
 import { TablaCorrespondenciasInterna } from '@/features/modulo-correspondencia/correspondencia/components/TablaCorrespondenciasInterna';
 import '@/features/modulo-correspondencia/correspondencia/styles/correspondencia.css';
@@ -10,11 +11,13 @@ const getId = (item) =>
   item?.id ?? item?.idCorrespondencia ?? item?.correspondenciaId ?? item?.id_correspondencia ?? null;
 
 export const CorrespondenciasRegistradasPage = () => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   const [vistaActual, setVistaActual] = useState('EXTERNA');
   const [corrExterna, setCorrExterna] = useState([]);
   const [corrInterna, setCorrInterna] = useState([]);
+  const [oficiosGuardados, setOficiosGuardados] = useState({});
   const [loadingExt, setLoadingExt] = useState(false);
   const [loadingInt, setLoadingInt] = useState(false);
   const [error, setError] = useState(null);
@@ -53,6 +56,62 @@ export const CorrespondenciasRegistradasPage = () => {
     Promise.all([cargarExterna(), cargarInterna()]);
   }, [cargarExterna, cargarInterna]);
 
+  useEffect(() => {
+    const state = location.state;
+    if (state?.tabActivo) {
+      setVistaActual(state.tabActivo);
+    }
+    if (state?.refreshInterna) {
+      cargarInterna();
+    }
+  }, [cargarInterna, location.state]);
+
+  useEffect(() => {
+    if (!corrInterna.length) {
+      setOficiosGuardados({});
+      return;
+    }
+
+    let cancelled = false;
+
+    const verificar = async () => {
+      const mapa = {};
+      const batchSize = 10;
+
+      for (let i = 0; i < corrInterna.length; i += batchSize) {
+        const batch = corrInterna.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (corr) => {
+            const id = getId(corr);
+            if (!id) return;
+            try {
+              const oficio = await buscarOficioPorCorrespondencia(id);
+              if (oficio) {
+                const urlPdfFinal = oficio.urlPdfFinal ?? oficio.url_pdf_final ?? null;
+                const numOficioSalida = oficio.numOficioSalida ?? oficio.num_oficio_salida ?? null;
+                if (urlPdfFinal || numOficioSalida) {
+                  mapa[id] = { urlPdfFinal, numOficioSalida };
+                }
+              }
+            } catch (e) {
+              console.error('Error al verificar oficio de correspondencia:', e);
+            }
+          })
+        );
+      }
+
+      if (!cancelled) {
+        setOficiosGuardados(mapa);
+      }
+    };
+
+    verificar();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [corrInterna]);
+
   const handleActualizar = () => {
     if (vistaActual === 'EXTERNA') {
       cargarExterna();
@@ -67,10 +126,16 @@ export const CorrespondenciasRegistradasPage = () => {
     navigate(`/correspondencia/nuevo-memorandum/${id}`);
   };
 
-  const handleGenerarOficio = (item) => {
+  const handleGenerarOficioExterno = (item) => {
     const id = getId(item);
     if (!id) return;
     navigate(`/correspondencia/generar-oficio/${id}`);
+  };
+
+  const handleGenerarOficioInterno = (item) => {
+    const id = getId(item);
+    if (!id) return;
+    navigate(`/correspondencia/generar-oficio-interno/${id}`);
   };
 
   return (
@@ -128,7 +193,7 @@ export const CorrespondenciasRegistradasPage = () => {
           correspondencias={corrExterna}
           loading={loadingExt}
           onGenerarMemo={handleGenerarMemo}
-          onGenerarOficio={handleGenerarOficio}
+          onGenerarOficio={handleGenerarOficioExterno}
         />
       ) : null}
 
@@ -136,7 +201,8 @@ export const CorrespondenciasRegistradasPage = () => {
         <TablaCorrespondenciasInterna
           correspondencias={corrInterna}
           loading={loadingInt}
-          onGenerarOficio={handleGenerarOficio}
+          onGenerarOficio={handleGenerarOficioInterno}
+          oficiosGuardados={oficiosGuardados}
         />
       ) : null}
     </div>
