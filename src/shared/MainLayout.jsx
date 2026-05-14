@@ -14,7 +14,7 @@ export const MainLayout = () => {
         { label: 'Registrar Correspondencia', to: '/correspondencia/registrar', icon: <Archive size={16} /> },
         { label: 'Memorándum pendiente de Revisión', to: '/correspondencia/lista-memorandums-revision', icon: <FileText size={16} /> },
         { label: 'Memorándum asignados', to: '/correspondencia/memorandums-por-area', icon: <CheckSquare size={16} /> },
-        { label: 'Acuses de Oficio por Área', to: '/correspondencia/acuses-oficio-por-area', icon: <FolderCheck size={16} /> },
+        { label: 'Acuses de Oficio por Área', to: '/correspondencia/oficios-por-area', icon: <FolderCheck size={16} /> },
         { label: 'Contestación', to: '/correspondencia/bandeja', icon: <Archive size={16} /> },
     ];
 

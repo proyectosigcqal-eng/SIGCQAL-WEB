@@ -3,7 +3,6 @@ import { MainLayout } from './shared/MainLayout';
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { GenerarOficioPage } from './pages/modulo-correspondencia/oficio/GenerarOficioPage';
 import { GenerarOficioPage as GenerarOficioCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioPage';
-import { GenerarOficioInternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioInternoPage';
 import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
 import { CorrespondenciasRegistradasPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage';
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
@@ -46,27 +45,6 @@ function App() {
           />
 
           {/* Flujo de creación de Oficio (idéntico a Memorándum) */}
-          <Route path="correspondencia/nuevo-oficio/:idCorrespondencia" element={<GenerarOficioPage />} />
-          <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
-          <Route path="correspondencia/registradas" element={<CorrespondenciasRegistradasPage />} />
-          <Route path="correspondencia/generar-oficio/:id" element={<GenerarOficioCorrespondenciaPage />} />
-          <Route path="correspondencia/generar-oficio-interno/:idCorrespondencia" element={<GenerarOficioInternoPage />} />
-          <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
-
-          <Route path="correspondencia/contestacion-oficio/:id" element={<ContestacionOficioPage />} />
-          <Route path="correspondencia/contestacion-correspondencia/:id" element={<ContestacionCorrespondenciaPage />} />
-          <Route path="correspondencia/nuevo-oficio-contestacion" element={<GenerarOficioContestacionPage />} />
-          <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
-          <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
-          <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
-          <Route path="correspondencia/acuses-correspondencia" element={<ListaAcusesCorrespondenciaPage />} />
-
-            
-
-          <Route path="correspondencia/acuses-oficio-por-area" element={<ListaAcusesOficioPage />} />
-
-          {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
-          
           <Route
             path="correspondencia/nuevo-oficio/:idCorrespondencia"
             element={
