@@ -64,7 +64,10 @@ export const CorrespondenciasRegistradasPage = () => {
     if (state?.refreshInterna) {
       cargarInterna();
     }
-  }, [cargarInterna, location.state]);
+    if (state?.refreshExterna) {
+      cargarExterna();
+    }
+  }, [cargarExterna, cargarInterna, location.state]);
 
   useEffect(() => {
     if (!corrInterna.length) {
@@ -129,7 +132,7 @@ export const CorrespondenciasRegistradasPage = () => {
   const handleGenerarOficioExterno = (item) => {
     const id = getId(item);
     if (!id) return;
-    navigate(`/correspondencia/generar-oficio/${id}`);
+    navigate(`/correspondencia/generar-oficio-externo/${id}`);
   };
 
   const handleGenerarOficioInterno = (item) => {

@@ -3,6 +3,8 @@ import { MainLayout } from './shared/MainLayout';
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { GenerarOficioPage } from './pages/modulo-correspondencia/oficio/GenerarOficioPage';
 import { GenerarOficioPage as GenerarOficioCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioPage';
+import { GenerarOficioInternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioInternoPage';
+import { GenerarOficioExternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioExternoPage';
 import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
 import { CorrespondenciasRegistradasPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage';
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
@@ -77,6 +79,24 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio']}>
                 <GenerarOficioCorrespondenciaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/generar-oficio-interno/:idCorrespondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio-interno']}>
+                <GenerarOficioInternoPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/generar-oficio-externo/:idCorrespondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio-externo']}>
+                <GenerarOficioExternoPage />
               </ProtectedRoute>
             }
           />

@@ -20,6 +20,7 @@ export const RegistrarCorrespondenciaPage = () => {
     correspondenciaRegistrada,
     areaSeleccionada,
     areas,
+    todasCorrespondencias,
     correspondenciasSinArea,
     loading,
     error,

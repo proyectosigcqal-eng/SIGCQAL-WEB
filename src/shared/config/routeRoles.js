@@ -5,6 +5,8 @@ export const ROUTE_ROLES = {
   '/correspondencia/registrar': ['Administrador', 'Capturista'],
   '/correspondencia/registradas': ['Administrador', 'Revisor', 'Capturista'],
   '/correspondencia/generar-oficio': ['Administrador', 'Capturista'],
+  '/correspondencia/generar-oficio-interno': ['Administrador', 'Capturista'],
+  '/correspondencia/generar-oficio-externo': ['Administrador', 'Capturista', 'Revisor'],
   '/correspondencia/contestacion': ['Administrador', 'Revisor'],
   '/correspondencia/contestacion-oficio': ['Administrador', 'Revisor'],
   '/correspondencia/contestacion-correspondencia': ['Administrador', 'Revisor'],

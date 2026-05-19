@@ -19,18 +19,55 @@ export const GenerarOficioInternoPage = () => {
   const [errorNumOficio, setErrorNumOficio] = useState(false);
   const catalogos = useCatalogos();
 
+  const getSessionUsername = () => {
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw)?.username : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const [idUsuarioEmisor, setIdUsuarioEmisor] = useState(null);
+
   useEffect(() => {
     if (!idCorrespondencia) {
       setLoadingCorr(false);
       return;
     }
     obtenerCorrespondenciaPorId(idCorrespondencia)
-      .then((data) => setCorrespondencia(data))
+      .then((data) => {
+        console.log('[DEBUG] Correspondencia cargada:', data);
+        console.log('[DEBUG] Keys disponibles:', Object.keys(data || {}));
+        setCorrespondencia(data);
+      })
       .catch((err) => console.error('Error al cargar correspondencia:', err))
       .finally(() => setLoadingCorr(false));
   }, [idCorrespondencia]);
 
   const { formData, setFormData, handleChange } = useOficio(correspondencia, catalogos);
+
+  useEffect(() => {
+    const usuarios = catalogos?.usuarios;
+    if (!usuarios?.length) return;
+    const username = getSessionUsername();
+    if (!username) return;
+
+    const found = usuarios.find((u) => u.usuarioLogin === username);
+    if (found) {
+      setIdUsuarioEmisor(found.id);
+      setFormData((prev) =>
+        prev.idUsuarioEmisor === found.id ? prev : { ...prev, idUsuarioEmisor: found.id }
+      );
+    } else {
+      console.warn('[GenerarOficioInterno] Usuario no encontrado en catálogo:', username);
+      const fallback = usuarios[0]?.id ?? null;
+      setIdUsuarioEmisor(fallback);
+      setFormData((prev) =>
+        prev.idUsuarioEmisor === fallback ? prev : { ...prev, idUsuarioEmisor: fallback }
+      );
+    }
+  }, [catalogos?.usuarios]);
 
   const handleSubmitInterno = async (e) => {
     e.preventDefault();
@@ -41,11 +78,25 @@ export const GenerarOficioInternoPage = () => {
       return;
     }
     setErrorNumOficio(false);
+    if (!idUsuarioEmisor) {
+      setErrorGuardar(
+        'No se pudo identificar el usuario logueado. Por favor, cierre sesión y vuelva a ingresar.'
+      );
+      return;
+    }
+    if (!formData.asuntoCorrespondencia?.trim()) {
+      setErrorGuardar('El asunto es obligatorio');
+      return;
+    }
+    if (!formData.instruccionSeguimiento?.trim()) {
+      setErrorGuardar('El cuerpo del oficio es obligatorio');
+      return;
+    }
     setGuardando(true);
     try {
       const dto = {
         idCorrespondencia: Number(idCorrespondencia),
-        idUsuarioEmisor: formData.idUsuarioEmisor || null,
+        idUsuarioEmisor: idUsuarioEmisor,
         numOficioSalida: formData.folioUnico.trim(),
         asuntoContestacion: formData.asuntoCorrespondencia || null,
         cuerpoOficioTexto: formData.instruccionSeguimiento || null,
@@ -79,6 +130,47 @@ export const GenerarOficioInternoPage = () => {
       {errorGuardar && (
         <div className="alerta-error" style={{ margin: '0 1.5rem 1rem' }}>
           {errorGuardar}
+        </div>
+      )}
+
+      {correspondencia && (
+        <div
+          style={{
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: 6,
+            padding: '0.75rem 1.5rem',
+            margin: '0 1.5rem 1rem',
+            fontSize: '0.875rem',
+            color: '#1e40af'
+          }}
+        >
+          <div style={{ marginBottom: '0.25rem' }}>
+            <strong>Folio:</strong>{' '}
+            {correspondencia.folioUnico ??
+              correspondencia.folio_unico ??
+              correspondencia.folio ??
+              '—'}
+          </div>
+          <div style={{ marginBottom: '0.25rem' }}>
+            <strong>Asunto:</strong> {correspondencia.asunto ?? '—'}
+          </div>
+          <div style={{ marginBottom: '0.25rem' }}>
+            <strong>Dependencia remitente:</strong>{' '}
+            {correspondencia.dependenciaRemitente ??
+              correspondencia.dependencia_remitente ??
+              correspondencia.dependencia ??
+              '—'}
+          </div>
+          <div>
+            <strong>Titular / Encargado:</strong>{' '}
+            {correspondencia.titularDependencia ??
+              correspondencia.titular_dependencia ??
+              correspondencia.nombreRemitente ??
+              correspondencia.nombre_remitente ??
+              correspondencia.encargado ??
+              '—'}
+          </div>
         </div>
       )}
 
