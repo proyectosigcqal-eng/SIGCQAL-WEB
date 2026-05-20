@@ -299,3 +299,86 @@ export const obtenerBitacoraCompletaOficio = async (idSeguimientoOficio, idOfici
     return da - db;
   });
 };
+
+export const obtenerBitacoraCompletaCorrespondencia = async (idCorrespondencia) => {
+  const [correspondencia, acuses, seguimientos] = await Promise.all([
+    axios.get(`${API_BASE}/correspondencias/entrada/${idCorrespondencia}`)
+      .then(r => r.data).catch(() => null),
+
+    axios.get(`${API_BASE}/acuse-correspondencia/correspondencia/${idCorrespondencia}`)
+      .then(r => r.data).catch(() => []),
+
+    axios.get(`${API_BASE}/seguimiento-correspondencia/correspondencia/${idCorrespondencia}`)
+      .then(r => r.data).catch(() => []),
+  ]);
+
+  const eventos = [];
+
+  // 0️⃣ CORRESPONDENCIA RECIBIDA
+  if (correspondencia) {
+    eventos.push({
+      idLog:       `corr-${correspondencia.id}`,
+      estatus:     'CORRESPONDENCIA RECIBIDA',
+      fecha:       pickFecha(correspondencia) || correspondencia.fechaRecibido || correspondencia.fechaOficio,
+      usuario:     correspondencia.nombreRemitente || correspondencia.dependenciaRemitente || 'Remitente externo',
+      descripcion: correspondencia.asunto || '',
+      folio:       correspondencia.folioUnico,
+    });
+  }
+
+  // 1️⃣ ASIGNADA — el área se asigna al registrar
+  if (correspondencia?.idArea) {
+    eventos.push({
+      idLog:       `asignada-${correspondencia.id}`,
+      estatus:     'ASIGNADO',
+      fecha:       pickFecha(correspondencia) || correspondencia.fechaRecibido,
+      usuario:     correspondencia.nombreUsuarioCaptura || `Usuario ${correspondencia.idUsuarioCaptura}`,
+      descripcion: `Correspondencia asignada al área: ${correspondencia.nombreArea || `Área ${correspondencia.idArea}`}`,
+      folio:       correspondencia.folioUnico,
+    });
+  }
+
+  // 2️⃣ ACUSE — confirmación del área
+  (acuses || []).forEach((acuse, i) => {
+    eventos.push({
+      idLog:       `acuse-${acuse.idAcuseCorrespondencia || acuse.id || i}`,
+      estatus:     acuse.esDelArea ? 'EN SEGUIMIENTO' : 'REASIGNADO',
+      fecha:       pickFecha(acuse) || acuse.fechaAceptacion,
+      usuario:     `Usuario ${acuse.idUsuarioRevisor}`,
+      descripcion: acuse.esDelArea
+        ? 'El área confirmó recepción de la correspondencia.'
+        : 'Correspondencia enviada a reasignación.',
+      folio:       acuse.folioUnico || null,
+    });
+  });
+
+  // 3️⃣ CONTESTADO
+  (seguimientos || []).forEach((seg, i) => {
+    eventos.push({
+      idLog:       `seg-${seg.idSeguimientoCorrespondencia || i}`,
+      estatus:     'CONTESTADO',
+      fecha:       pickFecha(seg) || seg.fechaResolucion,
+      usuario:     `Usuario ${seg.idUsuario}`,
+      descripcion: seg.respuestaSeguimientoCorrespondencia || '',
+      folio:       seg.folioRespuesta,
+    });
+  });
+
+  const ORDEN_ESTATUS = {
+    'CORRESPONDENCIA RECIBIDA': 0,
+    'ASIGNADO':                 1,
+    'EN SEGUIMIENTO':           2,
+    'REASIGNADO':               2,
+    'CONTESTADO':               3,
+    'CONCLUIDO':                4,
+  };
+
+  return eventos.sort((a, b) => {
+    const ordenA = ORDEN_ESTATUS[a.estatus] ?? 99;
+    const ordenB = ORDEN_ESTATUS[b.estatus] ?? 99;
+    if (ordenA !== ordenB) return ordenA - ordenB;
+    const da = a.fecha ? new Date(a.fecha) : new Date(0);
+    const db = b.fecha ? new Date(b.fecha) : new Date(0);
+    return da - db;
+  });
+};
