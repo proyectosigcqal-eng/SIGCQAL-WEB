@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 // ✅
 import { FormularioContestacionCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/FormularioContestacion';
-import { VistaDocumentoCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/VistaDocumentoCorrespondencia';
 import { useContestacionCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/hooks/useContestacionCorrespondencia';
 import '../../../features/modulo-correspondencia/contestacion-correspondencia/styles/contestacion_correspondencia.css';
 
@@ -35,18 +34,6 @@ export const ContestacionCorrespondenciaPage = () => {
 
       {/* 3. Layout de dos columnas (Split Layout) */}
       <div className="split-layout">
-        <section className="card-container">
-          <div className="card-title-bar">
-            <span>📄</span>
-            <h5>Documento Original de Correspondencia</h5>
-          </div>
-          <div className="form-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-            <VistaDocumentoCorrespondencia 
-              correspondencia={correspondencia} 
-              loading={loading}
-            />
-          </div>
-        </section>
 
         <section className="card-container">
           <div className="card-title-bar">
