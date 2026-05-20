@@ -12,7 +12,7 @@ import { guardarOficioContestacion } from '@/features/modulo-correspondencia/cor
 
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
 
-const FIRMANTE_FIJO = 5; // ana_admin
+const FIRMANTE_FIJO = 10; // ana_admin
 
 export const GenerarOficioContestacionPage = () => {
   const location = useLocation();
@@ -34,9 +34,10 @@ export const GenerarOficioContestacionPage = () => {
     heredado.correspondencia ||
     heredado;
 
+  // Prioriza el idCorrespondencia pasado en location.state (heredado)
   const idCorrespondenciaH =
-    fuente?.idCorrespondencia ??
     heredado.idCorrespondencia ??
+    fuente?.idCorrespondencia ??
     fuente?.id ??
     null;
 
@@ -83,6 +84,15 @@ export const GenerarOficioContestacionPage = () => {
 
   const [correspondencia, setCorrespondencia] = useState(null);
 
+  // Diagnostic logs para depuración en runtime
+  useEffect(() => {
+    console.log('=== DIAGNÓSTICO OFICIO CONTESTACIÓN (MOUNT/UPDATE) ===');
+    console.log('location.state:', location.state);
+    console.log('heredado.idCorrespondencia:', heredado.idCorrespondencia);
+    console.log('fuente:', fuente);
+    console.log('correspondencia cargada:', correspondencia);
+  }, [correspondencia]);
+
   // =========================
   // CARGAR CORRESPONDENCIA
   // =========================
@@ -91,9 +101,7 @@ export const GenerarOficioContestacionPage = () => {
 
     obtenerCorrespondenciaPorId(idCorrespondenciaH)
       .then((data) => setCorrespondencia(data))
-      .catch((err) =>
-        console.error('Error al cargar correspondencia:', err)
-      );
+      .catch((err) => console.error('Error al cargar correspondencia:', err));
   }, [idCorrespondenciaH]);
 
   // =========================
@@ -112,23 +120,14 @@ export const GenerarOficioContestacionPage = () => {
   // RESOLVER EMISOR
   // =========================
   const resolveIdUsuarioEmisor = () => {
-    const usuario =
-      heredado?.usuario ||
-      heredado?.sessionUser ||
-      heredado?.user ||
-      null;
+    const usuario = heredado?.usuario || heredado?.sessionUser || heredado?.user || null;
 
     const id =
-      usuario?.id ??
-      usuario?.idUsuario ??
-      heredado?.idUsuarioEmisor ??
-      heredado?.idUsuario ??
-      null;
+      usuario?.id ?? usuario?.idUsuario ?? heredado?.idUsuarioEmisor ?? heredado?.idUsuario ?? null;
 
     if (id == null) return FIRMANTE_FIJO;
 
     const n = Number(id);
-
     return Number.isFinite(n) ? n : FIRMANTE_FIJO;
   };
 
@@ -154,21 +153,28 @@ export const GenerarOficioContestacionPage = () => {
     setError(null);
 
     try {
-      // ✅ Solo generarOficio — elimina guardarOficioContestacion
+      // Construir payload usando valores heredados en `location.state` cuando existan
       const payload = {
-        idCorrespondencia:      idCorrespondenciaH,
-        idUsuarioFirmante:      FIRMANTE_FIJO,
-        idUsuarioEmisor:        resolveIdUsuarioEmisor(),
+        idCorrespondencia:      heredado.idCorrespondencia ?? idCorrespondenciaH,
+        idUsuarioFirmante:      heredado.idUsuarioFirmante ?? FIRMANTE_FIJO,
+        idUsuarioEmisor:        heredado.idUsuarioEmisor ?? resolveIdUsuarioEmisor(),
         instruccionSeguimiento: instruccion,
-        observaciones:          fuente?.asunto || correspondencia?.asunto || instruccion,
+        observaciones:          correspondencia?.asunto || fuente?.asunto || instruccion,
+        areaDestinatario:       correspondencia?.dependenciaRemitente || fuente?.dependenciaRemitente || '',
         idPlantilla:            null,
         idArea:                 null,
         folioUnico:             folioOficio || '',
-        nombreFirmante:         firmanteH,
-        areaFirmante:           areaFirmanteH,
-        areaDestinatario:       fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '',
-        nombreEmisor:           firmanteH,
+        nombreFirmante:         heredado.firmante || firmanteH,
+        areaFirmante:           heredado.areaFirmante || areaFirmanteH,
+        nombreEmisor:           heredado.nombreEmisor || heredado.firmante || firmanteH,
       };
+
+      console.log('=== DIAGNÓSTICO OFICIO CONTESTACIÓN ===');
+      console.log('location.state:', location.state);
+      console.log('heredado.idCorrespondencia:', heredado.idCorrespondencia);
+      console.log('fuente:', fuente);
+      console.log('correspondencia cargada:', correspondencia);
+      console.log('payload que se enviará:', payload);
 
       await generarOficio(payload);
 
@@ -180,7 +186,7 @@ export const GenerarOficioContestacionPage = () => {
     } finally {
       setGuardando(false);
     }
-};
+  };
 
   // =========================
   // RENDER
@@ -194,212 +200,91 @@ export const GenerarOficioContestacionPage = () => {
         {/* ========================= */}
         <section className="panel-formulario">
 
-          <h3
-            style={{
-              marginBottom: '1rem',
-              color: '#691C32',
-            }}
-          >
+          <h3 style={{ marginBottom: '1rem', color: '#691C32' }}>
             Oficio de Contestación Interna
           </h3>
 
-          <p
-            style={{
-              color: '#718096',
-              marginBottom: '1.5rem',
-              fontSize: '0.9rem',
-            }}
-          >
+          <p style={{ color: '#718096', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
             El firmante y los datos de referencia se heredan automáticamente.
           </p>
 
           {(fuente?.asunto || correspondencia) && (
-            <div
-              style={{
-                background: '#f0f4f8',
-                borderRadius: 8,
-                padding: '12px 16px',
-                marginBottom: '1.5rem',
-                borderLeft: '3px solid #691C32',
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: '0.85rem',
-                  color: '#4a5568',
-                }}
-              >
+            <div style={{ background: '#f0f4f8', borderRadius: 8, padding: '12px 16px', marginBottom: '1.5rem', borderLeft: '3px solid #691C32' }}>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#4a5568' }}>
                 <strong>Asunto:</strong>{' '}
                 {fuente?.asunto || correspondencia?.asunto}
               </p>
 
-              <p
-                style={{
-                  margin: '4px 0 0',
-                  fontSize: '0.85rem',
-                  color: '#4a5568',
-                }}
-              >
+              <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#4a5568' }}>
                 <strong>Remitente:</strong>{' '}
-                {fuente?.dependenciaRemitente ||
-                  correspondencia?.dependenciaRemitente}
+                {fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente}
               </p>
             </div>
           )}
 
-          {error && (
-            <div className="alert-danger">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert-danger">{error}</div>}
 
           <form onSubmit={handleGuardar}>
 
-            {/* ========================= */}
             {/* FIRMANTE */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width"
-              style={{ marginBottom: '1rem' }}
-            >
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Firmante</label>
 
-              <input
-                type="text"
-                value={firmanteH}
-                disabled
-                className="input-readonly"
-              />
+              <input type="text" value={firmanteH} disabled className="input-readonly" />
             </div>
 
-            {/* ========================= */}
             {/* NUMERO OFICIO */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width"
-              style={{ marginBottom: '1rem' }}
-            >
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label htmlFor="numOficioSalida">
                 NO. OFICIO SALIDA{' '}
-                <span style={{ color: '#dc2626' }}>
-                  *
-                </span>
+                <span style={{ color: '#dc2626' }}>*</span>
               </label>
 
-              <input
-                id="numOficioSalida"
-                type="text"
-                name="numOficioSalida"
-                value={formData.numOficioSalida}
-                onChange={handleChange}
-                placeholder="Ej: OFICIO/001/2026"
-                required
-                style={{
-                  borderColor: errorNumOficio
-                    ? '#dc2626'
-                    : undefined,
-                }}
-              />
+              <input id="numOficioSalida" type="text" name="numOficioSalida" value={formData.numOficioSalida} onChange={handleChange} placeholder="Ej: OFICIO/001/2026" required style={{ borderColor: errorNumOficio ? '#dc2626' : undefined }} />
 
               {errorNumOficio && (
-                <span
-                  style={{
-                    color: '#dc2626',
-                    fontSize: '0.78rem',
-                  }}
-                >
-                  El número de oficio es obligatorio
-                </span>
+                <span style={{ color: '#dc2626', fontSize: '0.78rem' }}>El número de oficio es obligatorio</span>
               )}
             </div>
 
-            {/* ========================= */}
             {/* FOLIO */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width"
-              style={{ marginBottom: '1rem' }}
-            >
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Folio (manual)</label>
 
-              <input
-                type="text"
-                className="form-control"
-                value={folioOficio}
-                onChange={(e) =>
-                  setFolioOficio(e.target.value)
-                }
-                placeholder="Introduce folio para el oficio (opcional)"
-              />
+              <input type="text" className="form-control" value={folioOficio} onChange={(e) => setFolioOficio(e.target.value)} placeholder="Introduce folio para el oficio (opcional)" />
             </div>
 
-            {/* ========================= */}
             {/* CUERPO */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width rich-text-area"
-              style={{ marginBottom: '1.5rem' }}
-            >
+            <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">
                 <span className="tool-btn">B</span>
                 <span className="tool-btn">I</span>
                 <span className="tool-btn">U</span>
               </div>
 
-              <textarea
-                className="cuerpo-documento"
-                rows={10}
-                value={instruccion}
-                onChange={(e) =>
-                  setInstruccion(e.target.value)
-                }
-                placeholder="Cuerpo del oficio de contestación..."
-              />
+              <textarea className="cuerpo-documento" rows={10} value={instruccion} onChange={(e) => setInstruccion(e.target.value)} placeholder="Cuerpo del oficio de contestación..." />
             </div>
 
-            {/* ========================= */}
             {/* BOTON */}
-            {/* ========================= */}
-            <button
-              type="submit"
-              className="btn-primario"
-              disabled={guardando}
-            >
-              {guardando
-                ? 'Generando...'
-                : '📄 Generar Oficio'}
-            </button>
+            <button type="submit" className="btn-primario" disabled={guardando}>{guardando ? 'Generando...' : '📄 Generar Oficio'}</button>
 
           </form>
         </section>
 
-        {/* ========================= */}
         {/* VISTA PREVIA */}
-        {/* ========================= */}
         <section className="panel-vista-previa">
           <VistaPreviaOficio
             formData={{
               ...formData,
-
-              instruccionSeguimiento:
-                instruccion,
-
-              asuntoCorrespondencia:
-                fuente?.asunto ||
-                correspondencia?.asunto ||
-                '',
-
-              folioUnico:
-                folioOficio || '',
+              instruccionSeguimiento: instruccion,
+              asuntoCorrespondencia: fuente?.asunto || correspondencia?.asunto || '',
+              folioUnico: folioOficio || '',
+              idUsuarioFirmante: heredado.idUsuarioFirmante || FIRMANTE_FIJO,
+              idUsuarioEmisor: heredado.idUsuarioEmisor || resolveIdUsuarioEmisor(),
+              observaciones: correspondencia?.asunto || fuente?.asunto || '',
             }}
             usuarios={catalogos.usuarios}
-            areaDestino={{
-              nombre:
-                fuente?.dependenciaRemitente ||
-                correspondencia?.dependenciaRemitente ||
-                '',
-            }}
+            areaDestino={{ nombre: fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '' }}
           />
         </section>
 
@@ -407,3 +292,5 @@ export const GenerarOficioContestacionPage = () => {
     </div>
   );
 };
+
+export default GenerarOficioContestacionPage;

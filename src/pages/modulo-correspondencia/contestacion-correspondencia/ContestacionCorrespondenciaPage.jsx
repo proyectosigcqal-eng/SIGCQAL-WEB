@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FormularioContestacion } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/FormularioContestacion';
+// ✅
+import { FormularioContestacionCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/FormularioContestacion';
 import { VistaDocumentoCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/VistaDocumentoCorrespondencia';
 import { useContestacionCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/hooks/useContestacionCorrespondencia';
 import '../../../features/modulo-correspondencia/contestacion-correspondencia/styles/contestacion_correspondencia.css';
@@ -10,7 +11,7 @@ export const ContestacionCorrespondenciaPage = () => {
   const navigate = useNavigate();
   
   // Usamos el hook que ya tienes implementado
-  const { acuse, correspondencia, loading, error: errorCarga } = useContestacionCorrespondencia(id);
+  const { correspondencia, loading, error: errorCarga } = useContestacionCorrespondencia();
   const [errorForm, setErrorForm] = useState(null);
 
   const handleGuardado = () => {
@@ -54,14 +55,15 @@ export const ContestacionCorrespondenciaPage = () => {
           </div>
           <div className="form-body">
             {/* Solo renderizamos el formulario si el acuse ya terminó de cargar */}
-            {!loading && acuse && (
-              <FormularioContestacion
-                acuse={acuse}
-                onSuccess={handleGuardado}
-                onCancel={handleGuardado}
-                onError={setErrorForm}
-              />
-            )}
+          
+          {!loading && correspondencia && (
+            <FormularioContestacionCorrespondencia
+              acuse={{ idCorrespondencia: correspondencia.id }} // ← simulamos el acuse con lo que tenemos
+              correspondencia={correspondencia}
+              onGuardado={handleGuardado}
+              onError={setErrorForm}
+            />
+          )}
           </div>
         </section>
       </div>
