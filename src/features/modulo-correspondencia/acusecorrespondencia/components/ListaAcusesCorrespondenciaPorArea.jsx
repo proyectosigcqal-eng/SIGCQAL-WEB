@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom';
 import { useListaAcusesCorrespondenciaPorArea } from '../hooks/useListaAcusesCorrespondenciaPorArea';
 import '@/features/modulo-correspondencia/acusecorrespondencia/styles/listaAcusesCorrespondencia.css';
 
 export const ListaAcusesCorrespondenciaPorArea = () => {
   const { acuses, loading, error, recargar, areaForzada } = useListaAcusesCorrespondenciaPorArea();
+  const navigate = useNavigate();
 
   const formatearFecha = (fecha) => {
     if (!fecha) return '-';
@@ -76,8 +78,18 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
                   <td>{acuse.fechaExpedicion || '-'}</td>
                   <td>{acuse.fechaAceptacion || '-'}</td>
                   <td>
-                    <button className="btn-contestacion-acuse-correspondencia">
-                      Contestacion
+                    <button 
+                      className="btn-contestacion-acuse-correspondencia"
+                      onClick={() => {
+                        const idDestino = acuse.idAcuseCorrespondencia || acuse.id;
+                        if (idDestino) {
+                          navigate(`/correspondencia/contestacion-correspondencia/${idDestino}`);
+                        } else {
+                          console.error("No se encontró el idAcuseCorrespondencia para navegar.");
+                        }
+                      }}
+                    >
+                      Contestación
                     </button>
                   </td>
                 </tr>
