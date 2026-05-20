@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -6,15 +7,24 @@ import {
   guardarSeguimiento 
 } from '../services/seguimientoService';
 
-const formatDate = (date) => date.toISOString().split('T')[0];
+import { useCallback, useState } from 'react';
+import { guardarSeguimiento, obtenerCorrespondenciaPorId } from '../services/seguimientoService';
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-const formatTime = (date) =>
-  date.toLocaleTimeString('es-MX', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+
+const formatDate = (date) => formatForBackend(date);
+
+const formatTime = (date) => formatTimeForBackend(date);
+
+
+const formatTimestamp = (date) => `${formatForBackend(date)} ${formatTimeForBackend(date)}`;
+
+const unwrapCorrespondencia = (data) => {
+  if (!data) return null;
+  if (data.data) return data.data;
+  if (data.resultado) return data.resultado;
+  return data;
+};
 
 export const useContestacionCorrespondencia = () => {
   const { id } = useParams(); // Sincronizado con la ruta dinámica de App.jsx

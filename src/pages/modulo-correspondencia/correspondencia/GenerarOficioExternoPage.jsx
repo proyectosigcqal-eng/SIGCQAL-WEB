@@ -1,30 +1,35 @@
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 
-import { generarOficio } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
-import { obtenerCorrespondenciaPorId } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
-
-import { useCatalogos } from '../../../shared/hooks/useCatalogos';
-
-import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
-
+import { obtenerCorrespondenciaPorId } from '@/features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 import { guardarOficioContestacion } from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
+
+import { useCatalogos } from '@/shared/hooks/useCatalogos';
+
+import { VistaPreviaOficio } from '@/features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
 
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
 
-const FIRMANTE_FIJO = 5; // ana_admin
-
-export const GenerarOficioContestacionPage = () => {
+export const GenerarOficioExternoPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { idCorrespondencia } = useParams();
 
   const catalogos = useCatalogos();
 
+  const getSessionUsername = () => {
+    try {
+      const raw = localStorage.getItem('user');
+      return raw ? JSON.parse(raw)?.username : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const [idUsuarioEmisor, setIdUsuarioEmisor] = useState(null);
+
   const heredado = location.state || {};
 
-  // =========================
-  // DATOS HEREDADOS
-  // =========================
   const fuente =
     heredado.oficio ||
     heredado.memorandum ||
@@ -35,6 +40,7 @@ export const GenerarOficioContestacionPage = () => {
     heredado;
 
   const idCorrespondenciaH =
+    idCorrespondencia ??
     fuente?.idCorrespondencia ??
     heredado.idCorrespondencia ??
     fuente?.id ??
@@ -45,12 +51,6 @@ export const GenerarOficioContestacionPage = () => {
     fuente?.nombreFirmante ||
     heredado.firmante ||
     'ana_admin';
-
-  const areaFirmanteH =
-    fuente?.areaFirmante ||
-    fuente?.area ||
-    heredado.areaFirmante ||
-    'Administración';
 
   const textoSugeridoH =
     heredado.textoSugerido ||
@@ -64,11 +64,12 @@ export const GenerarOficioContestacionPage = () => {
     fuente?.folioUnico ||
     '';
 
-  // =========================
-  // STATES
-  // =========================
+  const asuntoBase = useMemo(() => fuente?.asunto || '', [fuente?.asunto]);
+
   const [formData, setFormData] = useState({
     numOficioSalida: heredado.numOficioSalida || '',
+    idUsuarioEmisor: '',
+    asuntoContestacion: asuntoBase || '',
   });
 
   const [instruccion, setInstruccion] = useState(textoSugeridoH);
@@ -83,22 +84,50 @@ export const GenerarOficioContestacionPage = () => {
 
   const [correspondencia, setCorrespondencia] = useState(null);
 
-  // =========================
-  // CARGAR CORRESPONDENCIA
-  // =========================
+  useEffect(() => {
+    const usuarios = catalogos?.usuarios;
+    if (!usuarios?.length) return;
+    const username = getSessionUsername();
+    if (!username) return;
+    const found = usuarios.find((u) => u.usuarioLogin === username);
+    if (found) {
+      setIdUsuarioEmisor(found.id);
+      setFormData((prev) =>
+        prev.idUsuarioEmisor === found.id ? prev : { ...prev, idUsuarioEmisor: found.id }
+      );
+    } else {
+      console.warn('[GenerarOficioExterno] Usuario no encontrado en catálogo:', username);
+      const fallback = usuarios[0]?.id ?? null;
+      setIdUsuarioEmisor(fallback);
+      setFormData((prev) =>
+        prev.idUsuarioEmisor === fallback ? prev : { ...prev, idUsuarioEmisor: fallback }
+      );
+    }
+  }, [catalogos?.usuarios]);
+
   useEffect(() => {
     if (!idCorrespondenciaH) return;
 
     obtenerCorrespondenciaPorId(idCorrespondenciaH)
       .then((data) => setCorrespondencia(data))
-      .catch((err) =>
-        console.error('Error al cargar correspondencia:', err)
-      );
+      .catch((err) => console.error('Error al cargar correspondencia:', err));
   }, [idCorrespondenciaH]);
 
-  // =========================
-  // HANDLE INPUTS
-  // =========================
+  useEffect(() => {
+    if (!correspondencia) return;
+    if (formData.asuntoContestacion?.trim()) return;
+
+    const asunto =
+      asuntoBase ||
+      correspondencia?.asunto ||
+      '';
+
+    setFormData((prev) => ({
+      ...prev,
+      asuntoContestacion: asunto,
+    }));
+  }, [asuntoBase, correspondencia, formData.asuntoContestacion]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -108,41 +137,27 @@ export const GenerarOficioContestacionPage = () => {
     }));
   };
 
-  // =========================
-  // RESOLVER EMISOR
-  // =========================
-  const resolveIdUsuarioEmisor = () => {
-    const usuario =
-      heredado?.usuario ||
-      heredado?.sessionUser ||
-      heredado?.user ||
-      null;
-
-    const id =
-      usuario?.id ??
-      usuario?.idUsuario ??
-      heredado?.idUsuarioEmisor ??
-      heredado?.idUsuario ??
-      null;
-
-    if (id == null) return FIRMANTE_FIJO;
-
-    const n = Number(id);
-
-    return Number.isFinite(n) ? n : FIRMANTE_FIJO;
-  };
-
-  // =========================
-  // GUARDAR
-  // =========================
   const handleGuardar = async (e) => {
     e.preventDefault();
 
-    if (!formData.numOficioSalida?.trim()) {
-      setErrorNumOficio(true);
-      document.getElementById('numOficioSalida')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (!idUsuarioEmisor) {
+      alert('No se pudo identificar el usuario emisor. Vuelva a iniciar sesión.');
       return;
     }
+
+    if (!formData.numOficioSalida?.trim()) {
+      setErrorNumOficio(true);
+
+      document
+        .getElementById('numOficioSalida')
+        ?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+
+      return;
+    }
+
     setErrorNumOficio(false);
 
     if (!instruccion?.trim()) {
@@ -154,53 +169,47 @@ export const GenerarOficioContestacionPage = () => {
     setError(null);
 
     try {
-      // ✅ Solo generarOficio — elimina guardarOficioContestacion
-      const payload = {
-        idCorrespondencia:      idCorrespondenciaH,
-        idUsuarioFirmante:      FIRMANTE_FIJO,
-        idUsuarioEmisor:        resolveIdUsuarioEmisor(),
-        instruccionSeguimiento: instruccion,
-        observaciones:          fuente?.asunto || correspondencia?.asunto || instruccion,
-        idPlantilla:            null,
-        idArea:                 null,
-        folioUnico:             folioOficio || '',
-        nombreFirmante:         firmanteH,
-        areaFirmante:           areaFirmanteH,
-        areaDestinatario:       fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '',
-        nombreEmisor:           firmanteH,
+      const dto = {
+        idCorrespondencia: Number(idCorrespondenciaH),
+        idUsuarioEmisor: idUsuarioEmisor,
+        numOficioSalida: formData.numOficioSalida.trim(),
+        asuntoContestacion:
+          formData.asuntoContestacion ||
+          fuente?.asunto ||
+          correspondencia?.asunto ||
+          null,
+        cuerpoOficioTexto: instruccion,
+        urlPdfFinal: null,
       };
 
-      await generarOficio(payload);
+      await guardarOficioContestacion(dto);
 
       navigate('/correspondencia/registradas', {
-        state: { refreshInterna: true, tabActivo: 'INTERNA' },
+        state: { refreshExterna: true, tabActivo: 'EXTERNA' },
       });
     } catch (err) {
-      setError(err?.response?.data?.message || err?.message || 'Error al generar el oficio');
+      const msg =
+        err?.response?.data?.detail ||
+        err?.response?.data?.message ||
+        err?.message ||
+        'Error al guardar el oficio';
+      setError(msg);
     } finally {
       setGuardando(false);
     }
-};
+  };
 
-  // =========================
-  // RENDER
-  // =========================
   return (
     <div className="sigcqal-page-container">
       <div className="split-view-container">
-
-        {/* ========================= */}
-        {/* FORMULARIO */}
-        {/* ========================= */}
         <section className="panel-formulario">
-
           <h3
             style={{
               marginBottom: '1rem',
               color: '#691C32',
             }}
           >
-            Oficio de Contestación Interna
+            Oficio de Contestación Externa
           </h3>
 
           <p
@@ -248,43 +257,30 @@ export const GenerarOficioContestacionPage = () => {
             </div>
           )}
 
-          {error && (
-            <div className="alert-danger">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert-danger">{error}</div>}
 
           <form onSubmit={handleGuardar}>
-
-            {/* ========================= */}
-            {/* FIRMANTE */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width"
-              style={{ marginBottom: '1rem' }}
-            >
-              <label>Firmante</label>
-
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
+              <label htmlFor="asuntoContestacion">Asunto de contestación</label>
               <input
+                id="asuntoContestacion"
                 type="text"
-                value={firmanteH}
-                disabled
-                className="input-readonly"
+                name="asuntoContestacion"
+                value={formData.asuntoContestacion}
+                onChange={handleChange}
+                placeholder="Asunto del oficio de contestación..."
               />
             </div>
 
-            {/* ========================= */}
-            {/* NUMERO OFICIO */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width"
-              style={{ marginBottom: '1rem' }}
-            >
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
+              <label>Firmante</label>
+
+              <input type="text" value={firmanteH} disabled className="input-readonly" />
+            </div>
+
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label htmlFor="numOficioSalida">
-                NO. OFICIO SALIDA{' '}
-                <span style={{ color: '#dc2626' }}>
-                  *
-                </span>
+                NO. OFICIO SALIDA <span style={{ color: '#dc2626' }}>*</span>
               </label>
 
               <input
@@ -296,9 +292,7 @@ export const GenerarOficioContestacionPage = () => {
                 placeholder="Ej: OFICIO/001/2026"
                 required
                 style={{
-                  borderColor: errorNumOficio
-                    ? '#dc2626'
-                    : undefined,
+                  borderColor: errorNumOficio ? '#dc2626' : undefined,
                 }}
               />
 
@@ -314,33 +308,19 @@ export const GenerarOficioContestacionPage = () => {
               )}
             </div>
 
-            {/* ========================= */}
-            {/* FOLIO */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width"
-              style={{ marginBottom: '1rem' }}
-            >
+            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Folio (manual)</label>
 
               <input
                 type="text"
                 className="form-control"
                 value={folioOficio}
-                onChange={(e) =>
-                  setFolioOficio(e.target.value)
-                }
+                onChange={(e) => setFolioOficio(e.target.value)}
                 placeholder="Introduce folio para el oficio (opcional)"
               />
             </div>
 
-            {/* ========================= */}
-            {/* CUERPO */}
-            {/* ========================= */}
-            <div
-              className="form-group full-width rich-text-area"
-              style={{ marginBottom: '1.5rem' }}
-            >
+            <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">
                 <span className="tool-btn">B</span>
                 <span className="tool-btn">I</span>
@@ -351,47 +331,28 @@ export const GenerarOficioContestacionPage = () => {
                 className="cuerpo-documento"
                 rows={10}
                 value={instruccion}
-                onChange={(e) =>
-                  setInstruccion(e.target.value)
-                }
+                onChange={(e) => setInstruccion(e.target.value)}
                 placeholder="Cuerpo del oficio de contestación..."
               />
             </div>
 
-            {/* ========================= */}
-            {/* BOTON */}
-            {/* ========================= */}
-            <button
-              type="submit"
-              className="btn-primario"
-              disabled={guardando}
-            >
-              {guardando
-                ? 'Generando...'
-                : '📄 Generar Oficio'}
+            <button type="submit" className="btn-primario" disabled={guardando}>
+              {guardando ? 'Guardando...' : '💾 Guardar Oficio'}
             </button>
-
           </form>
         </section>
 
-        {/* ========================= */}
-        {/* VISTA PREVIA */}
-        {/* ========================= */}
         <section className="panel-vista-previa">
           <VistaPreviaOficio
             formData={{
               ...formData,
-
-              instruccionSeguimiento:
-                instruccion,
-
+              instruccionSeguimiento: instruccion,
               asuntoCorrespondencia:
+                formData.asuntoContestacion ||
                 fuente?.asunto ||
                 correspondencia?.asunto ||
                 '',
-
-              folioUnico:
-                folioOficio || '',
+              folioUnico: folioOficio || '',
             }}
             usuarios={catalogos.usuarios}
             areaDestino={{
@@ -402,7 +363,6 @@ export const GenerarOficioContestacionPage = () => {
             }}
           />
         </section>
-
       </div>
     </div>
   );

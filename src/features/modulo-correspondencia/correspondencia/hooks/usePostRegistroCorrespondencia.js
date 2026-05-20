@@ -48,6 +48,44 @@ export const usePostRegistroCorrespondencia = () => {
   const onFormularioGuardado = useCallback((responseDTO) => {
     setCorrespondenciaRegistrada(responseDTO);
     setError(null);
+    const idTipo =
+      responseDTO?.idTipoCorrespondencia ??
+      responseDTO?.id_tipo_correspondencia ??
+      responseDTO?.tipoCorrespondencia?.idTipo ??
+      responseDTO?.tipoCorrespondencia?.id ??
+      null;
+
+    const descripcionTipo = String(
+      responseDTO?.descripcionTipo ??
+        responseDTO?.descripcion_tipo ??
+        responseDTO?.tipoCorrespondencia?.descripcion ??
+        responseDTO?.tipoCorrespondencia?.descripcionTipo ??
+        ''
+    ).toUpperCase();
+
+    const esInterna = String(idTipo) === '2' || descripcionTipo.includes('INTERNA');
+
+    if (esInterna) {
+      setFase('GUARDANDO');
+      setLoading(true);
+      listarCorrespondencias()
+        .then((corrResp) => {
+          setTodasCorrespondencias(Array.isArray(corrResp) ? corrResp : []);
+          setFase('SIN_AREA');
+        })
+        .catch((err) => {
+          const mensaje =
+            err?.response?.data?.message ||
+            err?.response?.data?.mensaje ||
+            err?.message ||
+            'Ocurrió un error al recargar la bandeja.';
+          setError(mensaje);
+          setFase('SIN_AREA');
+        })
+        .finally(() => setLoading(false));
+      return;
+    }
+
     setFase('MODAL_AREA');
   }, []);
 

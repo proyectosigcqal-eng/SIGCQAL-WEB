@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import { fileUrl } from '@/shared/config/api';
 
 const PAGE_SIZE = 10;
 
@@ -13,13 +15,7 @@ const normalizeText = (value) =>
 
 const safeDateLabel = (value) => {
   if (!value) return '—';
-  const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  try {
-    return d.toLocaleDateString('es-MX');
-  } catch {
-    return d.toISOString().slice(0, 10);
-  }
+  return formatDateTimeDisplay(value);
 };
 
 const getId = (item) =>
@@ -32,17 +28,12 @@ const getId = (item) =>
 const getIdEstatus = (item) => item?.idEstatus ?? item?.id_estatus ?? null;
 
 const getEstatusLabel = (item) => {
-  const raw = item?.estatus ?? item?.estatusNombre ?? item?.nombreEstatus ?? item?.descripcionEstatus ?? getIdEstatus(item);
-  if (raw == null) return 'Sin estatus';
-  if (typeof raw === 'number') {
-    if (raw === 1) return 'Registrado';
-    if (raw === 2) return 'Asignado';
-    if (raw === 3) return 'En seguimiento';
-    if (raw === 4) return 'Concluido';
-    return `Estatus ${raw}`;
-  }
-  const label = String(raw).trim();
-  return label.length ? label : 'Sin estatus';
+  const raw = item?.idEstatus ?? item?.id_estatus;
+  if (raw === 1 || raw === null || raw === undefined) return 'Registrado';
+  if (raw === 2) return 'Asignado';
+  if (raw === 3) return 'En Seguimiento';
+  if (raw === 4) return 'Concluido';
+  return String(raw);
 };
 
 const getEstatusColors = (label) => {
@@ -66,7 +57,7 @@ const buildEstatusOptions = (items) => {
   return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
 };
 
-export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarOficio, loading }) => {
+export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarOficio, oficiosGuardados = {}, loading }) => {
   const [texto, setTexto] = useState('');
   const [filtroEstatus, setFiltroEstatus] = useState('');
   const [page, setPage] = useState(1);
@@ -80,7 +71,7 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
 
     return rows.filter((item) => {
       if (q) {
-        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? item?.folio ?? '');
+        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? '');
         const asunto = normalizeText(item?.asunto ?? '');
         if (!folio.includes(q) && !asunto.includes(q)) return false;
       }
@@ -187,38 +178,40 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                 <th>Asunto</th>
                 <th>Fecha Recibido</th>
                 <th>Estatus</th>
+                <th>No. Oficio Salida</th>
+                <th>Doc. Adjunto</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '1rem', color: '#64748b' }}>
+                  <td colSpan={9} style={{ padding: '1rem', color: '#64748b' }}>
                     No hay correspondencias con los filtros actuales.
                   </td>
                 </tr>
               ) : (
                 paged.map((item, idx) => {
                   const id = getId(item);
-                  const folio = item?.folioUnico ?? item?.folio_unico ?? item?.folio ?? '';
-                  const oficio =
-                    item?.numOficioExterno ??
-                    item?.num_oficio_externo ??
-                    item?.numeroOficio ??
-                    item?.numOficio ??
-                    '';
-                  const asunto = item?.asunto ?? '';
-                  const fechaRecibido = safeDateLabel(item?.fechaRecibido ?? item?.fecha_recibido ?? item?.fecha ?? '');
+                  const folio = item?.folioUnico ?? item?.folio_unico ?? '—';
+                  const oficio = item?.numeroOficio ?? item?.num_oficio_externo ?? '—';
+                  const asunto = item?.asunto ?? '—';
+                  const fecha = item?.fechaRecibido ?? item?.fecha_recibido ?? '—';
+                  const fechaRecibido = safeDateLabel(fecha);
                   const estatusLabel = getEstatusLabel(item);
                   const badge = getEstatusColors(estatusLabel);
+                  const oficioGuardado = id ? oficiosGuardados[id] : null;
+                  const tieneOficio = oficioGuardado != null;
+                  const numOficioSalida = oficioGuardado?.numOficioSalida ?? null;
+                  const urlPdfFinal = oficioGuardado?.urlPdfFinal ?? null;
 
                   return (
                     <tr key={id ?? `${idx}`}>
                       <td style={{ whiteSpace: 'nowrap' }}>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{folio || '—'}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{oficio || '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{folio}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{oficio}</td>
                       <td title={asunto || ''} style={{ maxWidth: 420, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {asunto || '—'}
+                        {asunto}
                       </td>
                       <td style={{ whiteSpace: 'nowrap' }}>{fechaRecibido || '—'}</td>
                       <td style={{ whiteSpace: 'nowrap' }}>
@@ -226,11 +219,34 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                           {estatusLabel}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {numOficioSalida ? (
+                          <span style={{ fontWeight: 600 }}>{numOficioSalida}</span>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Pendiente</span>
+                        )}
+                      </td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
+                        {urlPdfFinal ? (
+                          <a
+                            href={fileUrl(urlPdfFinal)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-descargar-doc"
+                          >
+                            ⬇ Descargar
+                          </a>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Sin documento</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '10px 12px' }}>
                         <div className="acciones-cell">
-                          <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
-                            Generar Oficio
-                          </button>
+                          {!tieneOficio ? (
+                            <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
+                              Generar Oficio
+                            </button>
+                          ) : null}
                         </div>
                       </td>
                     </tr>

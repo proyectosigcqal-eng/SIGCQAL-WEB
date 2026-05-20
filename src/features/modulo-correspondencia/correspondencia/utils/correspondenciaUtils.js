@@ -8,19 +8,11 @@ export const AREA_FILTER_SIN_ASIGNAR = '__SIN_ASIGNAR__';
 
 export const hasAreaAsignada = (correspondencia) => {
   if (!correspondencia) return false;
-
-  const raw =
-    correspondencia.area_asignada ??
-    correspondencia.areaAsignada ??
-    correspondencia.idArea ??
-    correspondencia.id_area ??
-    correspondencia.nombreArea ??
-    correspondencia.area?.nombre ??
-    correspondencia.area?.nombreArea ??
-    null;
-
-  const normalized = normalizeValue(raw);
-  return normalized !== '';
+  const raw = correspondencia.idArea ?? correspondencia.id_area ?? correspondencia.area?.id ?? null;
+  if (raw === null || raw === undefined) return false;
+  if (typeof raw === 'number') return raw > 0;
+  if (typeof raw === 'string') return raw.trim() !== '';
+  return false;
 };
 
 export const shouldMostrarGenerarMemorandum = (correspondencia) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { obtenerMemorandumPorId } from '../services/memorandumService';
 import { responderAcuse } from '../../acuserecibointerno/services/acuserecibointernoService';
+import { formatForBackend, formatTimeForBackend, formatDateDisplay, formatDateTimeDisplay } from '@/shared/utils/dateUtils';
 import '../styles/detalleMemorandumModal.css';
 
 export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) => {
@@ -26,9 +27,9 @@ export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) =
   if (!idMemo) return null;
 
   // Utilidades para fecha/hora
-  const fecha = memo?.fechaEmision ? new Date(memo.fechaEmision) : null;
-  const fechaStr = fecha ? fecha.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-';
-  const horaStr = fecha ? fecha.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : '-';
+  const fecha = memo?.fechaEmision ? memo.fechaEmision : null;
+  const fechaStr = fecha ? formatDateDisplay(fecha) : '-';
+  const horaStr = fecha ? formatDateTimeDisplay(fecha).split(' ')[1] : '-';
 
   // Función para manejar la respuesta "Si es del área"
   const handleSiEsDelArea = async () => {
@@ -41,8 +42,8 @@ export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) =
       const request = {
         idAcuse: memo.idAcuse || memo.id,
         esDelArea: true,
-        fechaAceptacion: now.toISOString().split('T')[0],
-        horaAceptacion: now.toTimeString().slice(0, 8),
+        fechaAceptacion: formatForBackend(now),
+        horaAceptacion: formatTimeForBackend(now),
         idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
         idMemorandum: memo.idMemorandum || memo.id,
         idCorrespondencia: memo.idCorrespondencia,
@@ -77,8 +78,8 @@ export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) =
       const request = {
         idAcuse: memo.idAcuse || memo.id,
         esDelArea: false,
-        fechaAceptacion: now.toISOString().split('T')[0],
-        horaAceptacion: now.toTimeString().slice(0, 8),
+        fechaAceptacion: formatForBackend(now),
+        horaAceptacion: formatTimeForBackend(now),
         idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
         idMemorandum: memo.idMemorandum || memo.id,
         idCorrespondencia: memo.idCorrespondencia,

@@ -1,52 +1,21 @@
-import { Mail, LogOut, User, FileText, CheckSquare, FolderCheck, Archive } from 'lucide-react';
+import { Mail, LogOut, User, FileText, CheckSquare, FolderCheck, Archive, ChevronDown } from 'lucide-react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 
 export const MainLayout = () => {
     const { pathname } = useLocation();
 
-    const navItems = [
-        {
-            label: 'Correspondencia pendiente de Revisión',
-            to: '/correspondencia/pendiente-revision-area',
-            icon: <Mail size={16} />
-        },
-          {
-            label: 'Correspondencia Registrada',
-            to: '/correspondencia/registradas',
-            icon: <Archive size={16} />
-        },
-             {
-            label: 'Correspondencia asignada',
-            to: '/correspondencia/acuses-correspondencia',
-            icon: <Archive size={16} />
-        },
-               {
-            label: 'Registrar Correspondencia',
-            to: '/correspondencia/registrar',
-            icon: <Archive size={16} />
-        },
-        {
-            label: 'Memorándum pendiente de Revisión',
-            to: '/correspondencia/lista-memorandums-revision',
-            icon: <FileText size={16} />
-        },
-        {
-            label: 'Memorándum asignados',
-            to: '/correspondencia/memorandums-por-area',
-            icon: <CheckSquare size={16} />
-        },
-        {
-            label: 'Acuses de Oficio por Área',
-            to: '/correspondencia/acuses-oficio-por-area',
-            icon: <FolderCheck size={16} />
-        },
-   
-          {
-            label: 'Contestación',
-            to: '/correspondencia/bandeja',
-            icon: <Archive size={16} />
-        },
-           
+    const [moduleOpen, setModuleOpen] = useState(pathname.startsWith('/correspondencia'));
+
+    const subItems = [
+        { label: 'Correspondencia pendiente de Revisión', to: '/correspondencia/pendiente-revision-area', icon: <Mail size={16} /> },
+        { label: 'Correspondencia Registrada', to: '/correspondencia/registradas', icon: <Archive size={16} /> },
+        { label: 'Correspondencia asignada', to: '/correspondencia/acuses-correspondencia', icon: <Archive size={16} /> },
+        { label: 'Registrar Correspondencia', to: '/correspondencia/registrar', icon: <Archive size={16} /> },
+        { label: 'Memorándum pendiente de Revisión', to: '/correspondencia/lista-memorandums-revision', icon: <FileText size={16} /> },
+        { label: 'Memorándum asignados', to: '/correspondencia/memorandums-por-area', icon: <CheckSquare size={16} /> },
+        { label: 'Acuses de Oficio por Área', to: '/correspondencia/oficios-por-area', icon: <FolderCheck size={16} /> },
+        { label: 'Contestación', to: '/correspondencia/bandeja', icon: <Archive size={16} /> },
     ];
 
     return (
@@ -54,15 +23,33 @@ export const MainLayout = () => {
             <aside className="sidebar">
                 <div className="sidebar-logo"><h1>SIGCQAL</h1></div>
                 <nav className="sidebar-nav">
-                    {navItems.map(({ label, to, icon }) => (
-                        <Link
-                            key={to}
-                            to={to}
-                            className={`nav-item ${pathname === to ? 'active' : ''}`}
+                    <div className="module-header-wrap">
+                        <button
+                            onClick={() => setModuleOpen(!moduleOpen)}
+                            aria-expanded={moduleOpen}
+                            className={`module-header ${pathname.startsWith('/correspondencia') ? 'active' : ''}`}
                         >
-                            {icon} <span>{label}</span>
-                        </Link>
-                    ))}
+                            <FileText size={18} />
+                            <strong className="module-title">Módulo Correspondencia</strong>
+                            <span className="chevron-wrap">
+                                <ChevronDown className="chevron" size={16} />
+                            </span>
+                        </button>
+                    </div>
+
+                    {moduleOpen && (
+                        <div className="module-items">
+                            {subItems.map(({ label, to, icon }) => (
+                                <Link
+                                    key={to}
+                                    to={to}
+                                    className={`nav-item sub-item ${pathname === to ? 'active' : ''}`}
+                                >
+                                    {icon} <span>{label}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </nav>
                 <div className="sidebar-footer">
                     <a href="#" className="nav-item logout">

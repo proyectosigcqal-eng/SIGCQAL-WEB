@@ -2,20 +2,13 @@ import { useListaOficios } from '../hooks/useListaOficios';
 import '@/features/modulo-correspondencia/oficio/styles/listaOficios.css';
 import { useState } from 'react';
 import { DetalleOficioModal } from './DetalleOficioModal';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaOficios = () => {
   const { oficios, loading, error, recargar, areaForzada } = useListaOficios();
   const [detalleId, setDetalleId] = useState(null);
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '-';
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
   if (loading) {
     return (
@@ -77,7 +70,7 @@ export const ListaOficios = () => {
                   <td>{of.folioUnicoCorrespondencia || of.folioCorrespondencia || '-'}</td>
                   <td>{of.asuntoCorrespondencia || of.asunto || '-'}</td>
                   <td>{of.nombreUsuarioEmisor || of.remitente || of.nombreRemitente || '-'}</td>
-                  <td>{formatearFecha(of.fechaEmision)}</td>
+                  <td>{formatFecha(of, of.fechaEmision)}</td>
                   <td>
                     <button 
                       className="btn-ver-detalle"

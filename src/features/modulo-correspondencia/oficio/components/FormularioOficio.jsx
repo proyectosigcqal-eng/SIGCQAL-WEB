@@ -1,7 +1,22 @@
 import React from 'react';
 import '../styles/oficio.css';
 
-export const FormularioOficio = ({ formData, setFormData, handleChange, handleSubmit, catalogos }) => {
+export const FormularioOficio = ({
+  formData,
+  setFormData,
+  handleChange,
+  handleSubmit,
+  catalogos,
+  submitLabel = 'Asignar Área',
+  submitDisabled = false,
+  showEmisorFirmantePlantilla = true,
+  folioLabel = 'No. Oficio',
+  folioEditable = false,
+  folioRequired = false,
+  folioError = false,
+  folioPlaceholder = 'Se generará al guardar',
+  folioInputId = 'folioUnico'
+}) => {
   const { usuarios = [], plantillas = [], cargandoCatalogos = false } = catalogos || {};
 
   const getAreaUsuario = (userId) => {
@@ -25,14 +40,27 @@ export const FormularioOficio = ({ formData, setFormData, handleChange, handleSu
 
       {/* Folio — solo lectura */}
       <div className="form-group full-width">
-  <label>No. Oficio</label>
-  <input
-    type="text"
-    value={formData.folioUnico || ''}
-    placeholder="Se generará al guardar"
-    disabled
-    className="input-readonly"
-  />
+        <label htmlFor={folioInputId}>
+          {folioLabel}
+          {folioRequired ? <span style={{ color: '#dc2626' }}> *</span> : null}
+        </label>
+        <input
+          id={folioInputId}
+          type="text"
+          name="folioUnico"
+          value={formData.folioUnico || ''}
+          placeholder={folioPlaceholder}
+          disabled={!folioEditable}
+          required={folioRequired}
+          className={folioEditable ? undefined : 'input-readonly'}
+          style={folioError ? { borderColor: '#dc2626' } : undefined}
+          onChange={folioEditable ? handleChange : undefined}
+        />
+        {folioError ? (
+          <span style={{ color: '#dc2626', fontSize: '0.78rem' }}>
+            El número de oficio es obligatorio
+          </span>
+        ) : null}
 </div>
 
       {/* Asunto */}
@@ -57,56 +85,69 @@ export const FormularioOficio = ({ formData, setFormData, handleChange, handleSu
         />
       </div>
 
-      {/* Elaboró + Dependencia */}
-      <div className="form-row">
-        <div className="form-group">
-          <label>Elaboró</label>
-          <select name="idUsuarioEmisor" value={formData.idUsuarioEmisor} onChange={handleEmisorChange}>
-            <option value="">Seleccione...</option>
-            {usuarios.map(u => <option key={u.id} value={u.id}>{u.usuarioLogin}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Dependencia</label>
-          <input
-            type="text"
-            value={getAreaUsuario(formData.idUsuarioEmisor)}
-            disabled
-            className="input-readonly"
-            placeholder="Se cargará automáticamente"
-          />
-        </div>
-      </div>
+      {showEmisorFirmantePlantilla ? (
+        <>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Elaboró</label>
+              <select name="idUsuarioEmisor" value={formData.idUsuarioEmisor} onChange={handleEmisorChange}>
+                <option value="">Seleccione...</option>
+                {usuarios.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.usuarioLogin}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Dependencia</label>
+              <input
+                type="text"
+                value={getAreaUsuario(formData.idUsuarioEmisor)}
+                disabled
+                className="input-readonly"
+                placeholder="Se cargará automáticamente"
+              />
+            </div>
+          </div>
 
-      {/* Firmante + Dependencia */}
-      <div className="form-row">
-        <div className="form-group">
-          <label>Firmante</label>
-          <select name="idUsuarioFirmante" value={formData.idUsuarioFirmante} onChange={handleChange}>
-            <option value="">Seleccione...</option>
-            {usuarios.map(u => <option key={u.id} value={u.id}>{u.usuarioLogin}</option>)}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Dependencia</label>
-          <input
-            type="text"
-            value={getAreaUsuario(formData.idUsuarioFirmante)}
-            disabled
-            className="input-readonly"
-            placeholder="Se cargará automáticamente"
-          />
-        </div>
-      </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Firmante</label>
+              <select name="idUsuarioFirmante" value={formData.idUsuarioFirmante} onChange={handleChange}>
+                <option value="">Seleccione...</option>
+                {usuarios.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.usuarioLogin}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Dependencia</label>
+              <input
+                type="text"
+                value={getAreaUsuario(formData.idUsuarioFirmante)}
+                disabled
+                className="input-readonly"
+                placeholder="Se cargará automáticamente"
+              />
+            </div>
+          </div>
 
-      {/* Plantilla */}
-      <div className="form-group full-width">
-        <label>Plantilla</label>
-        <select name="idPlantilla" value={formData.idPlantilla} onChange={handleChange}>
-          <option value="">Seleccione...</option>
-          {plantillas.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
-        </select>
-      </div>
+          <div className="form-group full-width">
+            <label>Plantilla</label>
+            <select name="idPlantilla" value={formData.idPlantilla} onChange={handleChange}>
+              <option value="">Seleccione...</option>
+              {plantillas.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      ) : null}
 
       {/* Cuerpo */}
       <div className="form-group full-width rich-text-area">
@@ -125,8 +166,8 @@ export const FormularioOficio = ({ formData, setFormData, handleChange, handleSu
         />
       </div>
 
-      <button type="submit" className="btn-primario" disabled={cargandoCatalogos}>
-        {cargandoCatalogos ? 'Cargando...' : 'Asignar Área'}
+      <button type="submit" className="btn-primario" disabled={submitDisabled || cargandoCatalogos}>
+        {cargandoCatalogos ? 'Cargando...' : submitLabel}
       </button>
     </form>
   );

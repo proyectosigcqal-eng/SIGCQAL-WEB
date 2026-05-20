@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { guardarSeguimientoMemorandum, subirPdfFirmado, obtenerProximoFolio } from '../services/contestacionService'; // ← import agregado
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
+const FIRMANTE_FIJO = 5; // ana_admin
+
+export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError }) => {
   const [folioGenerado, setFolioGenerado] = useState(null);
   const [folioPreview, setFolioPreview]   = useState(null); // ← agregado
   const [respuesta, setRespuesta]         = useState('');
   const [archivo, setArchivo]             = useState(null);
   const [guardando, setGuardando]         = useState(false);
+  const [mostrarModalOficio, setMostrarModalOficio] = useState(false);
+  const [idCorrespondencia, setIdCorrespondencia]   = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     obtenerProximoFolio()
@@ -36,8 +43,8 @@ export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
       const payload = {
         idMemo:                         acuse.idMemorandum,
         respuestaSeguimientoMemorandum: respuesta,
-        fechaResolucion:                new Date().toISOString().split('T')[0],
-        horaResolucion:                 new Date().toTimeString().split(' ')[0],
+        fechaResolucion:                formatForBackend(new Date()),
+        horaResolucion:                 formatTimeForBackend(new Date()),
         archivoAdjunto:                 archivo?.name ?? null,
         idUsuario:                      1,
         idEstatus:                      5,
@@ -50,7 +57,12 @@ export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
       }
 
       setFolioGenerado(seguimientoGuardado?.folioFormateado ?? folioPreview);
-      onGuardado();
+
+      // Guardamos el idCorrespondencia para heredarlo al oficio
+      setIdCorrespondencia(acuse?.idCorrespondencia || null);
+
+      // Mostramos el modal para preguntar si se desea generar un oficio
+      setMostrarModalOficio(true);
     } catch (err) {
       onError(err.message);
     } finally {
@@ -58,8 +70,29 @@ export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
     }
   };
 
+  const handleGenerarOficio = () => {
+    setMostrarModalOficio(false);
+    navigate('/correspondencia/nuevo-oficio-contestacion', {
+      state: {
+        idCorrespondencia,
+        memorandum,
+        idUsuarioFirmante: FIRMANTE_FIJO,
+        firmante:          'ana_admin',
+        areaFirmante:      'Administración',
+        textoSugerido:     respuesta,
+        folioOficio:       folioGenerado || folioPreview || ''
+      }
+    });
+  };
+
+  const handleNoOficio = () => {
+    setMostrarModalOficio(false);
+    onGuardado && onGuardado();
+  };
+
   return (
-    <form className="contestacion-form" onSubmit={handleSubmit}>
+    <>
+      <form className="contestacion-form" onSubmit={handleSubmit}>
       <div className="input-group-custom">
         <label>Folio de Contestación</label>
         <div className="folio-preview-box">
@@ -73,7 +106,7 @@ export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
               </span>
             </>
           ) : (
-            <span style={{ color: '#a0aec0', fontSize: '0.9rem' }}>Calculando folio...</span>
+            <span style={{ color: 'var(--muted-2)', fontSize: '0.9rem' }}>Calculando folio...</span>
           )}
         </div>
       </div>
@@ -105,6 +138,33 @@ export const FormularioContestacion = ({ acuse, onGuardado, onError }) => {
       <button type="submit" className="btn-enviar" disabled={guardando}>
         {guardando ? 'Guardando...' : 'Enviar Contestación'}
       </button>
-    </form>
+      </form>
+
+      {/* Modal ¿Generar Oficio de Contestación? */}
+      {mostrarModalOficio && (
+        <div className="modal-overlay">
+          <div className="modal-oficio-pregunta">
+            <h3>✅ Contestación guardada</h3>
+            <p>
+              ¿Deseas generar un <strong>Oficio de Contestación Interna</strong>{' '}
+              vinculado a este trámite?
+            </p>
+            {folioGenerado && (
+              <p style={{ fontSize: '0.85rem', color: 'var(--muted-2)', marginBottom: '16px' }}>
+                Folio registrado: <strong>{folioGenerado}</strong>
+              </p>
+            )}
+            <div className="modal-oficio-btns">
+              <button className="btn-si-oficio" onClick={handleGenerarOficio}>
+                Sí, generar oficio
+              </button>
+              <button className="btn-no-oficio" onClick={handleNoOficio}>
+                No, continuar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

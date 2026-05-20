@@ -176,7 +176,7 @@
   flex: 1;
   border-radius: 8px;
   padding: 10px 14px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .timeline-header-row {
@@ -256,6 +256,15 @@
   padding: 0 24px 20px;
 }
 
+.modal-download-btns {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 0;
+  margin-bottom: 25px;
+  padding: 0 24px 8px;
+}
+
 .btn-cancelar {
   padding: 10px 20px;
   background: #edf2f7;
@@ -281,3 +290,16 @@
 .btn-concluir:hover    { background: #4a1323; }
 .btn-concluir:active   { transform: scale(0.98); }
 .btn-concluir:disabled { background: #a0aec0; cursor: not-allowed; }
+
+.btn-descargar {
+  padding: 10px 22px;
+  background: #2b6cb0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+.btn-descargar:hover  { background: #2c5282; }
+.btn-descargar:active { transform: scale(0.98); }

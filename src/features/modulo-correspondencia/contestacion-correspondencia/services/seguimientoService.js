@@ -1,6 +1,12 @@
 import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
+
 
 const API = 'http://localhost:8081/SIGCQAL_dev/api/v1';
+
+const API_SEGUIMIENTO_URL = `${API_BASE_URL}/seguimiento-correspondencia`;
+const API_CORRESPONDENCIA_URL = `${API_BASE_URL}/correspondencias/entrada`;
+
 
 /**
  * Obtiene los detalles de la correspondencia base por su ID

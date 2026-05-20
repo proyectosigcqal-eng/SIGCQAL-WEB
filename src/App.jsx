@@ -3,6 +3,8 @@ import { MainLayout } from './shared/MainLayout';
 import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
 import { GenerarOficioPage } from './pages/modulo-correspondencia/oficio/GenerarOficioPage';
 import { GenerarOficioPage as GenerarOficioCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioPage';
+import { GenerarOficioInternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioInternoPage';
+import { GenerarOficioExternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioExternoPage';
 import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
 import { CorrespondenciasRegistradasPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage';
 import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
@@ -20,6 +22,10 @@ import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/a
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
+import ProtectedRoute from './shared/components/ProtectedRoute';
+import { ROUTE_ROLES } from './shared/config/routeRoles';
+import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
+import { Login } from './pages/auth/login/LoginPage';
 
 
 
@@ -27,46 +33,224 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+         <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="correspondencia/registrar" replace />} />
-          
+          <Route index element={<Navigate to="/login" replace />} />
           {/* Flujo de creación de Memorándum */}
-          <Route path="correspondencia/nuevo-memorandum/:idCorrespondencia" element={<GenerarMemorandumPage />} />
+          <Route
+            path="correspondencia/nuevo-memorandum/:idCorrespondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/nuevo-memorandum']}>
+                <GenerarMemorandumPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Flujo de creación de Oficio (idéntico a Memorándum) */}
-          <Route path="correspondencia/nuevo-oficio/:idCorrespondencia" element={<GenerarOficioPage />} />
-          <Route path="correspondencia/registrar" element={<RegistrarCorrespondenciaPage />} />
-          <Route path="correspondencia/registradas" element={<CorrespondenciasRegistradasPage />} />
-          <Route path="correspondencia/generar-oficio/:id" element={<GenerarOficioCorrespondenciaPage />} />
-          <Route path="correspondencia/contestacion/:id" element={<ContestacionPage />} />
+          <Route
+            path="correspondencia/nuevo-oficio/:idCorrespondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/nuevo-oficio']}>
+                <GenerarOficioPage />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="correspondencia/contestacion-oficio/:id" element={<ContestacionOficioPage />} />
-          <Route path="correspondencia/contestacion-correspondencia/:id" element={<ContestacionCorrespondenciaPage />} />
-          <Route path="correspondencia/nuevo-oficio-contestacion" element={<GenerarOficioContestacionPage />} />
-          <Route path="correspondencia/seguimiento/:id" element={<ContestacionPage />} />
-          <Route path="correspondencia/bandeja" element={<BandejaCentralPage />} />
-          <Route path="correspondencia/pendiente-revision-area" element={<CorrespondenciaPendienteRevisionPage />} />
-          <Route path="correspondencia/acuses-correspondencia" element={<ListaAcusesCorrespondenciaPage />} />
+          <Route
+            path="correspondencia/registrar"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/registrar']}>
+                <RegistrarCorrespondenciaPage />
+              </ProtectedRoute>
+            }
+          />
 
-            
+          <Route
+            path="correspondencia/registradas"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/registradas']}>
+                <CorrespondenciasRegistradasPage />
+              </ProtectedRoute>
+            }
+          />
 
-          <Route path="correspondencia/acuses-oficio-por-area" element={<ListaAcusesOficioPage />} />
+          <Route
+            path="correspondencia/generar-oficio/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio']}>
+                <GenerarOficioCorrespondenciaPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Dejamos esta pendiente o comentada para que no falle el compilador */}
-          
+          <Route
+            path="correspondencia/generar-oficio-interno/:idCorrespondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio-interno']}>
+                <GenerarOficioInternoPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/generar-oficio-externo/:idCorrespondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio-externo']}>
+                <GenerarOficioExternoPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/contestacion/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/contestacion']}>
+                <ContestacionPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/contestacion-oficio/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/contestacion-oficio']}>
+                <ContestacionOficioPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/contestacion-correspondencia/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/contestacion-correspondencia']}>
+                <ContestacionCorrespondenciaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/nuevo-oficio-contestacion"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/nuevo-oficio-contestacion']}>
+                <GenerarOficioContestacionPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/seguimiento/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/seguimiento']}>
+                <ContestacionPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/bandeja"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/bandeja']}>
+                <BandejaCentralPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/pendiente-revision-area"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/pendiente-revision-area']}>
+                <CorrespondenciaPendienteRevisionPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/acuses-correspondencia"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/acuses-correspondencia']}>
+                <ListaAcusesCorrespondenciaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/acuses-oficio-por-area"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/acuses-oficio-por-area']}>
+                <ListaAcusesOficioPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* 2. Nueva ruta para Asignar Área (Paso posterior a la generación) */}
-          <Route path="correspondencia/asignar-area/:id" element={<AsignarAreaPage />} />
-          <Route path="correspondencia/asignar-area-oficio/:id" element={<AsignarAreaOficioPage />} />
+          <Route
+            path="correspondencia/asignar-area/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/asignar-area']}>
+                <AsignarAreaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/asignar-area-oficio/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/asignar-area-oficio']}>
+                <AsignarAreaOficioPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Consulta de Bitácora */}
-          <Route path="correspondencia/bitacora/:id" element={<BitacoraHistorica />} />
+          <Route
+            path="correspondencia/bitacora/:id"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/bitacora']}>
+                <BitacoraHistorica />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Lista de Memorandums por Área */}
-          <Route path="correspondencia/lista-memorandums-revision" element={<ListaMemorandumsPage />} />
-          <Route path="correspondencia/lista-oficios-revision" element={<ListaOficiosPage />} />
+          <Route
+            path="correspondencia/lista-memorandums-revision"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/lista-memorandums-revision']}>
+                <ListaMemorandumsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/lista-oficios-revision"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/lista-oficios-revision']}>
+                <ListaOficiosPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Lista de Memorandums por Área (Acuse Recibo Interno) */}
-          <Route path="correspondencia/memorandums-por-area" element={<ListaMemorandumsPorAreaPage />} />
-          <Route path="correspondencia/oficios-por-area" element={<ListaOficiosPorAreaPage />} />
+          <Route
+            path="correspondencia/memorandums-por-area"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/memorandums-por-area']}>
+                <ListaMemorandumsPorAreaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/oficios-por-area"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/oficios-por-area']}>
+                <ListaOficiosPorAreaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Acceso restringido (página pública para usuarios autenticados) */}
+          <Route path="acceso-restringido" element={<AccesoRestringidoPage />} />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>

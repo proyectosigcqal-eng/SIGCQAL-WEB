@@ -1,20 +1,13 @@
 import { useListaMemorandumsPorArea } from '../hooks/useListaMemorandumsPorArea';
 import '@/features/modulo-correspondencia/acuserecibointerno/styles/listaMemorandumsPorArea.css';
 import { useNavigate } from 'react-router-dom';
+import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaMemorandumsPorArea = () => {
   const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandumsPorArea();
   const navigate = useNavigate();
 
-  const formatearFecha = (fecha) => {
-    if (!fecha) return '-';
-    const date = new Date(fecha);
-    return date.toLocaleDateString('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
+  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
   const obtenerNombreUsuario = (idUsuario) => {
     // TODO: Integrar con catálogo de usuarios del sistema
@@ -86,8 +79,8 @@ export const ListaMemorandumsPorArea = () => {
                   <td>{memo.folioUnico || '-'}</td>
                   <td className="num-memo">{memo.numMemo || '-'}</td>
                   <td className="asunto-cell">{memo.observaciones || '-'}</td>
-                  <td>{formatearFecha(memo.fechaEmision)}</td>
-                  <td>{formatearFecha(memo.fechaAceptacion)}</td>
+                  <td>{formatFecha(memo, memo.fechaEmision)}</td>
+                  <td>{formatFecha(memo, memo.fechaAceptacion)}</td>
                   <td>
                     <button 
                       className="btn-accion btn-contestacion"

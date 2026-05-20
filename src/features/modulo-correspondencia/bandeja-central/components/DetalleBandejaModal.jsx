@@ -3,6 +3,8 @@ import { obtenerBitacoraCompletaMemo, obtenerBitacoraCompletaOficio } from '../s
 import { obtenerBitacoraPorCorrespondencia } from '../../bitacora-historica/services/bitacoraService';
 
 import '../styles/detalleBandejaModal.css';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import API_BASE_URL, { fileUrl } from '@/shared/config/api';
 
 // Mapa visual por estatus
 const ESTATUS_CONFIG = {
@@ -18,11 +20,7 @@ const ESTATUS_CONFIG = {
 };
 
 const formatFecha = (fecha) => {
-  if (!fecha) return '-';
-  return new Date(fecha).toLocaleString('es-MX', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
+  return formatDateTimeDisplay(fecha);
 };
 
 export default function DetalleBandejaModal({ isOpen, onClose, item, onCerrarSeguimiento }) {
@@ -43,7 +41,7 @@ const cargar = async () => {
             const data = await obtenerBitacoraCompletaMemo(item.idMemo);
             setLogs(data || []);
         } else if (item.tipo === 'oficio') {
-            const data = await obtenerBitacoraCompletaOficio(item.idMemo); // idMemo aquí es idOficio
+            const data = await obtenerBitacoraCompletaOficio(item.id, item.idMemo); // idMemo aquí es idOficio
             setLogs(data || []);
         } else {
             const data = await obtenerBitacoraPorCorrespondencia(item.id);
@@ -60,6 +58,29 @@ const cargar = async () => {
     cargar();
     return () => setLogs([]);
 }, [isOpen, item]);
+  const archivoUrl = item?.archivoAdjunto || item?.archivo || null;
+
+  const handleDescargarAdjunto = async () => {
+  if (!archivoUrl) return;
+  
+  try {
+    const respuesta = await fetch(archivoUrl);
+    const blob = await respuesta.blob(); 
+    const urlLocal = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = urlLocal;
+    link.download = `OficioContestacion-${item.folio || 'doc'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    
+    window.URL.revokeObjectURL(urlLocal);
+    link.remove();
+  } catch (error) {
+    window.open(archivoUrl, '_blank');
+  }
+};
+
   const handleConcluir = async () => {
     if (!window.confirm('¿Confirmas marcar este trámite como CONCLUIDO?')) return;
     setCerrando(true);
@@ -170,6 +191,22 @@ const cargar = async () => {
             </div>
           )}
         </div>
+
+       {item.archivo && (
+  <div
+    className="modal-download-btns"
+    style={{ justifyContent: 'center', padding: '0 0 8px', marginTop: 0 }}
+  >
+    <a
+      href={fileUrl(item.archivo)}
+      target="_blank"
+      rel="noreferrer"
+      className="btn-descargar"
+    >
+      📥 Descargar Oficio Contestación
+    </a>
+  </div>
+)}
 
         {/* ACCIÓN: CONCLUIR (solo si no está concluido) */}
         {!yaConcluido && (
