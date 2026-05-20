@@ -1,50 +1,67 @@
 import axios from 'axios';
 
-const API_SEGUIMIENTO_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia';
-const API_CORRESPONDENCIA_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/correspondencias/entrada';
+const API = 'http://localhost:8081/SIGCQAL_dev/api/v1';
 
+/**
+ * Obtiene los detalles de la correspondencia base por su ID
+ */
 export const obtenerCorrespondenciaPorId = async (id) => {
-  const response = await axios.get(`${API_CORRESPONDENCIA_URL}/${id}`);
-  return response.data;
+  const res = await axios.get(`${API}/correspondencias/entrada/${id}`);
+  return res.data;
 };
 
+/**
+ * Guarda el seguimiento de correspondencia empaquetando todo en FormData
+ * (Soporta archivos binarios automáticamente a través de Axios)
+ */
 export const guardarSeguimiento = async (payload) => {
   const formData = new FormData();
 
-  // Usamos exactamente los mismos nombres que tu SeguimientoCorrespondenciaRequestDTO.java
-  formData.append('idCorrespondencia', payload.id_correspondencia);
-  formData.append('folioRespuesta', payload.folio_respuesta);
-  formData.append('respuestaSeguimientoCorrespondencia', payload.respuesta_seguimiento_correspondencia);
-  formData.append('fechaResolucion', payload.fecha_resolucion);
-  formData.append('horaResolucion', payload.hora_resolucion);
-  formData.append('idUsuario', payload.id_usuario || 2); // Valor por defecto si no viene
-  formData.append('idEstatus', payload.id_estatus || 4);
+  // Mapeo directo respetando las propiedades del SeguimientoCorrespondenciaRequestDTO de Java
+  formData.append('idCorrespondencia', payload.idCorrespondencia);
+  formData.append('folioRespuesta', payload.folioRespuesta);
+  formData.append('respuestaSeguimientoCorrespondencia', payload.respuestaSeguimientoCorrespondencia);
+  formData.append('fechaResolucion', payload.fechaResolucion);
+  formData.append('horaResolucion', payload.horaResolucion);
+  formData.append('idUsuario', payload.idUsuario || 2); 
+  formData.append('idEstatus', payload.idEstatus || 4);
+  formData.append('numeroOficioContestacion', payload.numeroOficioContestacion); // ¡El nuevo campo estrella!
 
-  // IMPORTANTE: payload.archivo_adjunto debe ser el objeto File del input
-  if (payload.archivo_adjunto) {
-    formData.append('archivoAdjunto', payload.archivo_adjunto);
+  // Si el usuario seleccionó un archivo físico en el input, se adjunta
+  if (payload.archivoAdjunto) {
+    formData.append('archivoAdjunto', payload.archivoAdjunto);
   }
 
-  // Usamos fetch sin definir Headers manuales para que el navegador 
-  // genere el boundary correcto de multipart/form-data automáticamente
-  const response = await fetch(`${API_SEGUIMIENTO_URL}/guardar`, {
-    method: 'POST',
-    body: formData,
+  const res = await axios.post(`${API}/seguimiento-correspondencia/guardar`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
   });
+  return res.data;
+};
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    let errorMessage = 'Error al guardar el seguimiento';
-    
-    try {
-      const errorData = JSON.parse(errorBody);
-      errorMessage = errorData.message || errorMessage;
-    } catch {
-      errorMessage = errorBody || errorMessage;
-    }
-    
-    throw new Error(errorMessage);
-  }
+/**
+ * Lista todos los seguimientos globales de correspondencia (Para calcular el folio)
+ */
+export const listarSeguimientosCorrespondencia = async () => {
+  const res = await axios.get(`${API}/seguimiento-correspondencia/listar`);
+  return res.data;
+};
 
-  return response.json();
+/**
+ * Lista los seguimientos asociados a una correspondencia en específico
+ */
+export const listarSeguimientosPorCorrespondencia = async (id) => {
+  const res = await axios.get(`${API}/seguimiento-correspondencia/correspondencia/${id}`);
+  return res.data;
+};
+
+/**
+ * Genera el próximo folio con el prefijo "CC" (Contestación Correspondencia)
+ * de forma idéntica a como lo hace el módulo de memorándums
+ */
+export const obtenerProximoFolio = async () => {
+  const res = await axios.get(`${API}/seguimiento-correspondencia/listar`);
+  const total = res.data.length;
+  const proximo = total + 1;
+  const anio = new Date().getFullYear();
+  return `CC-${String(proximo).padStart(6, '0')}-${anio}`;
 };
