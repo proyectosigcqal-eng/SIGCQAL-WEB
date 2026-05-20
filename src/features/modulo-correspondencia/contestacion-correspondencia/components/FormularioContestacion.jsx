@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { guardarSeguimiento, obtenerProximoFolio } from '../services/seguimientoService';
-import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-const FIRMANTE_FIJO = 5;
+const FIRMANTE_FIJO = 10;
 
 export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, onGuardado, onError }) => {
   const [folioGenerado, setFolioGenerado] = useState(null);
@@ -40,19 +39,18 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
     setGuardando(true);
     try {
       const payload = {
-  idCorrespondencia:                   acuse?.idCorrespondencia || correspondencia?.id,
-  folioRespuesta:                      folioPreview || '',
-  respuestaSeguimientoCorrespondencia: respuesta,
-  fechaResolucion:                     formatForBackend(new Date()),
-  horaResolucion:                      formatTimeForBackend(new Date()),
-  archivoAdjunto:                      archivo ?? null,
-  idUsuario:                           1,
-  idEstatus:                           5,
-  numeroOficioContestacion:            '',
-};
+        idCorrespondencia:                   acuse?.idCorrespondencia || correspondencia?.id,
+        folioRespuesta:                      folioPreview || '',
+        respuestaSeguimientoCorrespondencia: respuesta,
+        fechaResolucion:                     new Date().toISOString().split('T')[0],
+        horaResolucion:                      new Date().toTimeString().split(' ')[0],
+        archivoAdjunto:                      archivo ?? null,
+        idUsuario:                           10,
+        idEstatus:                           5,
+        numeroOficioContestacion:            '',
+      };
 
       const seguimientoGuardado = await guardarSeguimiento(payload);
-
       setFolioGenerado(seguimientoGuardado?.folioFormateado ?? folioPreview);
       setMostrarModalOficio(true);
     } catch (err) {
@@ -68,10 +66,10 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
       state: {
         idCorrespondencia: acuse?.idCorrespondencia || correspondencia?.id || null,
         idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
+        firmante:          'jperez',
         areaFirmante:      'Administración',
         idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
+        nombreEmisor:      'jperez',
         textoSugerido:     respuesta,
       }
     });
@@ -85,6 +83,47 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
   return (
     <>
       <form className="contestacion-form" onSubmit={handleSubmit}>
+
+        {correspondencia && (
+          <div style={{
+            background: '#f5f4f0',
+            border: '0.5px solid #dddbd3',
+            borderRadius: '8px',
+            padding: '14px 16px',
+            marginBottom: '16px',
+            fontSize: '13px',
+            lineHeight: '1.7',
+          }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div>
+                <span style={{ fontWeight: 600, color: '#5F5E5A', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>Folio</span>
+                <p style={{ margin: 0, color: '#1a1a1a' }}>{correspondencia.folioUnico || '-'}</p>
+              </div>
+              <div>
+                <span style={{ fontWeight: 600, color: '#5F5E5A', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>Fecha recibido</span>
+                <p style={{ margin: 0, color: '#1a1a1a' }}>{correspondencia.fechaRecibido || '-'}</p>
+              </div>
+              <div>
+                <span style={{ fontWeight: 600, color: '#5F5E5A', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>Remitente</span>
+                <p style={{ margin: 0, color: '#1a1a1a' }}>{correspondencia.nombreRemitente || correspondencia.titularDependencia || '-'}</p>
+              </div>
+              <div>
+                <span style={{ fontWeight: 600, color: '#5F5E5A', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>Dependencia</span>
+                <p style={{ margin: 0, color: '#1a1a1a' }}>{correspondencia.dependenciaRemitente || '-'}</p>
+              </div>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <span style={{ fontWeight: 600, color: '#5F5E5A', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>Asunto</span>
+                <p style={{ margin: 0, color: '#1a1a1a' }}>{correspondencia.asunto || '-'}</p>
+              </div>
+              {correspondencia.observaciones && (
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <span style={{ fontWeight: 600, color: '#5F5E5A', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.5px' }}>Observaciones</span>
+                  <p style={{ margin: 0, color: '#1a1a1a' }}>{correspondencia.observaciones}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="input-group-custom">
           <label>Folio de Contestación</label>
@@ -136,22 +175,15 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
         <div className="modal-overlay">
           <div className="modal-oficio-pregunta">
             <h3>✅ Contestación guardada</h3>
-            <p>
-              ¿Deseas generar un <strong>Oficio de Contestación</strong>{' '}
-              vinculado a este trámite?
-            </p>
+            <p>¿Deseas generar un <strong>Oficio de Contestación</strong> vinculado a este trámite?</p>
             {folioGenerado && (
               <p style={{ fontSize: '0.85rem', color: 'var(--muted-2)', marginBottom: '16px' }}>
                 Folio registrado: <strong>{folioGenerado}</strong>
               </p>
             )}
             <div className="modal-oficio-btns">
-              <button className="btn-si-oficio" onClick={handleGenerarOficio}>
-                Sí, generar oficio
-              </button>
-              <button className="btn-no-oficio" onClick={handleNoOficio}>
-                No, continuar
-              </button>
+              <button className="btn-si-oficio" onClick={handleGenerarOficio}>Sí, generar oficio</button>
+              <button className="btn-no-oficio" onClick={handleNoOficio}>No, continuar</button>
             </div>
           </div>
         </div>

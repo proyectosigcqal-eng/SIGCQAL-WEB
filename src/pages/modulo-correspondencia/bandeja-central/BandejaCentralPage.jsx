@@ -7,6 +7,7 @@ import axios from 'axios';
 import API_BASE_URL from '@/shared/config/api';
 import { listarOficios } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
 import { listarMemorandums } from '../../../features/modulo-correspondencia/memorandum/services/memorandumService';
+import { listarCorrespondencias } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 
 export const BandejaCentralPage = () => {
     const [activeTab, setActiveTab] = useState('memorandums');
