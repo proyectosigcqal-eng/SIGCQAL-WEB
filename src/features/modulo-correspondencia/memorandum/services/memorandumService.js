@@ -1,7 +1,8 @@
 import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/memorandums';
+const API_URL = `${API_BASE_URL}/memorandums`;
 
 /**
  * 
@@ -106,11 +107,11 @@ export const registrarSeguimiento = async (idMemo, datosSeguimiento) => {
     formData.append('respuesta_seguimiento_memorandum', datosSeguimiento.respuestaSeguimiento);
     formData.append('archivo_adjunto', datosSeguimiento.archivoAdjunto);
     // Añadimos fecha/hora de resolución para consistencia entre endpoints
-    formData.append('fechaResolucion', new Date().toISOString().split('T')[0]);
-    formData.append('horaResolucion', new Date().toTimeString().split(' ')[0]);
+    formData.append('fechaResolucion', formatForBackend(new Date()));
+    formData.append('horaResolucion', formatTimeForBackend(new Date()));
     // NOTA: id_usuario y estatus idealmente lo maneja el backend, pero se pueden enviar si es necesario.
 
-    const response = await fetch(`${API_URL}/memorandums/${idMemo}/seguimiento`, {
+    const response = await fetch(`${API_URL}/${idMemo}/seguimiento`, {
         method: 'POST',
         body: formData 
     });

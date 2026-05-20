@@ -1,8 +1,9 @@
 // seguimientoService.js
 import axios from 'axios';
 import { pickFecha } from '@/shared/utils/dateUtils';
+import API_BASE_URL from '@/shared/config/api';
 
-const API_BASE = 'http://localhost:8081/SIGCQAL_dev/api/v1';
+const API_BASE = API_BASE_URL;
 
 // --- SEGUIMIENTO MEMORÁNDUM ---
 export const guardarSeguimientoMemo = async (data) => {

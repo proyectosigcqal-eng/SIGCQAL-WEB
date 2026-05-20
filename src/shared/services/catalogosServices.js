@@ -1,42 +1,41 @@
 import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
 
-
-const API_BASE_URL = 'http://localhost:8081/SIGCQAL_dev/catalogos';
+// The legacy catalogos endpoint lives at /SIGCQAL_dev/catalogos (outside /api/v1)
+const CATALOGOS_BASE = API_BASE_URL.replace('/api/v1', '') + '/catalogos';
 
 export const getAreas = async () => {
-        const response = await axios.get(`${API_BASE_URL}/areas`);
+        const response = await axios.get(`${CATALOGOS_BASE}/areas`);
         return response.data;
 };
 
 export const getUsuarios = async () => { 
-        const response = await axios.get(`${API_BASE_URL}/usuarios`);
+        const response = await axios.get(`${CATALOGOS_BASE}/usuarios`);
         return response.data;
 
 };
 
 export const getPlantillas = async () => {
-        const response = await axios.get(`${API_BASE_URL}/plantillas/listar`);
+        const response = await axios.get(`${CATALOGOS_BASE}/plantillas/listar`);
         return response.data;
 
 };
 
 export const getEstatus = async () => {
  
-        const response = await axios.get(`${API_BASE_URL}/estatus`);
+        const response = await axios.get(`${CATALOGOS_BASE}/estatus`);
         return response.data;
 
 };
 
 export const getRoles = async () => {
 
-        const response = await axios.get(`${API_BASE_URL}/roles`);
+        const response = await axios.get(`${CATALOGOS_BASE}/roles`);
         return response.data;
 
 };
 
 export const getTiposCorrespondencia = async () => {
-    const response = await axios.get(
-      `${API_BASE_URL}/tipos-correspondencia`
-    );
+                const response = await axios.get(`${CATALOGOS_BASE}/tipos-correspondencia`);
     return response.data;
 };

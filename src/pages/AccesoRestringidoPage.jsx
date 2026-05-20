@@ -25,8 +25,8 @@ const AccesoRestringidoPage = () => {
   return (
     <div className="sigcqal-page-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
       <div style={{ maxWidth: 680, textAlign: 'center' }}>
-        <h1 style={{ color: '#691C32', marginBottom: '0.5rem' }}>Acceso Restringido</h1>
-        <p style={{ color: '#4a5568', marginBottom: '1.25rem' }}>
+        <h1 style={{ color: 'var(--guinda)', marginBottom: '0.5rem' }}>Acceso Restringido</h1>
+        <p style={{ color: 'var(--muted-3)', marginBottom: '1.25rem' }}>
           No tienes permisos suficientes para acceder a este recurso. Si crees que esto es un error, contacta al administrador.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>

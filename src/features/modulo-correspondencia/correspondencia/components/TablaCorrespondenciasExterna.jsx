@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { hasAreaAsignada } from '../utils/correspondenciaUtils';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
 
 const PAGE_SIZE = 10;
 
@@ -14,13 +15,7 @@ const normalizeText = (value) =>
 
 const safeDateLabel = (value) => {
   if (!value) return '—';
-  const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  try {
-    return d.toLocaleDateString('es-MX');
-  } catch {
-    return d.toISOString().slice(0, 10);
-  }
+  return formatDateTimeDisplay(value);
 };
 
 const getId = (item) =>
