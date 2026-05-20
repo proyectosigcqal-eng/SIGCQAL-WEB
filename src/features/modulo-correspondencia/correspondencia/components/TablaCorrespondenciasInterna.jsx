@@ -61,7 +61,13 @@ const buildEstatusOptions = (items) => {
   return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
 };
 
-export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarOficio, oficiosGuardados = {}, loading }) => {
+export const TablaCorrespondenciasInterna = ({
+  correspondencias = [],
+  onGenerarOficio,
+  loading,
+  oficiosGuardados = {},
+  archivosAdjuntos = {}
+}) => {
   const [texto, setTexto] = useState('');
   const [filtroEstatus, setFiltroEstatus] = useState('');
   const [page, setPage] = useState(1);
@@ -208,6 +214,7 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                   const tieneOficio = oficioGuardado != null;
                   const numOficioSalida = oficioGuardado?.numOficioSalida ?? null;
                   const urlPdfFinal = oficioGuardado?.urlPdfFinal ?? null;
+                  const archivoAdjunto = id ? archivosAdjuntos[id] : null;
 
                   return (
                     <tr key={id ?? `${idx}`}>
@@ -231,18 +238,41 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                         )}
                       </td>
                       <td style={{ whiteSpace: 'nowrap' }}>
-                        {urlPdfFinal ? (
-                          <a
-                            href={`http://localhost:8081/SIGCQAL_dev${urlPdfFinal}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="btn-descargar-doc"
-                          >
-                            ⬇ Descargar
-                          </a>
-                        ) : (
-                          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Sin documento</span>
-                        )}
+                        {(() => {
+                          if (urlPdfFinal) {
+                            return (
+                              <a
+                                href={`http://localhost:8081/SIGCQAL_dev${urlPdfFinal}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn-descargar-doc"
+                                title="Descargar oficio de contestación"
+                              >
+                                ⬇ Oficio
+                              </a>
+                            );
+                          }
+
+                          const urlArchivo = archivoAdjunto?.urlDescarga ?? archivoAdjunto?.rutaServidor ?? null;
+                          if (typeof urlArchivo === 'string' && urlArchivo.trim()) {
+                            const nombre = archivoAdjunto?.nombreOriginal ?? 'Documento';
+                            const esRelativa = urlArchivo.startsWith('/');
+                            const href = esRelativa ? `http://localhost:8081/SIGCQAL_dev${urlArchivo}` : urlArchivo;
+                            return (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn-descargar-doc"
+                                title={`Descargar: ${nombre}`}
+                              >
+                                ⬇ Adjunto
+                              </a>
+                            );
+                          }
+
+                          return <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Sin documento</span>;
+                        })()}
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         <div className="acciones-cell">

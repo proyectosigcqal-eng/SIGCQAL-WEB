@@ -2,7 +2,10 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 
 import { obtenerCorrespondenciaPorId } from '@/features/modulo-correspondencia/correspondencia/services/correspondenciaService';
-import { guardarOficioContestacion } from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
+import {
+  finalizarOficioContestacionPdf,
+  guardarOficioContestacion
+} from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
 
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
 
@@ -83,6 +86,8 @@ export const GenerarOficioExternoPage = () => {
   const [errorNumOficio, setErrorNumOficio] = useState(false);
 
   const [correspondencia, setCorrespondencia] = useState(null);
+  const [archivoPdfFinal, setArchivoPdfFinal] = useState(null);
+  const [errorArchivo, setErrorArchivo] = useState(null);
 
   useEffect(() => {
     const usuarios = catalogos?.usuarios;
@@ -139,6 +144,7 @@ export const GenerarOficioExternoPage = () => {
 
   const handleGuardar = async (e) => {
     e.preventDefault();
+    setErrorArchivo(null);
 
     if (!idUsuarioEmisor) {
       alert('No se pudo identificar el usuario emisor. Vuelva a iniciar sesión.');
@@ -183,6 +189,9 @@ export const GenerarOficioExternoPage = () => {
       };
 
       await guardarOficioContestacion(dto);
+      if (archivoPdfFinal) {
+        await finalizarOficioContestacionPdf(Number(idCorrespondenciaH), archivoPdfFinal);
+      }
 
       navigate('/correspondencia/registradas', {
         state: { refreshExterna: true, tabActivo: 'EXTERNA' },
@@ -334,6 +343,40 @@ export const GenerarOficioExternoPage = () => {
                 onChange={(e) => setInstruccion(e.target.value)}
                 placeholder="Cuerpo del oficio de contestación..."
               />
+            </div>
+
+            <div className="form-group full-width" style={{ marginBottom: '1.5rem' }}>
+              <label>PDF final firmado (opcional)</label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => {
+                  const file = e?.target?.files?.[0] || null;
+                  if (!file) {
+                    setArchivoPdfFinal(null);
+                    setErrorArchivo(null);
+                    return;
+                  }
+                  if (file.type && file.type !== 'application/pdf') {
+                    setArchivoPdfFinal(null);
+                    setErrorArchivo('Formato no permitido. Solo PDF.');
+                    return;
+                  }
+                  if (file.size > 10 * 1024 * 1024) {
+                    setArchivoPdfFinal(null);
+                    setErrorArchivo('El archivo excede el tamaño máximo de 10 MB.');
+                    return;
+                  }
+                  setArchivoPdfFinal(file);
+                  setErrorArchivo(null);
+                }}
+              />
+              {archivoPdfFinal ? (
+                <div style={{ marginTop: 6, color: '#334155', fontSize: '0.85rem' }}>{archivoPdfFinal.name}</div>
+              ) : null}
+              {errorArchivo ? (
+                <div style={{ marginTop: 6, color: '#dc2626', fontSize: '0.85rem' }}>{errorArchivo}</div>
+              ) : null}
             </div>
 
             <button type="submit" className="btn-primario" disabled={guardando}>

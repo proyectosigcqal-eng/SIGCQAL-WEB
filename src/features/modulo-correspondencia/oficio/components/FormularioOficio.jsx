@@ -15,7 +15,8 @@ export const FormularioOficio = ({
   folioRequired = false,
   folioError = false,
   folioPlaceholder = 'Se generará al guardar',
-  folioInputId = 'folioUnico'
+  folioInputId = 'folioUnico',
+  children = null
 }) => {
   const { usuarios = [], plantillas = [], cargandoCatalogos = false } = catalogos || {};
 
@@ -165,6 +166,8 @@ export const FormularioOficio = ({
           rows="10"
         />
       </div>
+
+      {children}
 
       <button type="submit" className="btn-primario" disabled={submitDisabled || cargandoCatalogos}>
         {cargandoCatalogos ? 'Cargando...' : submitLabel}

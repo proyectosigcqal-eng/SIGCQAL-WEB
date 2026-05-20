@@ -7,6 +7,14 @@ export const guardarOficioContestacion = async (dto) => {
   return response.data;
 };
 
+export const finalizarOficioContestacionPdf = async (idCorrespondencia, archivo) => {
+  const formData = new FormData();
+  formData.append('archivo', archivo);
+
+  const response = await axios.post(`${API}/correspondencia/${idCorrespondencia}/finalizar`, formData);
+  return response.data;
+};
+
 export const buscarOficioPorCorrespondencia = async (idCorrespondencia) => {
   try {
     const response = await axios.get(`${API}/correspondencia/${idCorrespondencia}`);
