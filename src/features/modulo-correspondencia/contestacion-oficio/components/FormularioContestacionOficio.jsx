@@ -45,7 +45,9 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
       const seguimientoResp = await registrarSeguimiento(idOficio, datos);
       setFolioGenerado(seguimientoResp?.folioRespuesta ?? '');
       if (!folioManual) setFolioManual(seguimientoResp?.folioRespuesta ?? '');
-      setIdCorrespondencia(acuse?.idCorrespondencia || null);
+      // Resolver idCorrespondencia a partir del acuse o del oficio
+      const resolvedIdCorr = acuse?.idCorrespondencia ?? oficio?.idCorrespondencia ?? acuse?.id ?? oficio?.id ?? null;
+      setIdCorrespondencia(resolvedIdCorr || null);
       setMostrarModalOficio(true);
 
     } catch (err) {
@@ -59,13 +61,13 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
     setMostrarModalOficio(false);
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
-        idCorrespondencia,
-        oficio,
+        idCorrespondencia: Number(idCorrespondencia) || null,
         idUsuarioFirmante: FIRMANTE_FIJO,
         firmante:          'ana_admin',
         areaFirmante:      'Administración',
+        idUsuarioEmisor:   FIRMANTE_FIJO,
+        nombreEmisor:      'ana_admin',
         textoSugerido:     respuesta,
-        folioOficio:       folioManual || folioGenerado,
       }
     });
   };

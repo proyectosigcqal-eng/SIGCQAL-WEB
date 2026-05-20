@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const API = 'http://localhost:8081/SIGCQAL_dev/api/v1';
+import { obtenerAcuseOficioPorId } from '../services/contestacionOficioService';
+import { obtenerOficioPorId } from '../../oficio/services/oficioService';
 
 export const useContestacionOficio = (idAcuse) => {
   const [acuse, setAcuse]     = useState(null);
@@ -14,10 +13,24 @@ export const useContestacionOficio = (idAcuse) => {
     const cargar = async () => {
       try {
         setLoading(true);
-        // ✅ Llama al acuse, no al oficio directamente
-        const data = await axios.get(`${API}/acuse-oficio/${idAcuse}`);
-        setAcuse(data.data);
-        setOficio(data.data); // ya trae urlOficioGenerado
+        const dataAcuse = await obtenerAcuseOficioPorId(idAcuse);
+        setAcuse(dataAcuse);
+
+        // Si existe idOficio, obtener el oficio completo para intentar heredar idCorrespondencia
+        if (dataAcuse?.idOficio) {
+          try {
+            const oficioData = await obtenerOficioPorId(dataAcuse.idOficio);
+            setOficio(oficioData);
+            if (!dataAcuse?.idCorrespondencia && oficioData?.idCorrespondencia) {
+              setAcuse({ ...dataAcuse, idCorrespondencia: oficioData.idCorrespondencia });
+            }
+          } catch (err) {
+            // fallback: usar la respuesta del acuse
+            setOficio(dataAcuse);
+          }
+        } else {
+          setOficio(dataAcuse);
+        }
       } catch (err) {
         setError(err.message || 'Error al cargar acuse de oficio');
       } finally {

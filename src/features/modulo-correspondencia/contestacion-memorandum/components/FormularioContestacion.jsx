@@ -72,15 +72,17 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
 
   const handleGenerarOficio = () => {
     setMostrarModalOficio(false);
+    const resolvedIdCorrespondencia = acuse?.idCorrespondencia ?? memorandum?.idCorrespondencia ?? acuse?.id ?? memorandum?.id ?? null;
+
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
-        idCorrespondencia,
-        memorandum,
+        idCorrespondencia: Number(resolvedIdCorrespondencia) || null,
         idUsuarioFirmante: FIRMANTE_FIJO,
         firmante:          'ana_admin',
         areaFirmante:      'Administración',
+        idUsuarioEmisor:   FIRMANTE_FIJO,
+        nombreEmisor:      'ana_admin',
         textoSugerido:     respuesta,
-        folioOficio:       folioGenerado || folioPreview || ''
       }
     });
   };

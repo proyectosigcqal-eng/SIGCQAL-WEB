@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   obtenerCorrespondenciaPorId, 
@@ -8,7 +8,6 @@ import {
 } from '../services/seguimientoService';
 
 import { useCallback, useState } from 'react';
-import { guardarSeguimiento, obtenerCorrespondenciaPorId } from '../services/seguimientoService';
 import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
 
