@@ -53,12 +53,13 @@ if (tab === 'memorandums') {
 
     // 2. Con el idCorrespondencia del memo, busca si hay oficio de contestación
     const idCorrDelMemo = memoOriginal?.idCorrespondencia;
-    const oficioContestacion = idCorrDelMemo
-        ? oficios.find(o =>
-            Number(o.idCorrespondencia) === Number(idCorrDelMemo) &&
-            o.idArea === null // ← sin área = es contestación
-          )
-        : null;
+        const oficioContestacion = idCorrDelMemo
+                ? oficios.find(o =>
+                        Number(o.idCorrespondencia) === Number(idCorrDelMemo) &&
+                        Number(o.id) !== Number(item.idMemo) &&
+                        o.idArea === null // ← sin área = es contestación
+                    )
+                : null;
 
     return {
         id:                      item.idSeguimientoMemorandum,
@@ -86,11 +87,12 @@ if (tab === 'memorandums') {
         const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
         
         // Busca si existe un oficio de contestación con la misma correspondencia
-        const oficioContest = oficioOriginal
-            ? oficiosContestacion.find(o =>
-                Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia)
-              )
-            : null;
+                const oficioContest = oficioOriginal
+                        ? oficiosContestacion.find(o =>
+                                Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia) &&
+                                Number(o.id) !== Number(item.idOficio)
+                            )
+                        : null;
 
         return {
             id:                      item.idSeguimientoOficio,
@@ -118,8 +120,9 @@ if (tab === 'memorandums') {
 
     const oficioContest = corrOriginal
       ? oficios.find(o =>
-          Number(o.idCorrespondencia) === Number(corrOriginal.id) &&
-          o.idArea === null
+                    Number(o.idCorrespondencia) === Number(corrOriginal.id) &&
+                    Number(o.id) !== Number(item.idMemo) &&
+                    o.idArea === null
         )
       : null;
 
@@ -256,9 +259,20 @@ if (tab === 'memorandums') {
                                                 </span>
                                             </td>
                                             <td style={{ textAlign: 'center' }}>
-                                                <button className="btn-atender" onClick={() => handleAbrirDetalle(item)}>
-                                                    Detalles
-                                                </button>
+                                                                                                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                                                                                                    <button className="btn-atender" onClick={() => handleAbrirDetalle(item)}>
+                                                                                                        Detalles
+                                                                                                    </button>
+                                                                                                    {item.tieneOficioContestacion && item.archivo && (
+                                                                                                        <button
+                                                                                                            className="btn-descargar-oficio"
+                                                                                                            onClick={() => window.open(`${API_BASE_URL}${item.archivo}`, '_blank')}
+                                                                                                            title="Ver Oficio de Contestación"
+                                                                                                        >
+                                                                                                            📄 Ver Oficio
+                                                                                                        </button>
+                                                                                                    )}
+                                                                                                </div>
                                             </td>
                                         </tr>
                                     ))

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FormularioContestacionCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/FormularioContestacion';
-import { VistaDocumentoCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/components/VistaDocumentoCorrespondencia';
 import { useContestacionCorrespondencia } from '../../../features/modulo-correspondencia/contestacion-correspondencia/hooks/useContestacionCorrespondencia';
 import '../../../features/modulo-correspondencia/contestacion-correspondencia/styles/contestacion_correspondencia.css';
 
@@ -26,6 +25,7 @@ export const ContestacionCorrespondenciaPage = () => {
       )}
 
       <div className="split-layout">
+
         <section className="card-container">
           <div className="card-title-bar">
             <span>📄</span>
@@ -38,6 +38,7 @@ export const ContestacionCorrespondenciaPage = () => {
             />
           </div>
         </section>
+
 
         <section className="card-container">
           <div className="card-title-bar">

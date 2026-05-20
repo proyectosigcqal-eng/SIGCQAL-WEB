@@ -61,22 +61,12 @@ const cargar = async () => {
 
   const handleDescargarAdjunto = async () => {
   if (!archivoUrl) return;
-  
+
+  // Abrir el archivo en nueva pestaña — el backend debe servir PDF o el navegador lo mostrará
   try {
-    const respuesta = await fetch(archivoUrl);
-    const blob = await respuesta.blob(); 
-    const urlLocal = window.URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = urlLocal;
-    link.download = `OficioContestacion-${item.folio || 'doc'}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    
-    window.URL.revokeObjectURL(urlLocal);
-    link.remove();
+    window.open(fileUrl(archivoUrl), '_blank');
   } catch (error) {
-    window.open(archivoUrl, '_blank');
+    console.error('Error al abrir archivo:', error);
   }
 };
 

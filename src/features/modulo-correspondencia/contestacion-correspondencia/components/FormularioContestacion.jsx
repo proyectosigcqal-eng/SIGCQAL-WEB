@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { guardarSeguimiento, obtenerProximoFolio } from '../services/seguimientoService';
 
-const FIRMANTE_FIJO = 10;
+const FIRMANTE_FIJO = 5;
 
 export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, onGuardado, onError }) => {
   const [folioGenerado, setFolioGenerado] = useState(null);
@@ -45,7 +45,7 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
         fechaResolucion:                     new Date().toISOString().split('T')[0],
         horaResolucion:                      new Date().toTimeString().split(' ')[0],
         archivoAdjunto:                      archivo ?? null,
-        idUsuario:                           10,
+        idUsuario:                           5,
         idEstatus:                           5,
         numeroOficioContestacion:            '',
       };
@@ -66,10 +66,10 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
       state: {
         idCorrespondencia: acuse?.idCorrespondencia || correspondencia?.id || null,
         idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'jperez',
+        firmante:          'ana_admin',
         areaFirmante:      'Administración',
         idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'jperez',
+        nombreEmisor:      'ana_admin',
         textoSugerido:     respuesta,
       }
     });

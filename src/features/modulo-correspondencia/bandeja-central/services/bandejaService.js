@@ -42,7 +42,7 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     .then(r => r.data).catch(() => null);
 
   // Con el idCorrespondencia del memo, cargamos todo en paralelo
-  const [correspondencia, acuses, seguimientos] = await Promise.all([
+  const [correspondencia, acuses, seguimientos, oficiosContestacion] = await Promise.all([
     memo?.idCorrespondencia
       ? axios.get(`${API_BASE}/correspondencias/entrada/${memo.idCorrespondencia}`)
           .then(r => r.data).catch(() => null)
@@ -51,6 +51,16 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
       .then(r => r.data).catch(() => []),
     axios.get(`${API_BASE}/seguimiento-memorandum/memorandum/${idMemo}`)
       .then(r => r.data).catch(() => []),
+    // Buscar oficios de contestación relacionados a la misma correspondencia
+    memo?.idCorrespondencia
+      ? axios.get(`${API_BASE}/oficios/listar`)
+          .then(r => r.data.filter(o =>
+            Number(o.idCorrespondencia) === Number(memo.idCorrespondencia) &&
+            Number(o.id) !== Number(idMemo) &&
+            o.idArea === null
+          ))
+          .catch(() => [])
+      : Promise.resolve([]),
   ]);
 
   const eventos = [];
@@ -117,6 +127,24 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     });
   });
 
+  // 5️⃣ OFICIO DE CONTESTACIÓN (si existe)
+  if (oficiosContestacion && oficiosContestacion.length > 0) {
+    const oficioContestacionActual = oficiosContestacion
+      .slice()
+      .sort((a, b) => new Date(b.fechaEmision || b.fechaRegistro || 0) - new Date(a.fechaEmision || a.fechaRegistro || 0))[0] || null;
+
+    if (oficioContestacionActual) {
+      eventos.push({
+        idLog: `oficio-contest-${oficioContestacionActual.id}`,
+        estatus: 'OFICIO GENERADO',
+        fecha: pickFecha(oficioContestacionActual) || oficioContestacionActual.fechaEmision,
+        usuario: oficioContestacionActual.nombreUsuarioFirmante || `Usuario ${oficioContestacionActual.idUsuarioFirmante}`,
+        descripcion: `Oficio de contestación generado: ${oficioContestacionActual.folioUnico}`,
+        folio: oficioContestacionActual.folioUnico,
+      });
+    }
+  }
+
 const ORDEN_ESTATUS = {
   'CORRESPONDENCIA RECIBIDA': 0,
   'MEMORANDUM GENERADO':      1,
@@ -128,18 +156,19 @@ const ORDEN_ESTATUS = {
   'CONCLUIDO':                6,
 };
 
-return eventos.sort((a, b) => {
-  const ordenA = ORDEN_ESTATUS[a.estatus] ?? 99;
-  const ordenB = ORDEN_ESTATUS[b.estatus] ?? 99;
-  
-  // Si tienen diferente tipo → orden fijo
-  if (ordenA !== ordenB) return ordenA - ordenB;
-  
-  // Si tienen el mismo tipo → orden cronológico
-  const da = a.fecha ? new Date(a.fecha) : new Date(0);
-  const db = b.fecha ? new Date(b.fecha) : new Date(0);
-  return da - db;
-});
+  // Deduplicación por idLog (por si el backend devolviera eventos repetidos)
+  const eventosUnicos = eventos.filter((evento, index, self) =>
+    index === self.findIndex(e => e.idLog === evento.idLog)
+  );
+
+  return eventosUnicos.sort((a, b) => {
+    const ordenA = ORDEN_ESTATUS[a.estatus] ?? 99;
+    const ordenB = ORDEN_ESTATUS[b.estatus] ?? 99;
+    if (ordenA !== ordenB) return ordenA - ordenB;
+    const da = a.fecha ? new Date(a.fecha) : new Date(0);
+    const db = b.fecha ? new Date(b.fecha) : new Date(0);
+    return da - db;
+  });
 
   
 };
@@ -289,7 +318,12 @@ export const obtenerBitacoraCompletaOficio = async (idSeguimientoOficio, idOfici
     'CONCLUIDO': 5,
   };
 
-  return eventos.sort((a, b) => {
+  // Deduplicación por idLog
+  const eventosUnicos = eventos.filter((evento, index, self) =>
+    index === self.findIndex(e => e.idLog === evento.idLog)
+  );
+
+  return eventosUnicos.sort((a, b) => {
     const ordenA = ORDEN_ESTATUS[a.estatus] ?? 99;
     const ordenB = ORDEN_ESTATUS[b.estatus] ?? 99;
     if (ordenA !== ordenB) return ordenA - ordenB;
