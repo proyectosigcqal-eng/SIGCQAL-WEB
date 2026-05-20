@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { obtenerBitacoraCompletaMemo, obtenerBitacoraCompletaOficio } from '../services/bandejaService';
-import { obtenerBitacoraPorCorrespondencia } from '../../bitacora-historica/services/bitacoraService';
-
+import { obtenerBitacoraCompletaCorrespondencia } from '../services/bandejaService';
 import '../styles/detalleBandejaModal.css';
 import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
 import API_BASE_URL, { fileUrl } from '@/shared/config/api';
@@ -44,8 +43,8 @@ const cargar = async () => {
             const data = await obtenerBitacoraCompletaOficio(item.id, item.idMemo); // idMemo aquí es idOficio
             setLogs(data || []);
         } else {
-            const data = await obtenerBitacoraPorCorrespondencia(item.id);
-            setLogs(data || []);
+            const data = await obtenerBitacoraCompletaCorrespondencia(item.idMemo);
+  setLogs(data || []);
         }
     } catch (e) {
         console.error('Error bitácora:', e);

@@ -7,6 +7,7 @@ import axios from 'axios';
 import API_BASE_URL from '@/shared/config/api';
 import { listarOficios } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
 import { listarMemorandums } from '../../../features/modulo-correspondencia/memorandum/services/memorandumService';
+import { listarCorrespondencias } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 
 export const BandejaCentralPage = () => {
     const [activeTab, setActiveTab] = useState('memorandums');
@@ -104,20 +105,38 @@ if (tab === 'memorandums') {
             tipo:                    'oficio'
         };
     }));
-    } else {
-      const data = await listarSeguimientosCorr();
-      setDatosTabla(data.map(item => ({
-        id: item.idSeguimientoCorrespondencia,
-        idMemo: item.idCorrespondencia,
-        folio: item.folioRespuesta,
-        asunto: item.respuestaSeguimientoCorrespondencia,
-        fecha: pickFecha(item) || item.fechaResolucion,
-        estatus: item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-        archivo: item.archivoAdjunto,
-        tieneOficioContestacion: tieneOficio(item.idCorrespondencia),
-        tipo: 'correspondencia'
-      })));
-    }
+   } else {
+  const [data, correspondencias] = await Promise.all([
+    listarSeguimientosCorr(),
+    listarCorrespondencias() // ← ya existe en correspondenciaService.js
+  ]);
+
+  setDatosTabla(data.map(item => {
+    const corrOriginal = correspondencias.find(
+      c => Number(c.id) === Number(item.idCorrespondencia)
+    );
+
+    const oficioContest = corrOriginal
+      ? oficios.find(o =>
+          Number(o.idCorrespondencia) === Number(corrOriginal.id) &&
+          o.idArea === null
+        )
+      : null;
+
+    return {
+      id:                      item.idSeguimientoCorrespondencia,
+      idMemo:                  item.idCorrespondencia,
+      folio:                   item.folioRespuesta,
+      asunto:                  item.respuestaSeguimientoCorrespondencia,
+      fecha:                   pickFecha(item) || item.fechaResolucion,
+      estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+      archivo:                 oficioContest?.urlMemorandumGenerado || null,
+      nombreArchivo:           oficioContest?.folioUnico || null,
+      tieneOficioContestacion: !!oficioContest,
+      tipo:                    'correspondencia'
+    };
+  }));
+}
   } catch (error) {
     console.error("Error", error);
     setDatosTabla([]);
