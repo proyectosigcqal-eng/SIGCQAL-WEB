@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { listarCorrespondenciasPorTipo } from '@/features/modulo-correspondencia/correspondencia/services/correspondenciaService';
+import { obtenerArchivoCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/services/archivoAdjuntoService';
 import { buscarOficioPorCorrespondencia } from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
 import { TablaCorrespondenciasExterna } from '@/features/modulo-correspondencia/correspondencia/components/TablaCorrespondenciasExterna';
 import { TablaCorrespondenciasInterna } from '@/features/modulo-correspondencia/correspondencia/components/TablaCorrespondenciasInterna';
@@ -18,6 +19,7 @@ export const CorrespondenciasRegistradasPage = () => {
   const [corrExterna, setCorrExterna] = useState([]);
   const [corrInterna, setCorrInterna] = useState([]);
   const [oficiosGuardados, setOficiosGuardados] = useState({});
+  const [archivosAdjuntos, setArchivosAdjuntos] = useState({});
   const [loadingExt, setLoadingExt] = useState(false);
   const [loadingInt, setLoadingInt] = useState(false);
   const [error, setError] = useState(null);
@@ -115,6 +117,52 @@ export const CorrespondenciasRegistradasPage = () => {
     };
   }, [corrInterna]);
 
+  useEffect(() => {
+    if (!corrInterna.length) {
+      setArchivosAdjuntos({});
+      return;
+    }
+
+    let cancelled = false;
+
+    const cargarArchivos = async () => {
+      const mapa = {};
+      const batchSize = 10;
+
+      for (let i = 0; i < corrInterna.length; i += batchSize) {
+        const batch = corrInterna.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(async (corr) => {
+            const id = getId(corr);
+            if (!id) return;
+            try {
+              const archivo = await obtenerArchivoCorrespondencia(id);
+              if (!archivo) return;
+              const rutaServidor = archivo.rutaServidor ?? archivo.ruta_servidor ?? null;
+              const urlDescarga = archivo.urlDescarga ?? archivo.url_descarga ?? null;
+              const nombreOriginal = archivo.nombreOriginal ?? archivo.nombre_original ?? null;
+              if (rutaServidor || urlDescarga) {
+                mapa[id] = { ...archivo, rutaServidor, urlDescarga, nombreOriginal };
+              }
+            } catch (e) {
+              console.error('Error al verificar archivo adjunto:', e);
+            }
+          })
+        );
+      }
+
+      if (!cancelled) {
+        setArchivosAdjuntos(mapa);
+      }
+    };
+
+    cargarArchivos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [corrInterna]);
+
   const handleActualizar = () => {
     if (vistaActual === 'EXTERNA') {
       cargarExterna();
@@ -206,6 +254,7 @@ export const CorrespondenciasRegistradasPage = () => {
           loading={loadingInt}
           onGenerarOficio={handleGenerarOficioInterno}
           oficiosGuardados={oficiosGuardados}
+          archivosAdjuntos={archivosAdjuntos}
         />
       ) : null}
     </div>
