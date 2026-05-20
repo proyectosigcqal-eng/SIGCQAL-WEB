@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import { fileUrl } from '@/shared/config/api';
 
 const PAGE_SIZE = 10;
 
@@ -13,13 +15,7 @@ const normalizeText = (value) =>
 
 const safeDateLabel = (value) => {
   if (!value) return '—';
-  const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  try {
-    return d.toLocaleDateString('es-MX');
-  } catch {
-    return d.toISOString().slice(0, 10);
-  }
+  return formatDateTimeDisplay(value);
 };
 
 const getId = (item) =>
@@ -273,6 +269,18 @@ export const TablaCorrespondenciasInterna = ({
 
                           return <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Sin documento</span>;
                         })()}
+                        {urlPdfFinal ? (
+                          <a
+                            href={fileUrl(urlPdfFinal)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-descargar-doc"
+                          >
+                            ⬇ Descargar
+                          </a>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Sin documento</span>
+                        )}
                       </td>
                       <td style={{ padding: '10px 12px' }}>
                         <div className="acciones-cell">

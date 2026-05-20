@@ -1,6 +1,8 @@
 
+import { fileUrl } from '@/shared/config/api';
+
 export const VistaDocumentoOriginalOficio = ({ oficio, loading }) => {
-    console.log('oficio recibido:', oficio);
+  console.log('oficio recibido:', oficio);
   if (loading) return <p className="text-muted">Cargando documento...</p>;
   if (!oficio) return <p className="text-muted">No se pudo cargar el documento.</p>;
 
@@ -13,7 +15,7 @@ const urlRelativa = oficio.urlOficioGenerado
 
   if (!urlRelativa) return <p className="text-muted">Documento firmado aún no disponible.</p>;
 
-  const urlPdf = `http://localhost:8081/SIGCQAL_dev${urlRelativa}#toolbar=0&navpanes=0&view=FitH`;
+  const urlPdf = `${fileUrl(urlRelativa)}#toolbar=0&navpanes=0&view=FitH`;
 
   return (
     <div style={{ 

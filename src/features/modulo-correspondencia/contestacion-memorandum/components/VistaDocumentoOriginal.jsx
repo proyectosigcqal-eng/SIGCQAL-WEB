@@ -1,3 +1,5 @@
+import { fileUrl } from '@/shared/config/api';
+
 export const VistaDocumentoOriginal = ({ memorandum, loading }) => {
   if (loading) return <p className="text-muted">Cargando documento...</p>;
   if (!memorandum) return <p className="text-muted">No se pudo cargar el documento.</p>;
@@ -6,7 +8,7 @@ export const VistaDocumentoOriginal = ({ memorandum, loading }) => {
 
   if (!urlRelativa) return <p className="text-muted">Documento firmado aún no disponible.</p>;
 
-  const urlPdf = `http://localhost:8081/SIGCQAL_dev${urlRelativa}#toolbar=0&navpanes=0&view=FitH`;
+  const urlPdf = `${fileUrl(urlRelativa)}#toolbar=0&navpanes=0&view=FitH`;
 
   return (
     <div style={{ 

@@ -4,6 +4,7 @@ import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 import DetalleBandejaModal from '../../../features/modulo-correspondencia/bandeja-central/components/DetalleBandejaModal';
 import '../../../features/modulo-correspondencia/bandeja-central/styles/bandeja.css';
 import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
 import { listarOficios } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
 import { listarMemorandums } from '../../../features/modulo-correspondencia/memorandum/services/memorandumService';
 
@@ -140,17 +141,17 @@ if (tab === 'memorandums') {
 
             if (item.tipo === 'memorandum') {
                 await axios.put(
-                    `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-memorandum/concluir/${item.id}`,
+                    `${API_BASE_URL}/seguimiento-memorandum/concluir/${item.id}`,
                     { respuestaSeguimientoMemorandum: comentario || 'Cierre desde bandeja' }
                 );
             } else if (item.tipo === 'correspondencia') {
                 await axios.put(
-                    `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia/concluir/${item.id}`,
+                    `${API_BASE_URL}/seguimiento-correspondencia/concluir/${item.id}`,
                     { respuestaSeguimientoCorrespondencia: comentario || 'Cierre desde bandeja' }
                 );
             } else {
                 await axios.put(
-                    `http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-oficio/concluir/${item.id}`,
+                    `${API_BASE_URL}/seguimiento-oficio/concluir/${item.id}`,
                     { respuestaSeguimientoOficio: comentario || 'Cierre desde bandeja' }
                 );
             }

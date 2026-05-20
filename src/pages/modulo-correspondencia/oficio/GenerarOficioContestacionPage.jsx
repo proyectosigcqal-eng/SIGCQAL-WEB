@@ -140,17 +140,9 @@ export const GenerarOficioContestacionPage = () => {
 
     if (!formData.numOficioSalida?.trim()) {
       setErrorNumOficio(true);
-
-      document
-        .getElementById('numOficioSalida')
-        ?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-
+      document.getElementById('numOficioSalida')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-
     setErrorNumOficio(false);
 
     if (!instruccion?.trim()) {
@@ -162,76 +154,33 @@ export const GenerarOficioContestacionPage = () => {
     setError(null);
 
     try {
-      // =========================
-      // DTO GUARDADO
-      // =========================
-      const dto = {
-        idCorrespondencia: Number(idCorrespondenciaH),
-        idUsuarioEmisor: resolveIdUsuarioEmisor(),
-        numOficioSalida: formData.numOficioSalida.trim(),
-        asuntoContestacion:
-          fuente?.asunto ||
-          correspondencia?.asunto ||
-          null,
-        cuerpoOficioTexto: instruccion,
-        urlPdfFinal: null,
-      };
-
-      await guardarOficioContestacion(dto);
-
-      // =========================
-      // PAYLOAD PDF
-      // =========================
+      // ✅ Solo generarOficio — elimina guardarOficioContestacion
       const payload = {
-        idCorrespondencia: idCorrespondenciaH,
-
-        idUsuarioFirmante: FIRMANTE_FIJO,
-
-        idUsuarioEmisor: resolveIdUsuarioEmisor(),
-
+        idCorrespondencia:      idCorrespondenciaH,
+        idUsuarioFirmante:      FIRMANTE_FIJO,
+        idUsuarioEmisor:        resolveIdUsuarioEmisor(),
         instruccionSeguimiento: instruccion,
-
-        observaciones:
-          fuente?.asunto ||
-          correspondencia?.asunto ||
-          instruccion,
-
-        idPlantilla: null,
-
-        idArea: null,
-
-        folioUnico: folioOficio || '',
-
-        nombreFirmante: firmanteH,
-
-        areaFirmante: areaFirmanteH,
-
-        areaDestinatario:
-          fuente?.dependenciaRemitente ||
-          correspondencia?.dependenciaRemitente ||
-          '',
-
-        nombreEmisor: firmanteH,
+        observaciones:          fuente?.asunto || correspondencia?.asunto || instruccion,
+        idPlantilla:            null,
+        idArea:                 null,
+        folioUnico:             folioOficio || '',
+        nombreFirmante:         firmanteH,
+        areaFirmante:           areaFirmanteH,
+        areaDestinatario:       fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '',
+        nombreEmisor:           firmanteH,
       };
 
       await generarOficio(payload);
 
       navigate('/correspondencia/registradas', {
-        state: {
-          refreshInterna: true,
-          tabActivo: 'INTERNA',
-        },
+        state: { refreshInterna: true, tabActivo: 'INTERNA' },
       });
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          'Error al generar el oficio'
-      );
+      setError(err?.response?.data?.message || err?.message || 'Error al generar el oficio');
     } finally {
       setGuardando(false);
     }
-  };
+};
 
   // =========================
   // RENDER

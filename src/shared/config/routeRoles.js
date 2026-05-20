@@ -13,7 +13,7 @@ export const ROUTE_ROLES = {
   '/correspondencia/nuevo-oficio-contestacion': ['Administrador', 'Revisor'],
   '/correspondencia/seguimiento': ['Administrador', 'Revisor'],
   '/correspondencia/bandeja': ['Administrador', 'Revisor', 'Capturista'],
-  '/correspondencia/pendiente-revision-area': ['Revisor'],
+  '/correspondencia/pendiente-revision-area': ['Administrador', 'Revisor'],
   '/correspondencia/acuses-correspondencia': ['Administrador', 'Revisor', 'Capturista'],
   '/correspondencia/acuses-oficio-por-area': ['Administrador', 'Revisor'],
   '/correspondencia/asignar-area': ['Administrador', 'Revisor'],
@@ -21,7 +21,7 @@ export const ROUTE_ROLES = {
   '/correspondencia/bitacora': ['Administrador', 'Revisor'],
   '/correspondencia/lista-memorandums-revision': ['Administrador', 'Revisor'],
   '/correspondencia/lista-oficios-revision': ['Administrador', 'Revisor'],
-  '/correspondencia/memorandums-por-area': ['Revisor'],
+  '/correspondencia/memorandums-por-area': ['Administrador', 'Revisor'],
   '/correspondencia/oficios-por-area': ['Administrador', 'Revisor'],
 };
 

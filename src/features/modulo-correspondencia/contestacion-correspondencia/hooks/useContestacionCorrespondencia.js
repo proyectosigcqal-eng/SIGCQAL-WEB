@@ -1,17 +1,23 @@
+
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  obtenerCorrespondenciaPorId, 
+  obtenerProximoFolio, 
+  guardarSeguimiento 
+} from '../services/seguimientoService';
+
 import { useCallback, useState } from 'react';
 import { guardarSeguimiento, obtenerCorrespondenciaPorId } from '../services/seguimientoService';
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-const formatDate = (date) => date.toISOString().split('T')[0];
 
-const formatTime = (date) =>
-  date.toLocaleTimeString('es-MX', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+const formatDate = (date) => formatForBackend(date);
 
-const formatTimestamp = (date) => date.toISOString().slice(0, 19).replace('T', ' ');
+const formatTime = (date) => formatTimeForBackend(date);
+
+
+const formatTimestamp = (date) => `${formatForBackend(date)} ${formatTimeForBackend(date)}`;
 
 const unwrapCorrespondencia = (data) => {
   if (!data) return null;
@@ -21,57 +27,120 @@ const unwrapCorrespondencia = (data) => {
 };
 
 export const useContestacionCorrespondencia = () => {
+  const { id } = useParams(); // Sincronizado con la ruta dinámica de App.jsx
+  const navigate = useNavigate();
+
+  // Estados de control de UI (Idénticos al patrón de useContestacion)
   const [correspondencia, setCorrespondencia] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const cargarDetalle = useCallback(async (id) => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const data = await obtenerCorrespondenciaPorId(id);
-      setCorrespondencia(unwrapCorrespondencia(data));
-    } catch (err) {
-      setError(err.message || 'No se pudo cargar la correspondencia');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Estado del formulario unificado
+  const [form, setForm] = useState({
+    idCorrespondencia: id,
+    folioRespuesta: '',
+    numeroOficioContestacion: '', // Nuevo campo requerido
+    respuestaSeguimientoCorrespondencia: '',
+    fechaResolucion: formatDate(new Date()),
+    horaResolucion: formatTime(new Date()),
+    idUsuario: 2, // Por defecto temporalmente
+    idEstatus: 4, // Estado inicial por defecto
+    archivoAdjunto: null
+  });
 
-  const registrarContestacion = useCallback(async ({ idCorrespondencia, folioRespuesta, respuestaSeguimiento, archivoAdjunto }) => {
-    setIsLoading(true);
-    setError('');
+  
+  useEffect(() => {
+    if (!id) return;
 
-    const now = new Date();
-    const payload = {
-      id_correspondencia: Number(idCorrespondencia),
-      folio_respuesta: folioRespuesta,
-      respuesta_seguimiento_correspondencia: respuestaSeguimiento,
-      archivo_adjunto: archivoAdjunto,
-      fecha_resolucion: formatDate(now),
-      hora_resolucion: formatTime(now),
-      id_usuario: 2, //TODO: cambiar por el id del usuario logueado
-      id_estatus: 4,
-      fecha_registro: formatTimestamp(now),
+    const cargarDatosIniciales = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Se ejecutan en paralelo la consulta base y el cálculo del folio dinámico CC
+        const [dataCorrespondencia, nuevoFolio] = await Promise.all([
+          obtenerCorrespondenciaPorId(id),
+          obtenerProximoFolio()
+        ]);
+
+        // Desempaquetado seguro del objeto JSON que retorna el API
+        const unwrapData = dataCorrespondencia.data || dataCorrespondencia.resultado || dataCorrespondencia;
+        setCorrespondencia(unwrapData);
+
+        // Seteamos el próximo folio generado en el formulario
+        setForm(prev => ({
+          ...prev,
+          folioRespuesta: nuevoFolio
+        }));
+
+      } catch (err) {
+        console.error("Error al inicializar la contestación de correspondencia:", err);
+        setError(err.message || 'No se pudo cargar la correspondencia base');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    try {
-      await guardarSeguimiento(payload);
-      return { success: true };
-    } catch (err) {
-      const message = err.message || 'No se pudo guardar el seguimiento';
-      setError(message);
-      return { success: false, message };
-    } finally {
-      setIsLoading(false);
+    cargarDatosIniciales();
+  }, [id]);
+
+  // Manejador de cambios para inputs estándar (Texto, Fecha, Tiempo)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Manejador de cambios especializado para capturar archivos del input file
+  const handleFileChange = (e) => {
+    const file = e.target.files[0] || null;
+    setForm(prev => ({
+      ...prev,
+      archivoAdjunto: file
+    }));
+  };
+
+  // Ejecución del guardado
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!form.numeroOficioContestacion.trim()) {
+      alert("El número de oficio de contestación es requerido.");
+      return;
     }
-  }, []);
+
+    if (!form.respuestaSeguimientoCorrespondencia.trim()) {
+      alert("La descripción de la respuesta no puede ir vacía.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      
+      // Enviamos el objeto del formulario al servicio
+      await guardarSeguimiento(form);
+      
+      alert("Contestación de correspondencia registrada exitosamente.");
+      navigate(-1); // Regresa a la pantalla anterior (Bandeja)
+    } catch (err) {
+      console.error("Error al registrar contestación:", err);
+      alert(err.message || "Ocurrió un error al guardar el seguimiento.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return {
+    form,
     correspondencia,
-    isLoading,
+    loading,
+    submitting,
     error,
-    cargarDetalle,
-    registrarContestacion,
+    handleChange,
+    handleFileChange,
+    handleSubmit
   };
 };
