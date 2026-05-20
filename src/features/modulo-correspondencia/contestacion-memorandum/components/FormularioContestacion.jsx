@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { guardarSeguimientoMemorandum, subirPdfFirmado, obtenerProximoFolio } from '../services/contestacionService'; // ← import agregado
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
 const FIRMANTE_FIJO = 5; // ana_admin
 
@@ -42,8 +43,8 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
       const payload = {
         idMemo:                         acuse.idMemorandum,
         respuestaSeguimientoMemorandum: respuesta,
-        fechaResolucion:                new Date().toISOString().split('T')[0],
-        horaResolucion:                 new Date().toTimeString().split(' ')[0],
+        fechaResolucion:                formatForBackend(new Date()),
+        horaResolucion:                 formatTimeForBackend(new Date()),
         archivoAdjunto:                 archivo?.name ?? null,
         idUsuario:                      1,
         idEstatus:                      5,
@@ -105,7 +106,7 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
               </span>
             </>
           ) : (
-            <span style={{ color: '#a0aec0', fontSize: '0.9rem' }}>Calculando folio...</span>
+            <span style={{ color: 'var(--muted-2)', fontSize: '0.9rem' }}>Calculando folio...</span>
           )}
         </div>
       </div>
@@ -149,7 +150,7 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
               vinculado a este trámite?
             </p>
             {folioGenerado && (
-              <p style={{ fontSize: '0.85rem', color: '#718096', marginBottom: '16px' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--muted-2)', marginBottom: '16px' }}>
                 Folio registrado: <strong>{folioGenerado}</strong>
               </p>
             )}

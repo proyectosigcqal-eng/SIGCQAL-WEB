@@ -28,9 +28,21 @@ body {
 
 .app-container {
     display: flex;
-    min-height: 100vh;
-}
 
+    /* Additional standardized palette (use across app) */
+    --guinda: #691C32;
+    --muted-2: #718096;
+    --muted-3: #4a5568;
+    --bg-primary-100: #eef2ff;
+    --bg-info-100: #ebf8ff;
+    --bg-success-100: #f0fff4;
+    --danger-dark: #dc2626;
+    --warning: #d69e2e;
+    --purple-600: #6b46c1;
+    --indigo-700: #3730a3;
+    min-height: 100vh;
+
+@import './styles/buttons.css';
 /* Sidebar */
 .sidebar {
     width: 260px;
@@ -145,4 +157,5 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0 2rem;
+}
 }

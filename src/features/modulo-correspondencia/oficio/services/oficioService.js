@@ -1,7 +1,8 @@
 import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/oficios';
+const API_URL = `${API_BASE_URL}/oficios`;
 
 /**
  * 
@@ -90,17 +91,14 @@ export const registrarSeguimiento = async (idOficio, datos) => {
     formData.append('respuestasSeguimientoOficio', datos.respuestaSeguimiento);
     formData.append('idEstatus',                   datos.idEstatus || 5);
     formData.append('idUsuario',                   datos.idUsuario || 1);
-    formData.append('fechaResolucion', new Date().toISOString().split('T')[0]);
-    formData.append('horaResolucion',  new Date().toTimeString().split(' ')[0]);
+    formData.append('fechaResolucion', formatForBackend(new Date()));
+    formData.append('horaResolucion',  formatTimeForBackend(new Date()));
 
     if (datos.archivoAdjunto) {
         formData.append('archivoAdjunto', datos.archivoAdjunto);
     }
 
-    const response = await fetch(
-        'http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-oficio/guardar',
-        { method: 'POST', body: formData }
-    );
+    const response = await fetch(`${API_BASE_URL}/seguimiento-oficio/guardar`, { method: 'POST', body: formData });
 
     if (!response.ok) throw new Error('Error al registrar el seguimiento de oficio');
     return await response.json();
@@ -108,10 +106,7 @@ export const registrarSeguimiento = async (idOficio, datos) => {
 
 export const crearAcuseOficio = async ({ idOficio, idUsuarioRevisor, esDelArea }) => {
     try {
-        const response = await axios.post(
-            'http://localhost:8081/SIGCQAL_dev/api/v1/acuse-oficio/crear',
-            { idOficio, idUsuarioRevisor, esDelArea }
-        );
+        const response = await axios.post(`${API_BASE_URL}/acuse-oficio/crear`, { idOficio, idUsuarioRevisor, esDelArea });
         return response.data;
     } catch (error) {
         console.error("Error al crear acuse de oficio:", error.response?.data || error.message);

@@ -1,17 +1,12 @@
 import { useCallback, useState } from 'react';
 import { guardarSeguimiento, obtenerCorrespondenciaPorId } from '../services/seguimientoService';
+import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
 
-const formatDate = (date) => date.toISOString().split('T')[0];
+const formatDate = (date) => formatForBackend(date);
 
-const formatTime = (date) =>
-  date.toLocaleTimeString('es-MX', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+const formatTime = (date) => formatTimeForBackend(date);
 
-const formatTimestamp = (date) => date.toISOString().slice(0, 19).replace('T', ' ');
+const formatTimestamp = (date) => `${formatForBackend(date)} ${formatTimeForBackend(date)}`;
 
 const unwrapCorrespondencia = (data) => {
   if (!data) return null;

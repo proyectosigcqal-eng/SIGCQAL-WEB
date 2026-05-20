@@ -1,7 +1,8 @@
 import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
 
-const API_SEGUIMIENTO_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/seguimiento-correspondencia';
-const API_CORRESPONDENCIA_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/correspondencias/entrada';
+const API_SEGUIMIENTO_URL = `${API_BASE_URL}/seguimiento-correspondencia`;
+const API_CORRESPONDENCIA_URL = `${API_BASE_URL}/correspondencias/entrada`;
 
 export const obtenerCorrespondenciaPorId = async (id) => {
   const response = await axios.get(`${API_CORRESPONDENCIA_URL}/${id}`);

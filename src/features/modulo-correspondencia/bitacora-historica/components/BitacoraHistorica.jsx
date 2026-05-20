@@ -1,6 +1,7 @@
 // src/features/modulo-correspondencia/bitacora-historica/pages/BitacoraHistorica.jsx
 import React, { useState, useEffect } from 'react';
 import { obtenerBitacoraPorCorrespondencia } from '../services/bitacoraService';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
 import { DetalleEventoModal } from '../components/DetalleEventoModal';
 import '../styles/bitacora.css';
 import { useParams } from 'react-router-dom';
@@ -28,9 +29,7 @@ export const BitacoraHistorica = ({ idCorrespondencia }) => {
 }, [id]);
 
   const formatearFecha = (fechaString) => {
-    if (!fechaString) return '';
-    const date = new Date(fechaString);
-    return date.toISOString().split('T')[0]; 
+    return formatDateTimeDisplay(fechaString);
   };
 
   if (loading) return <div className="p-4">Cargando bitácora histórica...</div>;

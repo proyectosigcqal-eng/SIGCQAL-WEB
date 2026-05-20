@@ -3,6 +3,8 @@ import { obtenerBitacoraCompletaMemo, obtenerBitacoraCompletaOficio } from '../s
 import { obtenerBitacoraPorCorrespondencia } from '../../bitacora-historica/services/bitacoraService';
 
 import '../styles/detalleBandejaModal.css';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import API_BASE_URL, { fileUrl } from '@/shared/config/api';
 
 // Mapa visual por estatus
 const ESTATUS_CONFIG = {
@@ -18,11 +20,7 @@ const ESTATUS_CONFIG = {
 };
 
 const formatFecha = (fecha) => {
-  if (!fecha) return '-';
-  return new Date(fecha).toLocaleString('es-MX', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
+  return formatDateTimeDisplay(fecha);
 };
 
 export default function DetalleBandejaModal({ isOpen, onClose, item, onCerrarSeguimiento }) {
@@ -200,7 +198,7 @@ const cargar = async () => {
     style={{ justifyContent: 'center', padding: '0 0 8px', marginTop: 0 }}
   >
     <a
-      href={`http://localhost:8081/SIGCQAL_dev${item.archivo}`}
+      href={fileUrl(item.archivo)}
       target="_blank"
       rel="noreferrer"
       className="btn-descargar"

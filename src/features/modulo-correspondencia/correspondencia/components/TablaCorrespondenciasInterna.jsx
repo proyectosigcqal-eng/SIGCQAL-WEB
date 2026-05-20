@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import { fileUrl } from '@/shared/config/api';
 
 const PAGE_SIZE = 10;
 
@@ -13,13 +15,7 @@ const normalizeText = (value) =>
 
 const safeDateLabel = (value) => {
   if (!value) return '—';
-  const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  try {
-    return d.toLocaleDateString('es-MX');
-  } catch {
-    return d.toISOString().slice(0, 10);
-  }
+  return formatDateTimeDisplay(value);
 };
 
 const getId = (item) =>
@@ -233,7 +229,7 @@ export const TablaCorrespondenciasInterna = ({ correspondencias = [], onGenerarO
                       <td style={{ whiteSpace: 'nowrap' }}>
                         {urlPdfFinal ? (
                           <a
-                            href={`http://localhost:8081/SIGCQAL_dev${urlPdfFinal}`}
+                            href={fileUrl(urlPdfFinal)}
                             target="_blank"
                             rel="noreferrer"
                             className="btn-descargar-doc"
