@@ -25,10 +25,10 @@ export const VistaPreviaOficio = ({ formData, usuarios = [], areaDestino }) => {
   };
 
   // Valores dinámicos — igual que los marcadores de la plantilla
-  const folio           = formData.folioUnico || '{{FOLIO}}';
-  const asunto          = formData.asuntoCorrespondencia || formData.observaciones || '{{ASUNTO}}';
+  const folio           = formData.folioUnico || '';
+  const asunto          = formData.asuntoCorrespondencia || formData.observaciones || '';
   const fecha           = obtenerFechaActual();
-  const areaDestinatario = areaDestino?.nombre || areaDestino?.nombreArea || null;
+  const areaDestinatario = areaDestino?.nombre || areaDestino?.nombreArea || '';
   const areaEmisor = getAreaUsuario(formData.idUsuarioEmisor) || '[Sin Área Asignada]';
   const nombreEmisor    = getNombreUsuario(formData.idUsuarioEmisor);
   const instruccion     = formData.instruccionSeguimiento || '';
@@ -43,17 +43,24 @@ export const VistaPreviaOficio = ({ formData, usuarios = [], areaDestino }) => {
 
         <div className="membrete-contenido">
 
-          {/* META INFO — esquina superior derecha */}
+          {/* META INFO — siempre a la derecha */}
           <div className="membrete-meta-info">
-            <p className="meta-folio">
-            <strong>Oficio: {formData.folioUnico || 'XXXXXXXX'}</strong>
-          </p>
+            <p className="meta-folio"><strong>Oficio: {folio || '{{FOLIO}}'}</strong></p>
+            <p><strong>Asunto:</strong> {asunto || '{{ASUNTO}}'}</p>
             <p>Guadalupe, Zacatecas, a {fecha}.</p>
           </div>
 
-          {/* DESTINATARIO */}
+          {/* CUERPO */}
           <div className="cuerpo-memorandum">
-            <p className="area-destinatario"><strong>{areaDestinatario}</strong></p>
+
+            {/* ÁREA DESTINATARIA — va ANTES de PRESENTE */}
+            <p className="area-destinatario">
+              <strong>
+                {areaDestinatario || <span className="placeholder-muted">[Área Destinataria]</span>}
+              </strong>
+            </p>
+
+            {/* PRESENTE — siempre debajo del área */}
             <p className="texto-presente"><strong>P R E S E N T E.</strong></p>
 
             {/* Texto del cuerpo — idéntico a la plantilla Word */}

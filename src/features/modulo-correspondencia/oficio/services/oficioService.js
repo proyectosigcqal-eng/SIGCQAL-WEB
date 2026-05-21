@@ -71,7 +71,11 @@ export const listarPorArea = async (idArea, options = {}) => {
 export const finalizarAsignacion = async (id, archivo, idArea) => {
     const formData = new FormData();
     formData.append('archivo', archivo);
-    formData.append('idArea', idArea);
+    
+    // ← Solo agrega idArea si tiene valor real, nunca el string "null"
+    if (idArea !== null && idArea !== undefined) {
+        formData.append('idArea', idArea);
+    }
 
     const response = await fetch(`${API_URL}/${id}/finalizar`, {
         method: 'POST',
@@ -84,7 +88,6 @@ export const finalizarAsignacion = async (id, archivo, idArea) => {
 
     return true;
 };
-
 export const registrarSeguimiento = async (idOficio, datos) => {
     const formData = new FormData();
     formData.append('idOficio',                    idOficio);

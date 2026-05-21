@@ -4,6 +4,7 @@ import { obtenerBitacoraCompletaCorrespondencia } from '../services/bandejaServi
 import '../styles/detalleBandejaModal.css';
 import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
 import API_BASE_URL, { fileUrl } from '@/shared/config/api';
+import { listarOficios, obtenerOficioPorId } from '@/features/modulo-correspondencia/oficio/services/oficioService';
 
 // Mapa visual por estatus
 const ESTATUS_CONFIG = {
@@ -28,11 +29,13 @@ export default function DetalleBandejaModal({ isOpen, onClose, item, onCerrarSeg
   const [comentario, setComentario]   = useState('');
   const [cerrando, setCerrando]       = useState(false);
   const [yaConcluido, setYaConcluido] = useState(false);
+  const [contestacionArchivo, setContestacionArchivo] = useState(null);
 
  useEffect(() => {
     if (!isOpen || !item) return;
     console.log('>>> item completo:', item);
     setYaConcluido(item.estatus === 'CONCLUIDO' || item.estatus === 'CERRADO');
+    setContestacionArchivo(null);
 const cargar = async () => {
     setLoadingLogs(true);
     try {
@@ -42,6 +45,23 @@ const cargar = async () => {
         } else if (item.tipo === 'oficio') {
             const data = await obtenerBitacoraCompletaOficio(item.id, item.idMemo); // idMemo aquí es idOficio
             setLogs(data || []);
+            // Buscar el oficio de contestación asociado (idArea === null y misma correspondencia)
+            try {
+              if (item.idMemo) {
+                const oficioOriginal = await obtenerOficioPorId(item.idMemo).catch(() => null);
+                if (oficioOriginal?.idCorrespondencia) {
+                  const allOficios = await listarOficios().catch(() => []);
+                  const match = allOficios.find(o =>
+                    Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia) &&
+                    o.idArea === null &&
+                    Number(o.id) !== Number(oficioOriginal.id)
+                  );
+                  if (match?.urlMemorandumGenerado) setContestacionArchivo(match.urlMemorandumGenerado);
+                }
+              }
+            } catch (e) {
+              console.error('Error buscando oficio de contestación:', e);
+            }
         } else {
             const data = await obtenerBitacoraCompletaCorrespondencia(item.idMemo);
   setLogs(data || []);
@@ -57,28 +77,46 @@ const cargar = async () => {
     cargar();
     return () => setLogs([]);
 }, [isOpen, item]);
-  const archivoUrl = item?.archivoAdjunto || item?.archivo || null;
+  const archivoRelPreferido = contestacionArchivo || item?.archivoAdjunto || item?.archivo || null;
 
   const handleDescargarAdjunto = async () => {
-  if (!archivoUrl) return;
-  
-  try {
-    const respuesta = await fetch(archivoUrl);
-    const blob = await respuesta.blob(); 
-    const urlLocal = window.URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = urlLocal;
-    link.download = `OficioContestacion-${item.folio || 'doc'}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    
-    window.URL.revokeObjectURL(urlLocal);
-    link.remove();
-  } catch (error) {
-    window.open(archivoUrl, '_blank');
-  }
-};
+    const relativePath = archivoRelPreferido;
+    if (!relativePath) return;
+
+    const fullUrl = fileUrl(relativePath);
+
+    try {
+      const resp = await fetch(fullUrl);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+
+      // Intenta obtener filename desde headers, si existe
+      let filename = `OficioContestacion-${item.folio || 'document'}.pdf`;
+      const disposition = resp.headers.get('content-disposition');
+      if (disposition) {
+        const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+        if (match && match[1]) filename = decodeURIComponent(match[1]);
+      } else {
+        // Fallback: derive nombre del path
+        const parts = relativePath.split('/');
+        const last = parts[parts.length - 1];
+        if (last) filename = last.includes('.') ? last : `${last}.pdf`;
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (e) {
+      console.error('Error descargando archivo:', e);
+      // Fallback a abrir en nueva pestaña
+      try { window.open(fileUrl(relativePath), '_blank'); } catch (e2) { console.error(e2); }
+    }
+  };
 
   const handleConcluir = async () => {
     if (!window.confirm('¿Confirmas marcar este trámite como CONCLUIDO?')) return;
@@ -191,19 +229,18 @@ const cargar = async () => {
           )}
         </div>
 
-       {item.archivo && (
+       {archivoRelPreferido && (
   <div
     className="modal-download-btns"
     style={{ justifyContent: 'center', padding: '0 0 8px', marginTop: 0 }}
   >
-    <a
-      href={fileUrl(item.archivo)}
-      target="_blank"
-      rel="noreferrer"
+    <button
+      type="button"
+      onClick={handleDescargarAdjunto}
       className="btn-descargar"
     >
       📥 Descargar Oficio Contestación
-    </a>
+    </button>
   </div>
 )}
 
