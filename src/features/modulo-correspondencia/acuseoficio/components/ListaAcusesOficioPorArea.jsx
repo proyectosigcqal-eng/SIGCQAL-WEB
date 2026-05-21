@@ -1,9 +1,11 @@
 import { useListaAcusesOficioPorArea } from '../hooks/useListaAcusesOficioPorArea'; 
 import '@/features/modulo-correspondencia/acuseoficio/styles/listaAcusesOficio.css';
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
+import { useNavigate } from 'react-router-dom';
 
 export const ListaAcusesOficioPorArea = () => {
   const { acuses, loading, error, recargar, areaForzada } = useListaAcusesOficioPorArea();
+  const navigate = useNavigate();
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
@@ -70,9 +72,12 @@ export const ListaAcusesOficioPorArea = () => {
                   <td>{formatFecha(acuse, acuse.fechaEmision)}</td>
                   <td>{formatFecha(acuse, acuse.fechaAceptacion)}</td>
                   <td>
-                    <button className="btn-contestacion-acuse-oficio">
-                      Contestacion
-                    </button>
+                    <button
+    className="btn-contestacion-acuse-oficio"
+    onClick={() => navigate(`/correspondencia/contestacion-oficio/${acuse.idOficio ?? acuse.id}`)}
+  >
+    Contestación
+  </button>
                   </td>
                 </tr>
               ))}

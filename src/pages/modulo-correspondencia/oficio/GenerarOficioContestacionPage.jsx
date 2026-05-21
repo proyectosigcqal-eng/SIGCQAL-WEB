@@ -121,9 +121,9 @@ const canvas  = await html2canvas(elemento, {
 
     // ✅ Altura fija carta — evita que el contenido desborde
     el.style.width     = '816px';
-    el.style.height    = '1056px';
-    el.style.minHeight = '1056px';
-    el.style.maxHeight = '1056px';
+    el.style.height    = '816px';
+    el.style.minHeight = '816px';
+    el.style.maxHeight = '816px';
     el.style.overflow  = 'hidden';
     el.style.position  = 'relative';
     el.style.boxSizing = 'border-box';

@@ -180,7 +180,7 @@ export const CorrespondenciasRegistradasPage = () => {
   const handleGenerarOficioExterno = (item) => {
     const id = getId(item);
     if (!id) return;
-    navigate(`/correspondencia/generar-oficio-externo/${id}`);
+    navigate(`/correspondencia/nuevo-oficio/${id}`);
   };
 
   const handleGenerarOficioInterno = (item) => {

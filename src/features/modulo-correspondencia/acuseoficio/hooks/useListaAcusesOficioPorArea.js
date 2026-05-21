@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { listarAcusesPorArea } from '../services/acuseoficioService';
 
+
 export const useListaAcusesOficioPorArea = () => {
   const [acuses, setAcuses] = useState([]);
   const [loading, setLoading] = useState(false);
