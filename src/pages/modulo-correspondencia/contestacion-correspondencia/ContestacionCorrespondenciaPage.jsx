@@ -25,21 +25,6 @@ export const ContestacionCorrespondenciaPage = () => {
       )}
 
       <div className="split-layout">
-
-        <section className="card-container">
-          <div className="card-title-bar">
-            <span>📄</span>
-            <h5>Documento Original de Correspondencia</h5>
-          </div>
-          <div className="form-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-            <VistaDocumentoCorrespondencia
-              correspondencia={correspondencia}
-              loading={loading}
-            />
-          </div>
-        </section>
-
-
         <section className="card-container">
           <div className="card-title-bar">
             <span>📝</span>

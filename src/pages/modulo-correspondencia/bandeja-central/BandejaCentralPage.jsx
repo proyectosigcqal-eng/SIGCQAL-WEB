@@ -23,9 +23,8 @@ export const BandejaCentralPage = () => {
         cargarDatos(activeTab);
     }, [activeTab]);
 
-   const normalizeId = (v) => v != null ? Number(v) : null;
-
-  
+const esContestacion = (o) =>
+  o.idArea === null || o.idArea === undefined || o.idArea === 0 || o.esContestacion === true;
 
 const cargarDatos = async (tab) => {
 
@@ -51,13 +50,14 @@ if (tab === 'memorandums') {
         m => Number(m.id) === Number(item.idMemo) // ← usa m.id no m.idMemo
     );
 
+
     // 2. Con el idCorrespondencia del memo, busca si hay oficio de contestación
     const idCorrDelMemo = memoOriginal?.idCorrespondencia;
         const oficioContestacion = idCorrDelMemo
                 ? oficios.find(o =>
                         Number(o.idCorrespondencia) === Number(idCorrDelMemo) &&
                         Number(o.id) !== Number(item.idMemo) &&
-                        o.idArea === null // ← sin área = es contestación
+                        esContestacion(o)// ← sin área = es contestación
                     )
                 : null;
 
@@ -76,37 +76,35 @@ if (tab === 'memorandums') {
     };
 }));
 
-  } else if (tab === 'oficios') {
-    const data = await listarSeguimientosOficio();
+    } else if (tab === 'oficios') {
+        const data = await listarSeguimientosOficio();
 
-    // Oficios de contestación = los que tienen idArea null
-    const oficiosContestacion = oficios.filter(o => o.idArea === null);
+        setDatosTabla(data.map(item => {
+                // Encuentra el oficio original del seguimiento
+                const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
 
-    setDatosTabla(data.map(item => {
-        // Encuentra el oficio original del seguimiento
-        const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
-        
-        // Busca si existe un oficio de contestación con la misma correspondencia
-                const oficioContest = oficioOriginal
-                        ? oficiosContestacion.find(o =>
-                                Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia) &&
-                                Number(o.id) !== Number(item.idOficio)
-                            )
-                        : null;
+                // Busca el oficio de contestación por idCorrespondencia y idArea === null
+                let oficioContest = null;
+                if (oficioOriginal?.idCorrespondencia) {
+                    oficioContest = oficios.find(o =>
+                        Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia) &&
+                        esContestacion(o)
+                    );
+                }
 
-        return {
-            id:                      item.idSeguimientoOficio,
-            idMemo:                  item.idOficio,
-            folio:                   item.folioRespuesta,
-            asunto:                  item.respuestasSeguimientoOficio,
-            fecha:                   pickFecha(item) || item.fechaResolucion,
-            estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-            archivo:                 oficioContest?.urlMemorandumGenerado || null,
-            nombreArchivo:           oficioContest?.folioUnico || null,
-            tieneOficioContestacion: !!oficioContest,
-            tipo:                    'oficio'
-        };
-    }));
+                return {
+                        id:                      item.idSeguimientoOficio,
+                        idMemo:                  item.idOficio,
+                        folio:                   item.folioRespuesta,
+                        asunto:                  item.respuestasSeguimientoOficio,
+                        fecha:                   pickFecha(item) || item.fechaResolucion,
+                        estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+                        archivo:                 oficioContest?.urlMemorandumGenerado || null,
+                        nombreArchivo:           oficioContest?.folioUnico || null,
+                        tieneOficioContestacion: !!oficioContest,
+                        tipo:                    'oficio'
+                };
+        }));
    } else {
   const [data, correspondencias] = await Promise.all([
     listarSeguimientosCorr(),
@@ -122,7 +120,7 @@ if (tab === 'memorandums') {
       ? oficios.find(o =>
                     Number(o.idCorrespondencia) === Number(corrOriginal.id) &&
                     Number(o.id) !== Number(item.idMemo) &&
-                    o.idArea === null
+                    esContestacion(o)
         )
       : null;
 
@@ -263,15 +261,6 @@ if (tab === 'memorandums') {
                                                                                                     <button className="btn-atender" onClick={() => handleAbrirDetalle(item)}>
                                                                                                         Detalles
                                                                                                     </button>
-                                                                                                    {item.tieneOficioContestacion && item.archivo && (
-                                                                                                        <button
-                                                                                                            className="btn-descargar-oficio"
-                                                                                                            onClick={() => window.open(`${API_BASE_URL}${item.archivo}`, '_blank')}
-                                                                                                            title="Ver Oficio de Contestación"
-                                                                                                        >
-                                                                                                            📄 Ver Oficio
-                                                                                                        </button>
-                                                                                                    )}
                                                                                                 </div>
                                             </td>
                                         </tr>

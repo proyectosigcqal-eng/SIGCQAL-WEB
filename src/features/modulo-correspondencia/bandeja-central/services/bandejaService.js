@@ -55,9 +55,9 @@ export const obtenerBitacoraCompletaMemo = async (idMemo) => {
     memo?.idCorrespondencia
       ? axios.get(`${API_BASE}/oficios/listar`)
           .then(r => r.data.filter(o =>
-            Number(o.idCorrespondencia) === Number(memo.idCorrespondencia) &&
-            Number(o.id) !== Number(idMemo) &&
-            o.idArea === null
+  Number(o.idCorrespondencia) === Number(memo.idCorrespondencia) &&
+  Number(o.id) !== Number(idMemo) &&
+  (o.idArea === null || o.idArea === undefined || o.idArea === 0 || o.esContestacion === true)
           ))
           .catch(() => [])
       : Promise.resolve([]),
@@ -198,10 +198,10 @@ export const obtenerBitacoraCompletaOficio = async (idSeguimientoOficio, idOfici
       ? axios.get(`${API_BASE}/oficios/listar`)
           .then(r =>
             r.data.filter(o =>
-              Number(o.idCorrespondencia) === Number(oficio.idCorrespondencia) &&
-              Number(o.id) !== Number(idOficio) &&
-              o.idArea === null
-            )
+  Number(o.idCorrespondencia) === Number(memo.idCorrespondencia) &&
+  Number(o.id) !== Number(idMemo) &&
+  (o.idArea === null || o.idArea === undefined || o.idArea === 0 || o.esContestacion === true)
+)
           )
           .catch(() => [])
       : Promise.resolve([]),

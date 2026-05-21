@@ -358,6 +358,15 @@
   font-size: 14px;
 }
 
+/* ÁREA DESTINATARIA — negrita, mayúsculas, margen inferior pequeño */
+.area-destinatario {
+  font-size: 0.95em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #1a202c;
+}
+
 /* CUERPO */
 .texto-presente {
   margin-bottom: 30px;

@@ -1,12 +1,14 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { generarOficio } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { generarOficio, finalizarAsignacion } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
 import { obtenerCorrespondenciaPorId } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
 import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
 
-const FIRMANTE_FIJO = 10;
+const FIRMANTE_FIJO = 5; // ana_admin fijo
 
 export const GenerarOficioContestacionPage = () => {
   const location  = useLocation();
@@ -21,7 +23,10 @@ export const GenerarOficioContestacionPage = () => {
 
   const idCorrespondenciaH =
     heredado.idCorrespondencia ?? fuente?.idCorrespondencia ?? fuente?.id ?? null;
-
+// Agrega este cálculo ANTES del handleGuardar, usando los catálogos ya disponibles
+const usuarioFirmante = catalogos.usuarios?.find(u => u.id === FIRMANTE_FIJO || u.idUsuario === FIRMANTE_FIJO);
+const areaFirmanteResuelta = usuarioFirmante?.nombreArea || usuarioFirmante?.area || 'Archivo';
+const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante?.username || 'ana_admin';
   const firmanteH    = fuente?.firmante || fuente?.nombreFirmante || heredado.firmante || 'jperez';
   const areaFirmanteH = fuente?.areaFirmante || fuente?.area || heredado.areaFirmante || 'Administración';
   const textoSugeridoH = heredado.textoSugerido || fuente?.textoSugerido || fuente?.respuestaSeguimiento || '';
@@ -75,21 +80,67 @@ export const GenerarOficioContestacionPage = () => {
 
     try {
       const payload = {
-        idCorrespondencia:      heredado.idCorrespondencia ?? idCorrespondenciaH,
-        idUsuarioFirmante:      heredado.idUsuarioFirmante ?? FIRMANTE_FIJO,
-        idUsuarioEmisor:        heredado.idUsuarioEmisor ?? resolveIdUsuarioEmisor(),
-        instruccionSeguimiento: instruccion,
-        observaciones:          correspondencia?.asunto || fuente?.asunto || instruccion,
-        areaDestinatario:       correspondencia?.dependenciaRemitente || fuente?.dependenciaRemitente || '',
-        idPlantilla:            null,
-        idArea:                 null,
-        folioUnico:             folioOficio || '',
-        nombreFirmante:         heredado.firmante || firmanteH,
-        areaFirmante:           heredado.areaFirmante || areaFirmanteH,
-        nombreEmisor:           heredado.nombreEmisor || heredado.firmante || firmanteH,
-      };
+  idCorrespondencia:      heredado.idCorrespondencia,
+  idUsuarioFirmante:      FIRMANTE_FIJO,
+  idUsuarioEmisor:        FIRMANTE_FIJO,
+  instruccionSeguimiento: instruccion,
+  observaciones:          correspondencia?.asunto || instruccion,
+  areaDestinatario:       correspondencia?.dependenciaRemitente || '',
 
-      await generarOficio(payload);
+  // ✅ Usar los datos resueltos desde catálogos, no hardcodeados
+  nombreFirmante:         nombreFirmanteResuelto,
+  areaFirmante:           areaFirmanteResuelta,
+  nombreEmisor:           nombreFirmanteResuelto,
+
+  idArea:                 null,   // ✅ null EXPLÍCITO — identifica que es contestación
+  idPlantilla:            null,
+  folioUnico:             formData.numOficioSalida || '', // ✅ usar el número de oficio capturado
+  esContestacion:         true,   // ✅ añadir este campo si el backend lo soporta
+};
+      // 1) Crear registro del oficio en el backend y obtener su id
+      const resultado = await generarOficio(payload);
+      const nuevoId = resultado?.id;
+      if (!nuevoId) throw new Error('No se obtuvo id del oficio generado');
+
+      // 2) Generar PDF en cliente desde la vista previa (elemento con id 'oficio-pdf-content')
+      const elemento = document.getElementById('oficio-pdf-content');
+      if (!elemento) {
+        console.warn('GenerarOficioContestacionPage: no se encontró #oficio-pdf-content para generar PDF');
+        navigate('/correspondencia/registradas', { state: { refreshInterna: true, tabActivo: 'INTERNA' } });
+        return;
+      }
+
+      const canvas = await html2canvas(elemento, {
+        scale: 3,
+        useCORS: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById('oficio-pdf-content');
+          if (el) {
+            el.style.letterSpacing = '0.5px';
+            el.style.wordSpacing = '2px';
+            const parrafos = el.getElementsByTagName('p');
+            for (let p of parrafos) {
+              p.style.textAlign = 'left';
+              p.style.display = 'block';
+            }
+          }
+        }
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'letter');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+      const pdfBlob = pdf.output('blob');
+      const file = new File([pdfBlob], `OFICIO_${resultado?.folioUnico || nuevoId}.pdf`, { type: 'application/pdf' });
+
+      // 3) Subir el PDF generado y asociarlo al oficio (usa el endpoint existente)
+      await finalizarAsignacion(nuevoId, file, null);
+
+      // 4) Navegar a la lista
       navigate('/correspondencia/registradas', {
         state: { refreshInterna: true, tabActivo: 'INTERNA' },
       });
@@ -126,7 +177,7 @@ export const GenerarOficioContestacionPage = () => {
           <form onSubmit={handleGuardar}>
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Firmante</label>
-              <input type="text" value={firmanteH} disabled className="input-readonly" />
+              <input type="text" value={'ana_admin'} disabled className="input-readonly" />
             </div>
 
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
@@ -167,18 +218,23 @@ export const GenerarOficioContestacionPage = () => {
         </section>
 
         <section className="panel-vista-previa">
-          <VistaPreviaOficio
-            formData={{
-              ...formData,
-              instruccionSeguimiento: instruccion,
-              asuntoCorrespondencia:  fuente?.asunto || correspondencia?.asunto || '',
-              folioUnico:             folioOficio || '',
-              idUsuarioFirmante:      heredado.idUsuarioFirmante || FIRMANTE_FIJO,
-              idUsuarioEmisor:        heredado.idUsuarioEmisor || resolveIdUsuarioEmisor(),
-              observaciones:          correspondencia?.asunto || fuente?.asunto || '',
-            }}
+         <VistaPreviaOficio
+  formData={{
+    folioUnico:             formData.numOficioSalida || folioOficio || '',
+    asuntoCorrespondencia:  correspondencia?.asunto || '',
+    observaciones:          correspondencia?.asunto || '',
+    instruccionSeguimiento: instruccion,
+    idUsuarioFirmante:      FIRMANTE_FIJO,
+    idUsuarioEmisor:        FIRMANTE_FIJO,
+    // ✅ Pasar los datos ya resueltos para que la vista previa sea idéntica al PDF guardado
+    nombreFirmante:         nombreFirmanteResuelto,
+    areaFirmante:           areaFirmanteResuelta,
+  }}
             usuarios={catalogos.usuarios}
-            areaDestino={{ nombre: fuente?.dependenciaRemitente || correspondencia?.dependenciaRemitente || '' }}
+            areaDestino={{
+              nombre:     correspondencia?.dependenciaRemitente || '',
+              nombreArea: correspondencia?.dependenciaRemitente || '',
+            }}
           />
         </section>
 
