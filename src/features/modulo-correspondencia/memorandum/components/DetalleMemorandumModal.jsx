@@ -10,26 +10,44 @@ export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) =
   const [error, setError] = useState(null);
   const [respondiendo, setRespondiendo] = useState(false);
 
-  useEffect(() => {
-    if (!idMemo) return;
-    setLoading(true);
-    obtenerMemorandumPorId(idMemo)
-      .then(data => {
-        setMemo(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Error al cargar el memorándum');
-        setLoading(false);
-      });
-  }, [idMemo]);
+ useEffect(() => {
+  if (!idMemo) return;
+  setLoading(true);
+  obtenerMemorandumPorId(idMemo)
+    .then(data => {
+      console.log('>>> memo completo keys:', Object.keys(data)); // ← ver campos reales
+      console.log('>>> memo completo:', data);
+      setMemo(data);
+      setLoading(false);
+    })
+    .catch(err => {
+      setError('Error al cargar el memorándum');
+      setLoading(false);
+    });
+}, [idMemo]);
 
   if (!idMemo) return null;
 
-  // Utilidades para fecha/hora
-  const fecha = memo?.fechaEmision ? memo.fechaEmision : null;
-  const fechaStr = fecha ? formatDateDisplay(fecha) : '-';
-  const horaStr = fecha ? formatDateTimeDisplay(fecha).split(' ')[1] : '-';
+
+// Reemplaza el bloque de fecha/hora en DetalleMemorandumModal.jsx
+
+const fecha = memo?.fechaEmision 
+  ?? memo?.fecha_emision 
+  ?? memo?.fechaCreacion 
+  ?? memo?.createdAt 
+  ?? null;
+
+const fechaStr = fecha 
+  ? formatDateDisplay(fecha) 
+  : memo?.urlMemorandumGenerado  // si tiene archivo, al menos sabemos que fue procesado
+    ? 'Fecha no registrada' 
+    : '-';
+
+const horaStr = fecha
+  ? fecha.includes('T') 
+    ? fecha.split('T')[1].substring(0, 5)
+    : '-'
+  : '-';
 
   // Función para manejar la respuesta "Si es del área"
   const handleSiEsDelArea = async () => {
@@ -136,11 +154,11 @@ export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) =
                 </div>
               <div className="info-correspondencia">
                 <strong>REMITENTE</strong>
-                <div>{memo.remitente || memo.nombreRemitente || memo.remitenteNombre || '-'}</div>
+                <div>{memo.nombreRemitente || memo.remitente || '-'}</div>
               </div>
               <div className="info-correspondencia">
                 <strong>DEPENDENCIA</strong>
-                <div>{memo.dependenciaRemitente || memo.dependencia || memo.nombreDependencia || '-'}</div>
+                <div>{memo.dependenciaRemitente || memo.dependencia || '-'}</div>
               </div>
               <div className="info-correspondencia">
                 <strong>ASUNTO </strong>

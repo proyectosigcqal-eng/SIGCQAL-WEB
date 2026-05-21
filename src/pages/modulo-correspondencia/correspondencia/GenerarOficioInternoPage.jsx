@@ -237,7 +237,11 @@ export const GenerarOficioInternoPage = () => {
           </FormularioOficio>
         </section>
         <section className="panel-vista-previa">
-          <VistaPreviaOficio formData={formData} usuarios={catalogos.usuarios} />
+          <VistaPreviaOficio
+            formData={formData}
+            usuarios={catalogos.usuarios}
+            areaDestino={{ nombre: correspondencia?.dependenciaRemitente || correspondencia?.nombreArea || '' }}
+          />
         </section>
       </div>
     </div>

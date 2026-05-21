@@ -343,19 +343,31 @@
   color: #4a4a4a;
 }
 
+.membrete-contenido {
+  display: flex;
+  flex-direction: column;
+}
+
 .membrete-meta-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   text-align: right;
-  font-size: 13px;
-  line-height: 1.4;
-  max-width: 300px;
+  margin-left: auto;
+  margin-bottom: 1.5rem;
+  padding-right: 0.5rem;
+  width: fit-content;
+  align-self: flex-end;
 }
 
 .membrete-meta-info p {
-  margin: 0 0 3px 0;
+  margin: 2px 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
-.meta-folio {
-  font-size: 14px;
+.membrete-meta-info .meta-folio {
+  font-size: 1rem;
 }
 
 /* ÁREA DESTINATARIA — negrita, mayúsculas, margen inferior pequeño */
@@ -433,4 +445,27 @@
   margin: 0;
   color: white;
   font-size: 10px;
+}
+
+/* CENTRAR BLOQUE DE FIRMA */
+.membrete-footer-firma {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 3rem;
+  width: 100%;
+}
+
+.bloque-firma {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.texto-ccp {
+  text-align: center;
+  margin-top: 1rem;
 }

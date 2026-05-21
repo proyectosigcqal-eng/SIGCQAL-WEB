@@ -110,32 +110,78 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
         return;
       }
 
-      const canvas = await html2canvas(elemento, {
-        scale: 3,
-        useCORS: true,
-        logging: false,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.getElementById('oficio-pdf-content');
-          if (el) {
-            el.style.letterSpacing = '0.5px';
-            el.style.wordSpacing = '2px';
-            const parrafos = el.getElementsByTagName('p');
-            for (let p of parrafos) {
-              p.style.textAlign = 'left';
-              p.style.display = 'block';
-            }
-          }
-        }
-      });
+// ✅ Reemplaza toda la sección de generación del PDF
+const canvas  = await html2canvas(elemento, {
+  scale: 2,
+  useCORS: true,
+  logging: false,
+  onclone: (clonedDoc) => {
+    const el = clonedDoc.getElementById('oficio-pdf-content');
+    if (!el) return;
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'letter');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    // ✅ Altura fija carta — evita que el contenido desborde
+    el.style.width     = '816px';
+    el.style.height    = '1056px';
+    el.style.minHeight = '1056px';
+    el.style.maxHeight = '1056px';
+    el.style.overflow  = 'hidden';
+    el.style.position  = 'relative';
+    el.style.boxSizing = 'border-box';
 
-      const pdfBlob = pdf.output('blob');
-      const file = new File([pdfBlob], `OFICIO_${resultado?.folioUnico || nuevoId}.pdf`, { type: 'application/pdf' });
+    const imgMembrete = el.querySelector('.membrete-fondo');
+    if (imgMembrete) {
+      imgMembrete.style.position  = 'absolute';
+      imgMembrete.style.top       = '0';
+      imgMembrete.style.left      = '0';
+      imgMembrete.style.width     = '100%';
+      imgMembrete.style.height    = '100%';
+      imgMembrete.style.objectFit = 'fill';
+      imgMembrete.style.zIndex    = '0';
+    }
+
+    const contenido = el.querySelector('.membrete-contenido');
+    if (contenido) {
+      contenido.style.position      = 'absolute';
+      contenido.style.top           = '0';
+      contenido.style.left          = '0';
+      contenido.style.width         = '100%';
+      contenido.style.height        = '100%';
+      contenido.style.padding       = '200px 56px 80px 56px';
+      contenido.style.boxSizing     = 'border-box';
+      contenido.style.zIndex        = '1';
+      contenido.style.display       = 'flex';
+      contenido.style.flexDirection = 'column';
+      contenido.style.fontSize      = '13px';
+      contenido.style.lineHeight    = '1.5';
+      contenido.style.overflow      = 'hidden'; // ← evita desborde
+    }
+
+    const firma = el.querySelector('.membrete-footer-firma');
+    if (firma) {
+      firma.style.marginTop = 'auto'; // ← empuja firma al fondo dentro del flex
+      firma.style.textAlign = 'center';
+    }
+
+    const parrafos = el.getElementsByTagName('p');
+    for (let p of parrafos) {
+      p.style.margin    = '4px 0';
+      p.style.wordBreak = 'normal';
+    }
+  }
+});
+
+const imgData = canvas.toDataURL('image/png');
+const pdf     = new jsPDF('p', 'mm', 'letter');
+
+// ✅ Fuerza una sola página — escala imagen al tamaño carta exacto
+pdf.addImage(imgData, 'PNG', 0, 0, 215.9, 279.4);
+
+const pdfBlob = pdf.output('blob');
+const file    = new File(
+  [pdfBlob],
+  `OFICIO_${resultado?.folioUnico || nuevoId}.pdf`,
+  { type: 'application/pdf' }
+);
 
       // 3) Subir el PDF generado y asociarlo al oficio (usa el endpoint existente)
       await finalizarAsignacion(nuevoId, file, null);
@@ -193,12 +239,7 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
               {errorNumOficio && <span style={{ color: '#dc2626', fontSize: '0.78rem' }}>El número de oficio es obligatorio</span>}
             </div>
 
-            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
-              <label>Folio (manual)</label>
-              <input type="text" className="form-control" value={folioOficio}
-                onChange={(e) => setFolioOficio(e.target.value)}
-                placeholder="Introduce folio para el oficio (opcional)" />
-            </div>
+            {/* Campo 'Folio (manual)' eliminado por requerimiento */}
 
             <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">

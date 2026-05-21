@@ -44,7 +44,7 @@ if (tab === 'memorandums') {
     listarMemorandums()
   ]);
 
-  setDatosTabla(data.map(item => {
+    setDatosTabla(data.map(item => {
     // 1. Encuentra el memorándum original por idMemo
     const memoOriginal = memorandums.find(
         m => Number(m.id) === Number(item.idMemo) // ← usa m.id no m.idMemo
@@ -61,11 +61,12 @@ if (tab === 'memorandums') {
                     )
                 : null;
 
+    const folioOriginal = memoOriginal?.folioUnico || memoOriginal?.folio_unico || memoOriginal?.folio || item.folioRespuesta;
     return {
         id:                      item.idSeguimientoMemorandum,
         idMemo:                  item.idMemo,
         idCorrespondencia:       idCorrDelMemo || null,
-        folio:                   item.folioRespuesta,
+        folio:                   folioOriginal,
         asunto:                  item.respuestaSeguimientoMemorandum,
         fecha:                   pickFecha(item) || item.fechaResolucion,
         estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
@@ -80,30 +81,32 @@ if (tab === 'memorandums') {
         const data = await listarSeguimientosOficio();
 
         setDatosTabla(data.map(item => {
-                // Encuentra el oficio original del seguimiento
-                const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
+            // Encuentra el oficio original del seguimiento
+            const oficioOriginal = oficios.find(o => Number(o.id) === Number(item.idOficio));
 
-                // Busca el oficio de contestación por idCorrespondencia y idArea === null
-                let oficioContest = null;
-                if (oficioOriginal?.idCorrespondencia) {
-                    oficioContest = oficios.find(o =>
-                        Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia) &&
-                        esContestacion(o)
-                    );
-                }
+            // Busca el oficio de contestación por idCorrespondencia y idArea === null
+            let oficioContest = null;
+            if (oficioOriginal?.idCorrespondencia) {
+                oficioContest = oficios.find(o =>
+                Number(o.idCorrespondencia) === Number(oficioOriginal.idCorrespondencia) &&
+                esContestacion(o)
+                );
+            }
 
-                return {
-                        id:                      item.idSeguimientoOficio,
-                        idMemo:                  item.idOficio,
-                        folio:                   item.folioRespuesta,
-                        asunto:                  item.respuestasSeguimientoOficio,
-                        fecha:                   pickFecha(item) || item.fechaResolucion,
-                        estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-                        archivo:                 oficioContest?.urlMemorandumGenerado || null,
-                        nombreArchivo:           oficioContest?.folioUnico || null,
-                        tieneOficioContestacion: !!oficioContest,
-                        tipo:                    'oficio'
-                };
+            const folioOriginal = oficioOriginal?.folioUnico || oficioOriginal?.folio_unico || oficioOriginal?.folio || item.folioRespuesta;
+
+            return {
+                id:                      item.idSeguimientoOficio,
+                idMemo:                  item.idOficio,
+                folio:                   folioOriginal,
+                asunto:                  item.respuestasSeguimientoOficio,
+                fecha:                   pickFecha(item) || item.fechaResolucion,
+                estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+                archivo:                 oficioContest?.urlMemorandumGenerado || null,
+                nombreArchivo:           oficioContest?.folioUnico || null,
+                tieneOficioContestacion: !!oficioContest,
+                tipo:                    'oficio'
+            };
         }));
    } else {
   const [data, correspondencias] = await Promise.all([
@@ -111,32 +114,34 @@ if (tab === 'memorandums') {
     listarCorrespondencias() // ← ya existe en correspondenciaService.js
   ]);
 
-  setDatosTabla(data.map(item => {
-    const corrOriginal = correspondencias.find(
-      c => Number(c.id) === Number(item.idCorrespondencia)
-    );
+    setDatosTabla(data.map(item => {
+        const corrOriginal = correspondencias.find(
+            c => Number(c.id) === Number(item.idCorrespondencia)
+        );
 
-    const oficioContest = corrOriginal
-      ? oficios.find(o =>
-                    Number(o.idCorrespondencia) === Number(corrOriginal.id) &&
-                    Number(o.id) !== Number(item.idMemo) &&
-                    esContestacion(o)
-        )
-      : null;
+        const oficioContest = corrOriginal
+            ? oficios.find(o =>
+                                        Number(o.idCorrespondencia) === Number(corrOriginal.id) &&
+                                        Number(o.id) !== Number(item.idMemo) &&
+                                        esContestacion(o)
+                )
+            : null;
 
-    return {
-      id:                      item.idSeguimientoCorrespondencia,
-      idMemo:                  item.idCorrespondencia,
-      folio:                   item.folioRespuesta,
-      asunto:                  item.respuestaSeguimientoCorrespondencia,
-      fecha:                   pickFecha(item) || item.fechaResolucion,
-      estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
-      archivo:                 oficioContest?.urlMemorandumGenerado || null,
-      nombreArchivo:           oficioContest?.folioUnico || null,
-      tieneOficioContestacion: !!oficioContest,
-      tipo:                    'correspondencia'
-    };
-  }));
+        const folioOriginal = corrOriginal?.folioUnico || corrOriginal?.folio_unico || corrOriginal?.folio || item.folioRespuesta;
+
+        return {
+            id:                      item.idSeguimientoCorrespondencia,
+            idMemo:                  item.idCorrespondencia,
+            folio:                   folioOriginal,
+            asunto:                  item.respuestaSeguimientoCorrespondencia,
+            fecha:                   pickFecha(item) || item.fechaResolucion,
+            estatus:                 item.idEstatus === 6 ? 'CONCLUIDO' : 'CONTESTADO',
+            archivo:                 oficioContest?.urlMemorandumGenerado || null,
+            nombreArchivo:           oficioContest?.folioUnico || null,
+            tieneOficioContestacion: !!oficioContest,
+            tipo:                    'correspondencia'
+        };
+    }));
 }
   } catch (error) {
     console.error("Error", error);

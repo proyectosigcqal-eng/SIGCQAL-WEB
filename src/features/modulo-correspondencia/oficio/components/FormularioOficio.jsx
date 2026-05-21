@@ -136,17 +136,7 @@ export const FormularioOficio = ({
             </div>
           </div>
 
-          <div className="form-group full-width">
-            <label>Plantilla</label>
-            <select name="idPlantilla" value={formData.idPlantilla} onChange={handleChange}>
-              <option value="">Seleccione...</option>
-              {plantillas.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nombre}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Plantilla removida por requerimiento: campo oculto en formularios */}
         </>
       ) : null}
 

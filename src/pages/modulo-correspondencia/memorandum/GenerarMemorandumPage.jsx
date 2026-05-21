@@ -43,10 +43,15 @@ export const GenerarMemorandumPage = () => {
           />
         </section>
         <section className="panel-vista-previa">
-          <VistaPreviaMemorandum
-            formData={formData}
-            usuarios={catalogos.usuarios}
-          />
+         <VistaPreviaMemorandum
+          formData={formData}
+          usuarios={catalogos.usuarios}
+          areaDestino={{
+            // ✅ Buscar el nombre del área seleccionada en el formulario
+            nombre: catalogos.areas?.find(a => a.id === Number(formData.idArea))?.nombre || '',
+            nombreArea: catalogos.areas?.find(a => a.id === Number(formData.idArea))?.nombre || '',
+          }}
+        />
         </section>
       </div>
     </div>

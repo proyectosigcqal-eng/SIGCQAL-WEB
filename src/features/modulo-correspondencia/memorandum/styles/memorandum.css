@@ -377,6 +377,32 @@
     hyphens: auto; /* Agrega guiones si es necesario */
 }
 
+.membrete-contenido {
+  display: flex;
+  flex-direction: column;
+}
+
+.membrete-meta-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  margin-left: auto;
+  margin-bottom: 1.5rem;
+  padding-right: 0.5rem;
+  width: fit-content;
+  align-self: flex-end;
+}
+
+.membrete-meta-info p {
+  margin: 2px 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.membrete-meta-info .meta-folio {
+  font-size: 1rem;
+}
 .parrafo-introductorio {
     margin-bottom: 1.5rem;
 }
@@ -533,4 +559,27 @@
 
 .bloque-firma {
   margin-top: 8px;
+}
+
+/* CENTRAR BLOQUE DE FIRMA */
+.membrete-footer-firma {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 3rem;
+  width: 100%;
+}
+
+.bloque-firma {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.texto-ccp {
+  text-align: center;
+  margin-top: 1rem;
 }

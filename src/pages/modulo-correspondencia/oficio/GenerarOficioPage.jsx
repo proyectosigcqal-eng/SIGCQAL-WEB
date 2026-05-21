@@ -46,6 +46,7 @@ export const GenerarOficioPage = () => {
           <VistaPreviaOficio
             formData={formData}
             usuarios={catalogos.usuarios}
+            areaDestino={{ nombre: correspondencia?.dependenciaRemitente || correspondencia?.nombreArea || '' }}
           />
         </section>
       </div>

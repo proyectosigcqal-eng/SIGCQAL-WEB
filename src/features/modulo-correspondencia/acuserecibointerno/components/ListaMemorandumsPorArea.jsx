@@ -73,25 +73,32 @@ export const ListaMemorandumsPorArea = () => {
               </tr>
             </thead>
             <tbody>
-              {memorandums.map((memo, index) => (
-                <tr key={memo.idAcuse}>
-                  <td className="num-index">{index + 1}</td>
-                  <td>{memo.folioUnico || '-'}</td>
-                  <td className="num-memo">{memo.numMemo || '-'}</td>
-                  <td className="asunto-cell">{memo.observaciones || '-'}</td>
-                  <td>{formatFecha(memo, memo.fechaEmision)}</td>
-                  <td>{formatFecha(memo, memo.fechaAceptacion)}</td>
-                  <td>
-                    <button 
-                      className="btn-accion btn-contestacion"
-                      title="Contestación"
-                      onClick={() => navigate(`/correspondencia/contestacion/${memo.idAcuse}`)}
-                    >
-                      Contestación
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {memorandums.map((memo, index) => {
+                // Aquí abrimos llaves `{}` correctamente para poder ejecutar el log antes del return
+                console.log('Memo:', memo); 
+                
+                return (
+                  <tr key={memo.idAcuse || index}>
+                    <td className="num-index">{index + 1}</td>
+                    <td>{memo.folioUnicoCorrespondencia || memo.folioUnico || '-'}</td>
+                    <td className="num-memo">{memo.folioUnico || memo.numMemo || '-'}</td>
+                    <td className="asunto-cell">
+                      {memo.asuntoCorrespondencia || memo.asuntoCorrespondenciaCompleto || memo.observaciones || '-'}
+                    </td>
+                    <td>{formatFecha(memo, memo.fechaEmision)}</td>
+                    <td>{formatFecha(memo, memo.fechaAceptacion)}</td>
+                    <td>
+                      <button 
+                        className="btn-accion btn-contestacion"
+                        title="Contestación"
+                        onClick={() => navigate(`/correspondencia/contestacion/${memo.idAcuse}`)}
+                      >
+                        Contestación
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

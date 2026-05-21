@@ -28,7 +28,9 @@ export const VistaPreviaMemorandum = ({ formData, usuarios = [], areaDestino }) 
   const folio           = formData.folioUnico || '{{FOLIO}}';
   const asunto          = formData.asuntoCorrespondencia || formData.observaciones || '{{ASUNTO}}';
   const fecha           = obtenerFechaActual();
-  const areaDestinatario = areaDestino?.nombre || areaDestino?.nombreArea || null;
+  const areaDestinatario = formData.idArea 
+  ? (areaDestino?.nombre || areaDestino?.nombreArea || null)
+  : null;
   const areaEmisor = getAreaUsuario(formData.idUsuarioEmisor) || '[Sin Área Asignada]';
   const nombreEmisor    = getNombreUsuario(formData.idUsuarioEmisor);
   const instruccion     = formData.instruccionSeguimiento || '';

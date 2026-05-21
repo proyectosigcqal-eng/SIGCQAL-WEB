@@ -71,19 +71,20 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
                   <td>{formatFecha(acuse, acuse.fechaExpedicion)}</td>
                   <td>{formatFecha(acuse, acuse.fechaAceptacion)}</td>
                   <td>
-                    <button 
-                      className="btn-contestacion-acuse-correspondencia"
-                      onClick={() => {
-                        const idDestino = acuse.idAcuseCorrespondencia || acuse.id;
-                        if (idDestino) {
-                          navigate(`/correspondencia/contestacion-correspondencia/${idDestino}`);
-                        } else {
-                          console.error("No se encontró el idAcuseCorrespondencia para navegar.");
-                        }
-                      }}
-                    >
-                      Contestación
-                    </button>
+                  <button 
+  className="btn-contestacion-acuse-correspondencia"
+  onClick={() => {
+    // ✅ Usar idCorrespondencia, no el id del acuse
+    const idDestino = acuse.idCorrespondencia;
+    if (idDestino) {
+      navigate(`/correspondencia/contestacion-correspondencia/${idDestino}`);
+    } else {
+      console.error("No se encontró idCorrespondencia en el acuse:", acuse);
+    }
+  }}
+>
+  Contestación
+</button>
                   </td>
                 </tr>
               ))}

@@ -37,6 +37,7 @@ export const useMemorandum = (correspondencia, catalogos) => { // ← recibe cat
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const now = new Date();
         const firmante = catalogos?.usuarios?.find(
             u => u.id === Number(formData.idUsuarioFirmante)
         );
@@ -49,11 +50,16 @@ export const useMemorandum = (correspondencia, catalogos) => { // ← recibe cat
 
         const payload = {
             ...formData,
-            areaDestinatario: areaDestino?.nombre || areaDestino?.nombreArea || '',
-            nombreFirmante:   firmante?.usuarioLogin || '',
-            areaFirmante:     firmante?.nombreArea   || getAreaUsuario(formData.idUsuarioFirmante, catalogos.usuarios) || '',
-            nombreEmisor:     emisor?.usuarioLogin   || '', // ← agregar
-        };
+            fechaEmision:  now.toISOString(),
+  fecha_emision: now.toISOString(),
+  fechaCreacion: now.toISOString(),
+  horaEmision:   now.toTimeString().slice(0, 8), // "HH:MM:SS"
+  
+  areaDestinatario: areaDestino?.nombre || areaDestino?.nombreArea || '',
+  nombreFirmante:   firmante?.usuarioLogin || '',
+  areaFirmante:     firmante?.nombreArea || getAreaUsuario(formData.idUsuarioFirmante, catalogos.usuarios) || '',
+  nombreEmisor:     emisor?.usuarioLogin || '',
+};
 
         const resultado = await generarMemorandum(payload);
         if (resultado?.id) {

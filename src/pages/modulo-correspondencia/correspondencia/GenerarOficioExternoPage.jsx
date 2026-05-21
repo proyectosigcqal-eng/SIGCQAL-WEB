@@ -317,17 +317,7 @@ export const GenerarOficioExternoPage = () => {
               )}
             </div>
 
-            <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
-              <label>Folio (manual)</label>
-
-              <input
-                type="text"
-                className="form-control"
-                value={folioOficio}
-                onChange={(e) => setFolioOficio(e.target.value)}
-                placeholder="Introduce folio para el oficio (opcional)"
-              />
-            </div>
+            {/* Campo 'Folio (manual)' eliminado por requerimiento */}
 
             <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">

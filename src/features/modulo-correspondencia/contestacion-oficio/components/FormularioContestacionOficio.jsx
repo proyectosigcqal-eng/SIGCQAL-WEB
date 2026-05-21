@@ -122,19 +122,7 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
                 Folio registrado: <strong>{folioGenerado}</strong>
               </p>
             )}
-            <div style={{ marginBottom: 12 }}>
-              <label className="fw-bold small text-uppercase">Folio para Oficio (manual)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={folioManual}
-                onChange={(e) => setFolioManual(e.target.value)}
-                placeholder="Introduce folio para el oficio (puedes editar)"
-              />
-              <small style={{ color: '#6b7280' }}>
-                Si queda vacío se usará el folio registrado automáticamente.
-              </small>
-            </div>
+            {/* Campo 'Folio para Oficio (manual)' eliminado por requerimiento */}
             <div className="modal-oficio-btns">
               <button className="btn-si-oficio" onClick={handleGenerarOficio}>
                 Sí, generar oficio

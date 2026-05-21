@@ -54,11 +54,7 @@ export const VistaPreviaOficio = ({ formData, usuarios = [], areaDestino }) => {
           <div className="cuerpo-memorandum">
 
             {/* ÁREA DESTINATARIA — va ANTES de PRESENTE */}
-            <p className="area-destinatario">
-              <strong>
-                {areaDestinatario || <span className="placeholder-muted">[Área Destinataria]</span>}
-              </strong>
-            </p>
+        
 
             {/* PRESENTE — siempre debajo del área */}
             <p className="texto-presente"><strong>P R E S E N T E.</strong></p>

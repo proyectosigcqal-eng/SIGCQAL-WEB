@@ -15,7 +15,11 @@ export function normalizeDateValue(val) {
     if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s) && !s.includes('T')) {
       return s.replace(' ', 'T');
     }
-    // Keep ISO date or date-only strings as-is
+    // If it's a date-only string 'YYYY-MM-DD', append a mid-day time so it's parsed as local
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+      return `${s}T12:00:00`;
+    }
+    // Keep ISO date/time strings as-is
     return s;
   }
   try {
@@ -51,8 +55,8 @@ export function pickFecha(obj, keys = KNOWN_DATE_KEYS) {
 
 export function formatDateDisplay(dateStr) {
   if (!dateStr) return '-';
-  const d = new Date(dateStr);
-  if (isNaN(d)) return '-';
+  const d = parseToLocalDate(dateStr);
+  if (!d || isNaN(d)) return '-';
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = d.getFullYear();
@@ -61,8 +65,8 @@ export function formatDateDisplay(dateStr) {
 
 export function formatDateTimeDisplay(dateStr) {
   if (!dateStr) return '-';
-  const d = new Date(dateStr);
-  if (isNaN(d)) return '-';
+  const d = parseToLocalDate(dateStr);
+  if (!d || isNaN(d)) return '-';
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = d.getFullYear();
@@ -73,8 +77,8 @@ export function formatDateTimeDisplay(dateStr) {
 
 export function formatForBackend(dateLike) {
   if (!dateLike) return null;
-  const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
-  if (isNaN(d)) return null;
+  const d = parseToLocalDate(dateLike instanceof Date ? dateLike : dateLike);
+  if (!d || isNaN(d)) return null;
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
@@ -83,12 +87,24 @@ export function formatForBackend(dateLike) {
 
 export function formatTimeForBackend(dateLike) {
   if (!dateLike) return null;
-  const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
-  if (isNaN(d)) return null;
+  const d = parseToLocalDate(dateLike instanceof Date ? dateLike : dateLike);
+  if (!d || isNaN(d)) return null;
   const hh = String(d.getHours()).padStart(2, '0');
   const mm = String(d.getMinutes()).padStart(2, '0');
   const ss = String(d.getSeconds()).padStart(2, '0');
   return `${hh}:${mm}:${ss}`;
+}
+
+// Helper: parse into a local Date safely. Handles date-only strings by forcing midday local time
+function parseToLocalDate(dateLike) {
+  if (!dateLike) return null;
+  if (dateLike instanceof Date) return dateLike;
+  const s = String(dateLike).trim();
+  // date-only
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(`${s}T12:00:00`);
+  // common 'YYYY-MM-DD HH:mm:ss' → 'T' for parsing
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s) && !s.includes('T')) return new Date(s.replace(' ', 'T'));
+  return new Date(s);
 }
 
 export default { pickFecha, normalizeDateValue, formatDateDisplay, formatDateTimeDisplay, formatForBackend, formatTimeForBackend };
