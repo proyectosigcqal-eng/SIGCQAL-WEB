@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { FileText, X } from 'lucide-react';
 import { useCatalogosJuridicos } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
 import { useClasificacion } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useClasificacion';
 import { useExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useExpediente';
 import { ResumenExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/ResumenExpediente';
+import { BannerConfirmacionClasificacion } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/BannerConfirmacionClasificacion';
 import { Toast } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/Toast';
 import '@/features/modulo-correspondencia/atencion-juridica/clasificacion/styles/clasificacion.css';
 
@@ -16,9 +17,8 @@ const TIPOS_ASESORIA_VIEW = [
 
 export const ClasificacionJuridicaPage = () => {
   const { idExpediente } = useParams();
-  const navigate = useNavigate();
 
-  const { autoridadesFiscales, tiposActo } = useCatalogosJuridicos();
+  const { autoridadesFiscales, tiposActo, calificaciones } = useCatalogosJuridicos();
 
   const { confirmarClasificacion, guardando, error } = useClasificacion(idExpediente);
   const { expediente, actualizarExpediente } = useExpediente(idExpediente);
@@ -26,6 +26,7 @@ export const ClasificacionJuridicaPage = () => {
   const [tipoAsesoria, setTipoAsesoria] = useState(3);
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [banner, setBanner] = useState(null);
 
   const [formData, setFormData] = useState({
     estatusExpediente: 'CONCLUIDO',
@@ -59,6 +60,15 @@ export const ClasificacionJuridicaPage = () => {
 
   const handleConfirmar = async (e) => {
     e.preventDefault();
+    if (!formData.confirmoAnalisis) {
+      const msg = 'Debes confirmar que realizaste el análisis legal.';
+      setToast({ type: 'error', message: msg });
+      setBanner({
+        status: 'error',
+        message: msg,
+      });
+      return;
+    }
     const result = await confirmarClasificacion({
       idAutoridadFiscal: Number(formData.idAutoridadFiscal),
       idTipoActo: Number(formData.idTipoActo),
@@ -69,20 +79,45 @@ export const ClasificacionJuridicaPage = () => {
     if (result.ok) {
       actualizarExpediente({ estatus: 'Calificado' });
       setModalOpen(false);
-      navigate(`/atencion-juridica/clasificacion/${idExpediente}`);
       setToast({ type: 'success', message: result.message });
+      setBanner({
+        status: 'success',
+        message: result.message,
+      });
     } else {
       setToast({ type: 'error', message: result.message });
+      setBanner({
+        status: 'error',
+        message: result.message,
+      });
     }
   };
 
   const tipoAsesoriaNombre = TIPOS_ASESORIA_VIEW.find((t) => t.id === tipoAsesoria)?.nombre;
   const autoridadNombre = autoridadesFiscales.find((a) => String(a.id) === String(formData.idAutoridadFiscal))?.nombre;
   const tipoActoNombre = tiposActo.find((t) => String(t.id) === String(formData.idTipoActo))?.nombre;
+  const calificacionNombre = calificaciones.find((c) => String(c.id) === String(formData.idCalificacionActo))?.nombre;
 
   return (
     <div className="aj-page">
       <Toast visible={!!toast} type={toast?.type} message={toast?.message} onClose={() => setToast(null)} />
+      <BannerConfirmacionClasificacion
+        status={banner?.status}
+        message={banner?.message}
+        detalles={
+          banner
+            ? {
+                folioGobierno: expediente?.folioGobierno,
+                nombreContribuyente: expediente?.nombreContribuyente,
+                tramite: expediente?.nombreTramite,
+                tipoAsesoria: tipoAsesoriaNombre,
+                tipoActo: tipoActoNombre,
+                calificacionActo: calificacionNombre,
+              }
+            : null
+        }
+        onCerrar={() => setBanner(null)}
+      />
       <div className="aj-header">
         <div className="aj-title-wrap">
           <h1 className="aj-title">CLASIFICACIÓN DE ATENCIÓN</h1>
@@ -95,9 +130,11 @@ export const ClasificacionJuridicaPage = () => {
 
       <ResumenExpediente
         expediente={expediente}
+        tramiteNombre={expediente?.nombreTramite}
         tipoAsesoriaNombre={tipoAsesoriaNombre}
         autoridadNombre={autoridadNombre}
         tipoActoNombre={tipoActoNombre}
+        calificacionNombre={calificacionNombre}
         canalEntrada={formData.canalEntrada}
         monto={formData.monto}
       />
@@ -235,13 +272,13 @@ export const ClasificacionJuridicaPage = () => {
                   />
                 </div>
                 <div className="aj-field">
-                  <label className="aj-label">ASESORÍA JURÍDICA PROPORCIONADA</label>
+                  <label className="aj-label">SEGUIMIENTO / ASESORÍA</label>
                   <textarea
                     className="aj-textarea"
                     name="asesoriaProporcionada"
                     value={formData.asesoriaProporcionada}
                     onChange={handleChange}
-                    placeholder="Describa la asesoría brindada..."
+                    placeholder="Describa el seguimiento o asesoría brindada..."
                   />
                 </div>
               </div>
@@ -292,7 +329,12 @@ export const ClasificacionJuridicaPage = () => {
               <button type="button" className="aj-btn aj-btn-ghost" onClick={() => setModalOpen(false)}>
                 CANCELAR
               </button>
-              <button type="button" className="aj-btn aj-btn-primary" disabled={guardando} onClick={(e) => handleConfirmar(e)}>
+              <button
+                type="button"
+                className="aj-btn aj-btn-primary"
+                disabled={guardando || !formData.confirmoAnalisis}
+                onClick={(e) => handleConfirmar(e)}
+              >
                 {guardando ? 'CONFIRMANDO...' : 'CONFIRMAR CALIFICACIÓN'}
               </button>
             </div>
