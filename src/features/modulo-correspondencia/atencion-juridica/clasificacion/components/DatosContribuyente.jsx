@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useExpediente } from '@/features/atencion-juridica/clasificacion/hooks/useExpediente';
+import { useExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useExpediente';
 
 const pick = (obj, paths) => {
   for (const path of paths) {

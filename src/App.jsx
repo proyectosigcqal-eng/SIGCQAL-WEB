@@ -22,7 +22,7 @@ import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/a
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
-import { ClasificacionJuridicaPage } from './pages/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
+import { ClasificacionJuridicaPage } from './pages/modulo-correspondencia/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';

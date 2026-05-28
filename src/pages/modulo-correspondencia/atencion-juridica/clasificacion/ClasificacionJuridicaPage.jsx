@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FileText, X } from 'lucide-react';
-import { useCatalogosJuridicos } from '@/features/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
-import { useClasificacion } from '@/features/atencion-juridica/clasificacion/hooks/useClasificacion';
-import { useExpediente } from '@/features/atencion-juridica/clasificacion/hooks/useExpediente';
-import { ResumenExpediente } from '@/features/atencion-juridica/clasificacion/components/ResumenExpediente';
-import { Toast } from '@/features/atencion-juridica/clasificacion/components/Toast';
-import '@/features/atencion-juridica/clasificacion/styles/clasificacion.css';
+import { useCatalogosJuridicos } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
+import { useClasificacion } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useClasificacion';
+import { useExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useExpediente';
+import { ResumenExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/ResumenExpediente';
+import { Toast } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/Toast';
+import '@/features/modulo-correspondencia/atencion-juridica/clasificacion/styles/clasificacion.css';
 
 const TIPOS_ASESORIA_VIEW = [
   { id: 1, titulo: 'ASESORÍA SIMPLIFICADA', subtitulo: 'Resolución inmediata', nombre: 'Asesoría Simplificada' },
@@ -82,12 +82,7 @@ export const ClasificacionJuridicaPage = () => {
 
   return (
     <div className="aj-page">
-      <Toast
-        visible={!!toast}
-        type={toast?.type}
-        message={toast?.message}
-        onClose={() => setToast(null)}
-      />
+      <Toast visible={!!toast} type={toast?.type} message={toast?.message} onClose={() => setToast(null)} />
       <div className="aj-header">
         <div className="aj-title-wrap">
           <h1 className="aj-title">CLASIFICACIÓN DE ATENCIÓN</h1>
@@ -136,8 +131,7 @@ export const ClasificacionJuridicaPage = () => {
         <div className="aj-analisis-content">
           <div className="aj-analisis-title">ANÁLISIS DE CASO OBLIGATORIO</div>
           <div className="aj-analisis-subtitle">
-            Para finalizar el registro, es necesario detallar el asunto legal y confirmar el compromiso del
-            contribuyente.
+            Para finalizar el registro, es necesario detallar el asunto legal y confirmar el compromiso del contribuyente.
           </div>
           <button type="button" className="aj-btn aj-btn-primary" onClick={() => setModalOpen(true)}>
             DETALLAR ASUNTO Y COMPROMISO LEGAL
@@ -184,12 +178,7 @@ export const ClasificacionJuridicaPage = () => {
               <div className="aj-form-row aj-form-row--3">
                 <div className="aj-field">
                   <label className="aj-label">AUTORIDAD EMISORA DEL ACTO</label>
-                  <select
-                    className="aj-input"
-                    name="idAutoridadFiscal"
-                    value={formData.idAutoridadFiscal}
-                    onChange={handleChange}
-                  >
+                  <select className="aj-input" name="idAutoridadFiscal" value={formData.idAutoridadFiscal} onChange={handleChange}>
                     <option value="">Ej: SAT, Finanzas...</option>
                     {autoridadesFiscales.map((a) => (
                       <option key={a.id} value={a.id}>
@@ -215,13 +204,7 @@ export const ClasificacionJuridicaPage = () => {
                   <label className="aj-label">MONTO DEL ACTO (MXN)</label>
                   <div className="aj-money">
                     <span className="aj-money-prefix">$</span>
-                    <input
-                      className="aj-input aj-input-money"
-                      name="monto"
-                      value={formData.monto}
-                      onChange={handleChange}
-                      placeholder=""
-                    />
+                    <input className="aj-input aj-input-money" name="monto" value={formData.monto} onChange={handleChange} />
                   </div>
                 </div>
               </div>
@@ -279,14 +262,10 @@ export const ClasificacionJuridicaPage = () => {
                   <div className="aj-normativo">
                     <div className="aj-normativo-title">V. DERECHOS DE LA PERSONA CONTRIBUYENTE</div>
                     <div className="aj-normativo-text">
-                      Conforme al artículo 3 de la Ley de los Derechos y Defensa del Contribuyente del Estado de
-                      Zacatecas y sus Municipios:
+                      Conforme al artículo 3 de la Ley de los Derechos y Defensa del Contribuyente del Estado de Zacatecas y sus Municipios:
                       <br />
                       <br />
-                      1. Que la Comisión le preste el servicio de Asesoría, Representación Legal y Defensa de manera
-                      gratuita de conformidad con lo previsto en la Ley de los Derechos y Defensa del Contribuyente
-                      para el Estado de Zacatecas y sus Municipios, el presente documento y las demás disposiciones
-                      que resulten aplicables.
+                      1. Que la Comisión le preste el servicio de Asesoría, Representación Legal y Defensa de manera gratuita de conformidad con lo previsto en la Ley de los Derechos y Defensa del Contribuyente para el Estado de Zacatecas y sus Municipios, el presente documento y las demás disposiciones que resulten aplicables.
                       <br />
                       <br />
                       2. A recibir un trato digno, respetuoso y no discriminatorio durante la atención del expediente.
@@ -313,12 +292,7 @@ export const ClasificacionJuridicaPage = () => {
               <button type="button" className="aj-btn aj-btn-ghost" onClick={() => setModalOpen(false)}>
                 CANCELAR
               </button>
-              <button
-                type="button"
-                className="aj-btn aj-btn-primary"
-                disabled={guardando}
-                onClick={(e) => handleConfirmar(e)}
-              >
+              <button type="button" className="aj-btn aj-btn-primary" disabled={guardando} onClick={(e) => handleConfirmar(e)}>
                 {guardando ? 'CONFIRMANDO...' : 'CONFIRMAR CALIFICACIÓN'}
               </button>
             </div>

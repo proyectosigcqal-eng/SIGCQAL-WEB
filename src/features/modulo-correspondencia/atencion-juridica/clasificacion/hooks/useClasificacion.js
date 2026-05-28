@@ -32,8 +32,7 @@ export const useClasificacion = (idExpediente) => {
       setMensaje(msg);
       return { ok: true, message: msg };
     } catch (err) {
-      const msg =
-        err?.message || 'Error al confirmar la clasificación.';
+      const msg = err?.message || 'Error al confirmar la clasificación.';
       setError(msg);
       setMensaje(msg);
       return { ok: false, message: msg };
