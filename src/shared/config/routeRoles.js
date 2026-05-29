@@ -23,6 +23,9 @@ export const ROUTE_ROLES = {
   '/correspondencia/lista-oficios-revision': ['Administrador', 'Revisor'],
   '/correspondencia/memorandums-por-area': ['Administrador', 'Revisor'],
   '/correspondencia/oficios-por-area': ['Administrador', 'Revisor'],
+  '/atencion-juridica/clasificacion': ['Administrador', 'Abogado', 'Abogado Calificador'],
+  '/correspondencia/bandeja-tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
+  '/correspondencia/tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
 };
 
 export default ROUTE_ROLES;

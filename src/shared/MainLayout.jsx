@@ -6,6 +6,7 @@ export const MainLayout = () => {
     const { pathname } = useLocation();
 
     const [moduleOpen, setModuleOpen] = useState(pathname.startsWith('/correspondencia'));
+    const [juridicoOpen, setJuridicoOpen] = useState(pathname.startsWith('/atencion-juridica'));
 
     const subItems = [
         { label: 'Correspondencia pendiente de Revisión', to: '/correspondencia/pendiente-revision-area', icon: <Mail size={16} /> },
@@ -16,7 +17,16 @@ export const MainLayout = () => {
         { label: 'Memorándum asignados', to: '/correspondencia/memorandums-por-area', icon: <CheckSquare size={16} /> },
         { label: 'Acuses de Oficio por Área', to: '/correspondencia/oficios-por-area', icon: <FolderCheck size={16} /> },
         { label: 'Contestación', to: '/correspondencia/bandeja', icon: <Archive size={16} /> },
+        { label: 'Bandeja Trámites IRL', to: '/correspondencia/bandeja-tramites-irl', icon: <Archive size={16} /> },
     ];
+
+    const juridicoItems = [
+        { label: 'Registro y Calificación', to: '/atencion-juridica/clasificacion/260100001', icon: <CheckSquare size={16} /> },
+        { label: 'Asignación (CU-MARSU-03)', to: '/atencion-juridica/asignacion', icon: <FolderCheck size={16} /> },
+        { label: 'Bandeja de Gestión (CU-MARSU-04)', to: '/atencion-juridica/bandeja', icon: <Archive size={16} /> },
+    ];
+
+    const breadcrumb = pathname.startsWith('/atencion-juridica') ? 'Atención Jurídica' : 'Memorándum';
 
     return (
         <div className="app-container">
@@ -50,6 +60,34 @@ export const MainLayout = () => {
                             ))}
                         </div>
                     )}
+
+                    <div className="module-header-wrap">
+                        <button
+                            onClick={() => setJuridicoOpen(!juridicoOpen)}
+                            aria-expanded={juridicoOpen}
+                            className={`module-header ${pathname.startsWith('/atencion-juridica') ? 'active' : ''}`}
+                        >
+                            <CheckSquare size={18} />
+                            <strong className="module-title">Atención Jurídica</strong>
+                            <span className="chevron-wrap">
+                                <ChevronDown className="chevron" size={16} />
+                            </span>
+                        </button>
+                    </div>
+
+                    {juridicoOpen && (
+                        <div className="module-items">
+                            {juridicoItems.map(({ label, to, icon }) => (
+                                <Link
+                                    key={to}
+                                    to={to}
+                                    className={`nav-item sub-item ${pathname === to ? 'active' : ''}`}
+                                >
+                                    {icon} <span>{label}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </nav>
                 <div className="sidebar-footer">
                     <a href="#" className="nav-item logout">
@@ -60,7 +98,7 @@ export const MainLayout = () => {
 
             <main className="main-content">
                 <header className="header">
-                    <div className="header-breadcrumb"><span>Memorándum</span></div>
+                    <div className="header-breadcrumb"><span>{breadcrumb}</span></div>
                     <div className="header-user">
                         <div className="user-info">
                             <span className="user-name">Juan Pérez García</span>

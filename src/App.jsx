@@ -13,6 +13,8 @@ import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-hi
 import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-memorandum/ContestacionPage';
 import { ContestacionOficioPage } from './pages/modulo-correspondencia/contestacion-oficio/ContestacionOficioPage';
 import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-central/BandejaCentralPage';
+import BandejaTramitesIrlPage from './pages/modulo-correspondencia/bandeja-tramites-irl/BandejaTramitesIrlPage';
+import DetalleTramiteIrlPage from './pages/modulo-correspondencia/bandeja-tramites-irl/DetalleTramiteIrlPage';
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 import { ListaOficiosPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPage';
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
@@ -22,6 +24,7 @@ import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/a
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
+import { ClasificacionJuridicaPage } from './pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
@@ -156,6 +159,24 @@ function App() {
           />
 
           <Route
+            path="correspondencia/bandeja-tramites-irl"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/bandeja-tramites-irl']}>
+                <BandejaTramitesIrlPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="correspondencia/tramites-irl/:folioId"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/tramites-irl']}>
+                <DetalleTramiteIrlPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="correspondencia/pendiente-revision-area"
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/pendiente-revision-area']}>
@@ -245,6 +266,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/oficios-por-area']}>
                 <ListaOficiosPorAreaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="atencion-juridica/clasificacion/:idExpediente"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/clasificacion']}>
+                <ClasificacionJuridicaPage />
               </ProtectedRoute>
             }
           />
