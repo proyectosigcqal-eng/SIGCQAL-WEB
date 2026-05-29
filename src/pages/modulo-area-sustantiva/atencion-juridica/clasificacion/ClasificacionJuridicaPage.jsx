@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, X } from 'lucide-react';
-import { useCatalogosJuridicos } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
-import { useClasificacion } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useClasificacion';
-import { useExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/hooks/useExpediente';
-import { ResumenExpediente } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/ResumenExpediente';
-import { BannerConfirmacionClasificacion } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/BannerConfirmacionClasificacion';
-import { Toast } from '@/features/modulo-correspondencia/atencion-juridica/clasificacion/components/Toast';
-import '@/features/modulo-correspondencia/atencion-juridica/clasificacion/styles/clasificacion.css';
+import { useCatalogosJuridicos } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
+import { useClasificacion } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/hooks/useClasificacion';
+import { useExpediente } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/hooks/useExpediente';
+import { ResumenExpediente } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/ResumenExpediente';
+import { BannerConfirmacionClasificacion } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/BannerConfirmacionClasificacion';
+import { Toast } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/Toast';
+import '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/styles/clasificacion.css';
 
 const TIPOS_ASESORIA_VIEW = [
   { id: 1, titulo: 'ASESORÍA SIMPLIFICADA', subtitulo: 'Resolución inmediata', nombre: 'Asesoría Simplificada' },

@@ -1,0 +1,361 @@
+.irl-bandeja-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.irl-bandeja-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.irl-bandeja-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.irl-bandeja-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.irl-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.irl-filters {
+  display: grid;
+  grid-template-columns: 1fr 240px 140px;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.irl-input,
+.irl-select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--text-main);
+  background: #ffffff;
+}
+
+.irl-input:focus,
+.irl-select:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.25);
+  outline-offset: 1px;
+  border-color: rgba(37, 99, 235, 0.5);
+}
+
+.irl-btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.irl-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.irl-btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.irl-btn-secondary {
+  background: #ffffff;
+  border-color: var(--border);
+  color: var(--text-main);
+}
+
+.irl-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0 16px;
+  overflow-x: auto;
+}
+
+.irl-tab {
+  position: relative;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text-main);
+  padding: 10px 12px;
+  border-radius: 12px 12px 0 0;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.irl-tab[aria-selected="true"] {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.35);
+  color: rgba(37, 99, 235, 1);
+}
+
+.irl-tab[aria-selected="true"]::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 6px;
+  background: rgba(37, 99, 235, 1);
+}
+
+.irl-table-wrap {
+  padding: 12px 16px 16px 16px;
+}
+
+.irl-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.irl-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.irl-table th,
+.irl-table td {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+  font-size: 13px;
+}
+
+.irl-table th {
+  background: #f8fafc;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.irl-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+.irl-cell-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.irl-cell-title {
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.irl-cell-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.irl-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.irl-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.irl-badge-info {
+  background: var(--bg-info-100);
+  color: var(--accent);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.irl-badge-warning {
+  background: rgba(214, 158, 46, 0.15);
+  color: #92400e;
+  border-color: rgba(214, 158, 46, 0.35);
+}
+
+.irl-badge-success {
+  background: var(--bg-success-100);
+  color: #15803d;
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.irl-badge-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.irl-badge-neutral {
+  background: rgba(148, 163, 184, 0.18);
+  color: var(--text-main);
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.irl-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+.irl-icon-btn:hover {
+  background: #f8fafc;
+}
+
+.irl-th-action,
+.irl-td-action {
+  text-align: center;
+  width: 64px;
+}
+
+.irl-th-action,
+.irl-td-action {
+  position: sticky;
+  right: 0;
+  background: inherit;
+}
+
+.irl-th-action.irl-action-1,
+.irl-td-action.irl-action-1 {
+  right: 64px;
+}
+
+.irl-td-action {
+  background: #ffffff;
+}
+
+.irl-table th.irl-th-action,
+.irl-table th.irl-th-action.irl-action-1 {
+  background: #f8fafc;
+}
+
+.irl-sticky-shadow {
+  box-shadow: -8px 0 12px rgba(15, 23, 42, 0.06);
+}
+
+.irl-state {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.irl-error {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.irl-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 1000;
+}
+
+.irl-modal {
+  width: min(720px, 100%);
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.irl-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.irl-modal-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.irl-modal-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.irl-modal-meta {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.irl-modal-meta-label {
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.irl-modal-meta-value {
+  color: var(--text-muted);
+}
+
+.irl-modal-empty {
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+}
+
+.irl-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .irl-filters {
+    grid-template-columns: 1fr;
+  }
+  .irl-tabs {
+    padding: 12px 12px 0 12px;
+  }
+  .irl-table-wrap {
+    padding: 12px;
+  }
+}
