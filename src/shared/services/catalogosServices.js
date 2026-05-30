@@ -103,3 +103,8 @@ export const getControlFoliosConfig = async () => {
     const response = await axios.get(`${CATALOGOS_BASE}/control-folios-config`);
     return response.data;
 };
+
+export const getAsesores = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/asesores`);
+    return response.data;
+};

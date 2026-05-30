@@ -22,6 +22,7 @@ import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/a
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
+import { RegistroExpedientePage } from './pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
@@ -245,6 +246,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/oficios-por-area']}>
                 <ListaOficiosPorAreaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Módulo Área Sustantiva - Registro de Expediente */}
+          <Route
+            path="area-sustantiva/registro-expediente"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/registro-expediente']}>
+                <RegistroExpedientePage />
               </ProtectedRoute>
             }
           />
