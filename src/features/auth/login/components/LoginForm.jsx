@@ -47,7 +47,9 @@ export const LoginForm = () => {
                     <input
                         type="text"
                         id="username"
+                        name="username"
                         placeholder="Usuario"
+                        autoComplete="username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
@@ -62,7 +64,9 @@ export const LoginForm = () => {
                     <input
                         type="password"
                         id="password"
+                        name="password"
                         placeholder="Contraseña"
+                        autoComplete="current-password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required

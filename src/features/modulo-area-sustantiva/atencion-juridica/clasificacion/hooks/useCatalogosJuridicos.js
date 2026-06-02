@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getAutoridadesFiscales, getTiposActo } from '@/shared/services/catalogosServices';
 
 const AUTORIDADES_FISCALES = [
   { id: 1, nombre: 'Ayuntamiento' },
@@ -29,12 +30,72 @@ const TIPOS_ASESORIA = [
 ];
 
 export const useCatalogosJuridicos = () => {
-  const [autoridadesFiscales] = useState(AUTORIDADES_FISCALES);
-  const [tiposActo] = useState(TIPOS_ACTO);
-  const [calificaciones] = useState(CALIFICACIONES);
-  const [tiposAsesoria] = useState(TIPOS_ASESORIA);
-  const [cargando] = useState(false);
-  const [error] = useState(null);
+  const [autoridadesFiscales, setAutoridadesFiscales] = useState(AUTORIDADES_FISCALES);
+  const [tiposActo, setTiposActo] = useState(TIPOS_ACTO);
+  const [calificaciones, setCalificaciones] = useState(CALIFICACIONES);
+  const [tiposAsesoria, setTiposAsesoriaState] = useState(TIPOS_ASESORIA);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+
+    const normalizarCatalogo = (data, idKeys, nombreKeys) => {
+      if (!Array.isArray(data)) return null;
+      const normalized = data
+        .map((item) => {
+          const id = idKeys.map((k) => item?.[k]).find((v) => v !== undefined && v !== null && String(v) !== '');
+          const nombre = nombreKeys
+            .map((k) => item?.[k])
+            .find((v) => v !== undefined && v !== null && String(v).trim() !== '');
+          if (id == null || nombre == null) return null;
+          return { id, nombre: String(nombre) };
+        })
+        .filter(Boolean);
+      return normalized.length > 0 ? normalized : null;
+    };
+
+    const cargar = async () => {
+      setCargando(true);
+      setError(null);
+      try {
+        const [autoridadesData, tiposActoData] = await Promise.all([getAutoridadesFiscales(), getTiposActo()]);
+        if (!alive) return;
+
+        setAutoridadesFiscales(
+          normalizarCatalogo(
+            autoridadesData,
+            ['id', 'idAutoridad', 'idAutoridadFiscal', 'id_autoridad', 'id_autoridad_fiscal'],
+            ['nombre', 'descripcion', 'autoridad', 'nombreAutoridad']
+          ) ?? AUTORIDADES_FISCALES
+        );
+        setTiposActo(
+          normalizarCatalogo(
+            tiposActoData,
+            ['id', 'idTipoActo', 'id_tipo_acto', 'tipoActoId'],
+            ['nombre', 'descripcion', 'tipoActo', 'nombreTipoActo']
+          ) ?? TIPOS_ACTO
+        );
+        setCalificaciones(CALIFICACIONES);
+        setTiposAsesoriaState(TIPOS_ASESORIA);
+      } catch {
+        if (!alive) return;
+        setAutoridadesFiscales(AUTORIDADES_FISCALES);
+        setTiposActo(TIPOS_ACTO);
+        setCalificaciones(CALIFICACIONES);
+        setTiposAsesoriaState(TIPOS_ASESORIA);
+        setError('No se pudieron cargar los catálogos.');
+      } finally {
+        if (!alive) return;
+        setCargando(false);
+      }
+    };
+
+    cargar();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return {
     autoridadesFiscales,

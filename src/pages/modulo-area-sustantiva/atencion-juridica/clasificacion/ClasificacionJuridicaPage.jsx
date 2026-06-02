@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, X } from 'lucide-react';
 import { useCatalogosJuridicos } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
@@ -7,6 +7,7 @@ import { useExpediente } from '@/features/modulo-area-sustantiva/atencion-juridi
 import { ResumenExpediente } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/ResumenExpediente';
 import { BannerConfirmacionClasificacion } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/BannerConfirmacionClasificacion';
 import { Toast } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/Toast';
+import { getEstatusDetalleExpediente } from '@/shared/services/catalogosServices';
 import '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/styles/clasificacion.css';
 
 const TIPOS_ASESORIA_VIEW = [
@@ -15,30 +16,53 @@ const TIPOS_ASESORIA_VIEW = [
   { id: 3, titulo: 'REPRESENTACIÓN LEGAL', subtitulo: 'Juicio de nulidad / Amparo', nombre: 'Representación Legal' },
 ];
 
+const TIPO_ENTRADA_ID_POR_NOMBRE = {
+  PRESENCIAL: 1,
+  'CORREO ELECTRÓNICO': 2,
+  TELEFÓNICO: 3,
+};
+
+const normalizarTexto = (value) => {
+  if (value == null) return '';
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 export const ClasificacionJuridicaPage = () => {
   const { idExpediente } = useParams();
 
-  const { autoridadesFiscales, tiposActo, calificaciones } = useCatalogosJuridicos();
+  const {
+    autoridadesFiscales,
+    tiposActo,
+    calificaciones,
+    cargando: cargandoCatalogos,
+    error: errorCatalogos,
+  } = useCatalogosJuridicos();
 
   const { confirmarClasificacion, guardando, error } = useClasificacion(idExpediente);
   const { expediente, actualizarExpediente } = useExpediente(idExpediente);
 
-  const [tipoAsesoria, setTipoAsesoria] = useState(3);
+  const [tipoAsesoria, setTipoAsesoria] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [banner, setBanner] = useState(null);
+  const [estatusDetalleCatalogo, setEstatusDetalleCatalogo] = useState([]);
 
   const [formData, setFormData] = useState({
     estatusExpediente: 'CONCLUIDO',
-    idAutoridadFiscal: '4',
-    idTipoActo: '1',
-    idCalificacionActo: '1',
+    idAutoridadFiscal: '',
+    idTipoActo: '',
+    idCalificacionActo: '',
     monto: '',
     canalEntrada: 'CORREO ELECTRÓNICO',
     problematica: '',
     asesoriaProporcionada: '',
     analisisLegal: '',
-    confirmoAnalisis: true,
+    confirmoAnalisis: false,
   });
 
   const handleChange = (e) => {
@@ -58,6 +82,23 @@ export const ClasificacionJuridicaPage = () => {
     setFormData((prev) => ({ ...prev, canalEntrada }));
   };
 
+  useEffect(() => {
+    let alive = true;
+    getEstatusDetalleExpediente()
+      .then((data) => {
+        if (!alive) return;
+        setEstatusDetalleCatalogo(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        if (!alive) return;
+        setEstatusDetalleCatalogo([]);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const handleConfirmar = async (e) => {
     e.preventDefault();
     if (!formData.confirmoAnalisis) {
@@ -69,11 +110,45 @@ export const ClasificacionJuridicaPage = () => {
       });
       return;
     }
+
+    let catalogoEstatus = estatusDetalleCatalogo;
+    if (!Array.isArray(catalogoEstatus) || catalogoEstatus.length === 0) {
+      try {
+        const data = await getEstatusDetalleExpediente();
+        catalogoEstatus = Array.isArray(data) ? data : [];
+        setEstatusDetalleCatalogo(catalogoEstatus);
+      } catch {
+        catalogoEstatus = [];
+      }
+    }
+
+    const estatusDetalleItem = catalogoEstatus.find(
+      (x) => normalizarTexto(x?.nombre) === normalizarTexto(formData.estatusExpediente)
+    );
+    const estatusDetalleIdRaw = estatusDetalleItem?.id ?? estatusDetalleItem?.idEstatusDetalleExpediente;
+    const estatusDetalleId = Number(estatusDetalleIdRaw);
+    if (!Number.isFinite(estatusDetalleId)) {
+      const msg = 'No se pudo determinar el estatus del expediente (catálogo).';
+      setToast({ type: 'error', message: msg });
+      setBanner({ status: 'error', message: msg });
+      return;
+    }
+
     const result = await confirmarClasificacion({
       idAutoridadFiscal: Number(formData.idAutoridadFiscal),
       idTipoActo: Number(formData.idTipoActo),
       idCalificacionActo: Number(formData.idCalificacionActo),
-      idTipoAsesoria: Number(tipoAsesoria),
+      idTipoAsesoria: tipoAsesoria ? Number(tipoAsesoria) : null,
+      problematica: formData.problematica,
+      seguimientoAsesoria: formData.asesoriaProporcionada,
+      monto: formData.monto,
+      idTipoEntrada: TIPO_ENTRADA_ID_POR_NOMBRE[formData.canalEntrada] ?? null,
+      nombreTipoEntrada: formData.canalEntrada,
+      idEstatusDetalleExpediente: estatusDetalleId,
+      nombreEstatusDetalle: formData.estatusExpediente,
+      calificacionActo: calificacionNombre,
+      nombreAutoridad: autoridadNombre,
+      nombreTipoActo: tipoActoNombre,
     });
 
     if (result.ok) {
@@ -97,6 +172,13 @@ export const ClasificacionJuridicaPage = () => {
   const autoridadNombre = autoridadesFiscales.find((a) => String(a.id) === String(formData.idAutoridadFiscal))?.nombre;
   const tipoActoNombre = tiposActo.find((t) => String(t.id) === String(formData.idTipoActo))?.nombre;
   const calificacionNombre = calificaciones.find((c) => String(c.id) === String(formData.idCalificacionActo))?.nombre;
+  const formularioCompleto = !!(
+    formData.idAutoridadFiscal &&
+    formData.idTipoActo &&
+    formData.idCalificacionActo &&
+    tipoAsesoria &&
+    formData.confirmoAnalisis
+  );
 
   return (
     <div className="aj-page">
@@ -215,7 +297,13 @@ export const ClasificacionJuridicaPage = () => {
               <div className="aj-form-row aj-form-row--3">
                 <div className="aj-field">
                   <label className="aj-label">AUTORIDAD EMISORA DEL ACTO</label>
-                  <select className="aj-input" name="idAutoridadFiscal" value={formData.idAutoridadFiscal} onChange={handleChange}>
+                  <select
+                    className="aj-input"
+                    name="idAutoridadFiscal"
+                    value={formData.idAutoridadFiscal}
+                    onChange={handleChange}
+                    disabled={cargandoCatalogos}
+                  >
                     <option value="">Ej: SAT, Finanzas...</option>
                     {autoridadesFiscales.map((a) => (
                       <option key={a.id} value={a.id}>
@@ -227,7 +315,13 @@ export const ClasificacionJuridicaPage = () => {
 
                 <div className="aj-field">
                   <label className="aj-label">TIPO DE ACTO / IMPUESTO</label>
-                  <select className="aj-input" name="idTipoActo" value={formData.idTipoActo} onChange={handleChange}>
+                  <select
+                    className="aj-input"
+                    name="idTipoActo"
+                    value={formData.idTipoActo}
+                    onChange={handleChange}
+                    disabled={cargandoCatalogos}
+                  >
                     <option value="">Seleccione acto...</option>
                     {tiposActo.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -237,6 +331,26 @@ export const ClasificacionJuridicaPage = () => {
                   </select>
                 </div>
 
+                <div className="aj-field">
+                  <label className="aj-label">CALIFICACIÓN DEL ACTO</label>
+                  <select
+                    className="aj-input"
+                    name="idCalificacionActo"
+                    value={formData.idCalificacionActo}
+                    onChange={handleChange}
+                    disabled={cargandoCatalogos}
+                  >
+                    <option value="">Seleccione calificación...</option>
+                    {calificaciones.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="aj-form-row">
                 <div className="aj-field">
                   <label className="aj-label">MONTO DEL ACTO (MXN)</label>
                   <div className="aj-money">
@@ -322,6 +436,7 @@ export const ClasificacionJuridicaPage = () => {
                 </label>
               </div>
 
+              {errorCatalogos && <div className="aj-inline-error">{errorCatalogos}</div>}
               {error && <div className="aj-inline-error">{error}</div>}
             </div>
 
@@ -332,10 +447,10 @@ export const ClasificacionJuridicaPage = () => {
               <button
                 type="button"
                 className="aj-btn aj-btn-primary"
-                disabled={guardando || !formData.confirmoAnalisis}
+                disabled={guardando || cargandoCatalogos || !formularioCompleto}
                 onClick={(e) => handleConfirmar(e)}
               >
-                {guardando ? 'CONFIRMANDO...' : 'CONFIRMAR CALIFICACIÓN'}
+                {guardando ? 'CONFIRMANDO...' : 'CONFIRMAR CLASIFICACIÓN'}
               </button>
             </div>
           </div>
