@@ -139,6 +139,25 @@
   background: white;
   color: var(--text-main);
   font-size: 0.95rem;
+  visibility: visible;
+}
+
+.form-group select {
+  cursor: pointer;
+  appearance: auto;
+  z-index: 10;
+}
+
+.form-group select option {
+  padding: 0.5rem;
+  background: white;
+  color: var(--text-main);
+  margin: 0.25rem 0;
+}
+
+.form-group select option:checked {
+  background: var(--primary);
+  color: white;
 }
 
 .form-group input:focus,

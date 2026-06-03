@@ -14,7 +14,7 @@ export const useCatalogos = () => {
         const cargarDatos = async () => {
             setCargandoCatalogos(true);
             try {
-                const [areasData, usuariosData, plantillasData, rolesData, tiposData] = await Promise.all([
+                const [areasData, usuariosData, plantillasData, rolesData, tiposData, asesoresData] = await Promise.all([
                     getAreas(),
                     getUsuarios(),
                     getPlantillas(),

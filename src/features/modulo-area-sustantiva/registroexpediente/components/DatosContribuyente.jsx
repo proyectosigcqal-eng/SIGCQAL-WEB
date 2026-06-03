@@ -1,6 +1,10 @@
 import React from 'react';
 
 export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handleFileChange, handleChangeNested, handleTipoPersonaChange, estados = [] }) => {
+  // Defensas para estructura de datos y keys del estado
+  const getEstadoId = (e, index) => e?.id || e?.idEstado || `estado-${index}`;
+  const getEstadoNombre = (e) => e?.nombre || e?.nombreEstado || 'Sin nombre';
+
   return (
     <section className="form-section section-card">
       <div className="section-header">
@@ -181,9 +185,13 @@ export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handl
               <label htmlFor="domicilioFiscal_estado">Estado</label>
               <select id="domicilioFiscal_estado" value={formData.domicilioFiscal.estado} onChange={(e) => handleChangeNested('domicilioFiscal', 'estado', e.target.value)}>
                 <option value="">Seleccionar estado...</option>
-                {estados.map((e) => (
-                  <option key={e.id} value={e.id}>{e.nombre}</option>
-                ))}
+                {Array.isArray(estados) && estados.length > 0 ? (
+                  estados.map((e, index) => (
+                    <option key={getEstadoId(e, index)} value={getEstadoId(e, index)}>{getEstadoNombre(e)}</option>
+                  ))
+                ) : (
+                  <option disabled>No hay estados disponibles</option>
+                )}
               </select>
             </div>
           </div>

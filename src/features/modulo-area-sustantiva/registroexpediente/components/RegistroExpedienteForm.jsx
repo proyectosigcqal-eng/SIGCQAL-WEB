@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRegistroExpediente } from '../hooks/useRegistroExpediente';
+import { getAsesores, getMunicipios, getEstados } from '@/shared/services/catalogosServices';
 import '@/features/modulo-area-sustantiva/registroexpediente/styles/registroExpediente.css';
 import { ControlOperativo } from './ControlOperativo';
 import { DatosContribuyente } from './DatosContribuyente';
@@ -8,33 +9,15 @@ import { ComponenteCritico } from './ComponenteCritico';
 import { ModalGuardarExpediente } from './ModalGuardarExpediente';
 import {SolicitanteRepresentante} from './Solicitante';
 
-const MUNICIPIOS = [
-  { id: '1', nombre: 'San Salvador' },
-  { id: '2', nombre: 'Santa Tecla' },
-  { id: '3', nombre: 'Soyapango' },
-];
-
-const LOCALIDADES = [
-  { id: '1', nombre: 'Centro' },
-  { id: '2', nombre: 'Zona Rosa' },
-  { id: '3', nombre: 'Mejoramiento Social' },
-];
-
-const ASESORES = [
-  { id: '1', nombre: 'Lic. Juan Pérez' },
-  { id: '2', nombre: 'Lic. María García' },
-  { id: '3', nombre: 'Lic. Carlos López' },
-];
-
-const ESTADOS = [
-  { id: '1', nombre: 'El Salvador' },
-  { id: '2', nombre: 'Guatemala' },
-  { id: '3', nombre: 'Honduras' },
-];
-
 // The presentational section components were moved to separate files under components/
 
 export const RegistroExpedienteForm = () => {
+  const [municipios, setMunicipios] = useState([]);
+  const [asesores, setAsesores] = useState([]);
+  const [estados, setEstados] = useState([]);
+  const [isLoadingCatalogos, setIsLoadingCatalogos] = useState(true);
+  const [catalogosError, setCatalogosError] = useState(null);
+
   const {
     formData,
     erroresCampo,
@@ -53,47 +36,83 @@ export const RegistroExpedienteForm = () => {
     handleCancelarGuardar
   } = useRegistroExpediente();
 
+  // Cargar catálogos al montar el componente
+  useEffect(() => {
+    const cargarCatalogos = async () => {
+      try {
+        setIsLoadingCatalogos(true);
+        setCatalogosError(null);
+        
+        const [municipiosData, asesoresData, estadosData] = await Promise.all([
+          getMunicipios(),
+          getAsesores(),
+          getEstados()
+        ]);
+        
+        console.log('Municipios cargados:', municipiosData);
+        console.log('Asesores cargados:', asesoresData);
+        console.log('Estados cargados:', estadosData);
+
+        setMunicipios(municipiosData || []);
+        setAsesores(asesoresData || []);
+        setEstados(estadosData || []);
+      } catch (err) {
+        console.error('Error cargando catálogos:', err);
+        setCatalogosError('Error al cargar los catálogos. Por favor recargue la página.');
+      } finally {
+        setIsLoadingCatalogos(false);
+      }
+    };
+
+    cargarCatalogos();
+  }, []);
+
   return (
     <div className="registro-expediente-container">
       <form onSubmit={handleSubmit} className="registro-expediente-form">
         <div className="form-wrapper">
-          {error && (
+          {(error || catalogosError) && (
             <div className="alerta-error" style={{ marginBottom: '1.5rem' }}>
-              {error}
+              {error || catalogosError}
             </div>
           )}
 
-          <ControlOperativo
-            formData={formData}
-            erroresCampo={erroresCampo}
-            handleChange={handleChange}
-            municipios={MUNICIPIOS}
-            localidades={LOCALIDADES}
-            asesores={ASESORES}
-          />
+          {isLoadingCatalogos ? (
+            <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando datos...</div>
+          ) : (
+            <>
+              <ControlOperativo
+                formData={formData}
+                erroresCampo={erroresCampo}
+                handleChange={handleChange}
+                municipios={municipios}
+                asesores={asesores}
+              />
 
-          <DatosContribuyente
-            formData={formData}
-            erroresCampo={erroresCampo}
-            handleChange={handleChange}
-            handleFileChange={handleFileChange}
-            handleChangeNested={handleChangeNested}
-            handleTipoPersonaChange={handleTipoPersonaChange}
-            estados={ESTADOS}
-          />
-          <SolicitanteRepresentante
-            formData={formData}
-            erroresCampo={erroresCampo}
-            handleChangeNested={handleChangeNested}
-          />
+              <DatosContribuyente
+                formData={formData}
+                erroresCampo={erroresCampo}
+                handleChange={handleChange}
+                handleFileChange={handleFileChange}
+                handleChangeNested={handleChangeNested}
+                handleTipoPersonaChange={handleTipoPersonaChange}
+                estados={estados}
+              />
+              <SolicitanteRepresentante
+                formData={formData}
+                erroresCampo={erroresCampo}
+                handleChangeNested={handleChangeNested}
+              />
 
-          <ClasificacionAtencion
-            formData={formData}
-            erroresCampo={erroresCampo}
-            handleClasificacionChange={handleClasificacionChange}
-          />
+              <ClasificacionAtencion
+                formData={formData}
+                erroresCampo={erroresCampo}
+                handleClasificacionChange={handleClasificacionChange}
+              />
 
-          <ComponenteCritico onGuardar={handleSubmit} isLoading={isLoading} />
+              <ComponenteCritico onGuardar={handleSubmit} isLoading={isLoading} />
+            </>
+          )}
         </div>
       </form>
 

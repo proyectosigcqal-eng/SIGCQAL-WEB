@@ -108,3 +108,13 @@ export const getAsesores = async () => {
     const response = await axios.get(`${CATALOGOS_BASE}/asesores`);
     return response.data;
 };
+
+export const getMunicipios = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/municipios`);
+    return response.data;
+};
+
+export const getEstados = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/estados`);
+    return response.data;
+};
