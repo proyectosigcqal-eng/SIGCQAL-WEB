@@ -14,7 +14,7 @@ import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-me
 import { ContestacionOficioPage } from './pages/modulo-correspondencia/contestacion-oficio/ContestacionOficioPage';
 import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-central/BandejaCentralPage';
 import BandejaTramitesIrlPage from './pages/modulo-correspondencia/bandeja-tramites-irl/BandejaTramitesIrlPage';
-import DetalleTramiteIrlPage from './pages/modulo-correspondencia/bandeja-tramites-irl/DetalleTramiteIrlPage';
+import {DetalleTramiteIrlPage} from './pages/modulo-correspondencia/bandeja-tramites-irl/DetalleTramiteIrlPage';
 import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
 import { ListaOficiosPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPage';
 import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
@@ -24,6 +24,7 @@ import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/a
 import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
 import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
+import { BandejaGestionPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage';
 import { ClasificacionJuridicaPage } from './pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
@@ -159,18 +160,37 @@ function App() {
           />
 
           <Route
-            path="correspondencia/bandeja-tramites-irl"
+            path="atencion-juridica/bandeja-tramites-irl"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/bandeja-tramites-irl']}>
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/bandeja-tramites-irl']}>
                 <BandejaTramitesIrlPage />
               </ProtectedRoute>
             }
           />
 
           <Route
-            path="correspondencia/tramites-irl/:folioId"
+            path="atencion-juridica/asignacion"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/tramites-irl']}>
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/asignacion']}>
+                <div style={{ padding: '2rem' }}>
+                  <h2>Asignación (CU-MARSU-03)</h2>
+                  <p>Página en construcción</p>
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+         <Route path="atencion-juridica/bandeja" element={
+          <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/bandeja']}>
+            <BandejaGestionPage />
+          </ProtectedRoute>
+        } />
+          
+
+          <Route
+            path="atencion-juridica/tramites-irl/:folio"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/tramites-irl']}>
                 <DetalleTramiteIrlPage />
               </ProtectedRoute>
             }

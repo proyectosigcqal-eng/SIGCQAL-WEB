@@ -158,4 +158,14 @@ body {
     justify-content: space-between;
     padding: 0 2rem;
 }
+
+.content-body {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.main-content {
+  overflow-y: auto;
+  height: 100vh;
+}
 }

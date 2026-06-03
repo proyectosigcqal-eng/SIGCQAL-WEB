@@ -24,8 +24,10 @@ export const ROUTE_ROLES = {
   '/correspondencia/memorandums-por-area': ['Administrador', 'Revisor'],
   '/correspondencia/oficios-por-area': ['Administrador', 'Revisor'],
   '/atencion-juridica/clasificacion': ['Administrador', 'Abogado', 'Abogado Calificador'],
-  '/correspondencia/bandeja-tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
-  '/correspondencia/tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
+  '/atencion-juridica/bandeja-tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
+  '/atencion-juridica/tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
+   '/atencion-juridica/asignacion': ['Administrador', 'Abogado', 'Abogado Calificador'],
+  '/atencion-juridica/bandeja':    ['Administrador', 'Abogado', 'Abogado Calificador'],
 };
 
 export default ROUTE_ROLES;
