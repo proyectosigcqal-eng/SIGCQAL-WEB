@@ -40,11 +40,6 @@ export const getTiposCorrespondencia = async () => {
     return response.data;
 };
 
-export const getEstatusDetalleExpediente = async () => {
-        const response = await axios.get(`${CATALOGOS_BASE}/estatus-detalle-expediente`);
-        return response.data;
-};
-
 export const getAutoridadesFiscales = async () => {
         const response = await axios.get(`${CATALOGOS_BASE}/autoridades`);
         return response.data;

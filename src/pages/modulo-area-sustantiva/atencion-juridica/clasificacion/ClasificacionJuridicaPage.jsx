@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FileText, X } from 'lucide-react';
 import { useCatalogosJuridicos } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/hooks/useCatalogosJuridicos';
@@ -7,20 +7,18 @@ import { useExpediente } from '@/features/modulo-area-sustantiva/atencion-juridi
 import { ResumenExpediente } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/ResumenExpediente';
 import { BannerConfirmacionClasificacion } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/BannerConfirmacionClasificacion';
 import { Toast } from '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/components/Toast';
-import { getEstatusDetalleExpediente } from '@/shared/services/catalogosServices';
 import '@/features/modulo-area-sustantiva/atencion-juridica/clasificacion/styles/clasificacion.css';
 
-const TIPOS_ASESORIA_VIEW = [
-  { id: 1, titulo: 'ASESORÍA SIMPLIFICADA', subtitulo: 'Resolución inmediata', nombre: 'Asesoría Simplificada' },
-  { id: 2, titulo: 'QUEJA ADMINISTRATIVA', subtitulo: 'Procedimiento de defensa', nombre: 'Queja Administrativa' },
-  { id: 3, titulo: 'REPRESENTACIÓN LEGAL', subtitulo: 'Juicio de nulidad / Amparo', nombre: 'Representación Legal' },
+const ESTATUS_DEFAULT = [
+  'ASESORIA EN PROCESO',
+  'QUEJAS Y RECLAMACIONES',
+  'REPRESENTACION LEGAL',
+  'CONCLUIDO',
+  'ACUERDO CONCLUSIVO',
+  'ACUERDO ANTICIPADO DE PAGO',
 ];
 
-const TIPO_ENTRADA_ID_POR_NOMBRE = {
-  PRESENCIAL: 1,
-  'CORREO ELECTRÓNICO': 2,
-  TELEFÓNICO: 3,
-};
+const TIPOS_ENTRADA_DEFAULT = ['PRESENCIAL', 'CORREO ELECTRONICO', 'TELEFONICO'];
 
 const normalizarTexto = (value) => {
   if (value == null) return '';
@@ -32,6 +30,23 @@ const normalizarTexto = (value) => {
     .trim();
 };
 
+const findById = (items, id) => items.find((item) => String(item.id) === String(id));
+const findByNombre = (items, nombre) => items.find((item) => normalizarTexto(item.nombre) === normalizarTexto(nombre));
+
+const getTipoAsesoriaMeta = (nombre) => {
+  const normalized = normalizarTexto(nombre);
+  if (normalized.includes('simplificada')) {
+    return { titulo: 'ASESORIA SIMPLIFICADA', subtitulo: 'Resolucion inmediata' };
+  }
+  if (normalized.includes('queja')) {
+    return { titulo: 'QUEJA ADMINISTRATIVA', subtitulo: 'Procedimiento de defensa' };
+  }
+  if (normalized.includes('representacion')) {
+    return { titulo: 'REPRESENTACION LEGAL', subtitulo: 'Juicio de nulidad / Amparo' };
+  }
+  return { titulo: String(nombre || '').toUpperCase(), subtitulo: 'Clasificacion juridica' };
+};
+
 export const ClasificacionJuridicaPage = () => {
   const { idExpediente } = useParams();
 
@@ -39,6 +54,9 @@ export const ClasificacionJuridicaPage = () => {
     autoridadesFiscales,
     tiposActo,
     calificaciones,
+    tiposAsesoria,
+    estatusDetalleExpediente,
+    tiposEntrada,
     cargando: cargandoCatalogos,
     error: errorCatalogos,
   } = useCatalogosJuridicos();
@@ -50,7 +68,6 @@ export const ClasificacionJuridicaPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [banner, setBanner] = useState(null);
-  const [estatusDetalleCatalogo, setEstatusDetalleCatalogo] = useState([]);
 
   const [formData, setFormData] = useState({
     estatusExpediente: 'CONCLUIDO',
@@ -58,12 +75,38 @@ export const ClasificacionJuridicaPage = () => {
     idTipoActo: '',
     idCalificacionActo: '',
     monto: '',
-    canalEntrada: 'CORREO ELECTRÓNICO',
+    canalEntrada: 'CORREO ELECTRONICO',
     problematica: '',
     asesoriaProporcionada: '',
     analisisLegal: '',
     confirmoAnalisis: false,
   });
+
+  const catalogosBloqueados = cargandoCatalogos || !!errorCatalogos;
+
+  const estatusOpciones = useMemo(
+    () => (estatusDetalleExpediente.length > 0 ? estatusDetalleExpediente.map((item) => item.nombre) : ESTATUS_DEFAULT),
+    [estatusDetalleExpediente]
+  );
+
+  const canalOpciones = useMemo(
+    () => (tiposEntrada.length > 0 ? tiposEntrada.map((item) => item.nombre) : TIPOS_ENTRADA_DEFAULT),
+    [tiposEntrada]
+  );
+
+  const tipoAsesoriaItem = findById(tiposAsesoria, tipoAsesoria);
+  const tipoAsesoriaNombre = tipoAsesoriaItem?.nombre;
+  const autoridadNombre = findById(autoridadesFiscales, formData.idAutoridadFiscal)?.nombre;
+  const tipoActoNombre = findById(tiposActo, formData.idTipoActo)?.nombre;
+  const calificacionNombre = findById(calificaciones, formData.idCalificacionActo)?.nombre;
+
+  const formularioCompleto = !!(
+    formData.idAutoridadFiscal &&
+    formData.idTipoActo &&
+    formData.idCalificacionActo &&
+    tipoAsesoria &&
+    formData.confirmoAnalisis
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -71,66 +114,50 @@ export const ClasificacionJuridicaPage = () => {
   };
 
   const handleSelectTipoAsesoria = (id) => {
+    if (catalogosBloqueados) return;
     setTipoAsesoria(id);
   };
 
   const handleSelectEstatus = (estatusExpediente) => {
+    if (catalogosBloqueados) return;
     setFormData((prev) => ({ ...prev, estatusExpediente }));
   };
 
   const handleSelectCanal = (canalEntrada) => {
+    if (catalogosBloqueados) return;
     setFormData((prev) => ({ ...prev, canalEntrada }));
   };
 
-  useEffect(() => {
-    let alive = true;
-    getEstatusDetalleExpediente()
-      .then((data) => {
-        if (!alive) return;
-        setEstatusDetalleCatalogo(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {
-        if (!alive) return;
-        setEstatusDetalleCatalogo([]);
-      });
-
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const mostrarError = (message) => {
+    setToast({ type: 'error', message });
+    setBanner({ status: 'error', message });
+  };
 
   const handleConfirmar = async (e) => {
     e.preventDefault();
-    if (!formData.confirmoAnalisis) {
-      const msg = 'Debes confirmar que realizaste el análisis legal.';
-      setToast({ type: 'error', message: msg });
-      setBanner({
-        status: 'error',
-        message: msg,
-      });
+
+    if (catalogosBloqueados) {
+      mostrarError(errorCatalogos || 'Espera a que terminen de cargar los catalogos.');
       return;
     }
 
-    let catalogoEstatus = estatusDetalleCatalogo;
-    if (!Array.isArray(catalogoEstatus) || catalogoEstatus.length === 0) {
-      try {
-        const data = await getEstatusDetalleExpediente();
-        catalogoEstatus = Array.isArray(data) ? data : [];
-        setEstatusDetalleCatalogo(catalogoEstatus);
-      } catch {
-        catalogoEstatus = [];
-      }
+    if (!formData.confirmoAnalisis) {
+      mostrarError('Debes confirmar que realizaste el analisis legal.');
+      return;
     }
 
-    const estatusDetalleItem = catalogoEstatus.find(
-      (x) => normalizarTexto(x?.nombre) === normalizarTexto(formData.estatusExpediente)
-    );
-    const estatusDetalleIdRaw = estatusDetalleItem?.id ?? estatusDetalleItem?.idEstatusDetalleExpediente;
-    const estatusDetalleId = Number(estatusDetalleIdRaw);
-    if (!Number.isFinite(estatusDetalleId)) {
-      const msg = 'No se pudo determinar el estatus del expediente (catálogo).';
-      setToast({ type: 'error', message: msg });
-      setBanner({ status: 'error', message: msg });
+    const estatusDetalleItem = findByNombre(estatusDetalleExpediente, formData.estatusExpediente);
+    const tipoEntradaItem = findByNombre(tiposEntrada, formData.canalEntrada);
+    const estatusDetalleId = Number(estatusDetalleItem?.id);
+    const tipoEntradaId = Number(tipoEntradaItem?.id);
+
+    if (!Number.isFinite(estatusDetalleId) || estatusDetalleId <= 0) {
+      mostrarError('No se pudo determinar el estatus del expediente desde el catalogo.');
+      return;
+    }
+
+    if (!Number.isFinite(tipoEntradaId) || tipoEntradaId <= 0) {
+      mostrarError('No se pudo determinar el canal de entrada desde el catalogo.');
       return;
     }
 
@@ -138,14 +165,14 @@ export const ClasificacionJuridicaPage = () => {
       idAutoridadFiscal: Number(formData.idAutoridadFiscal),
       idTipoActo: Number(formData.idTipoActo),
       idCalificacionActo: Number(formData.idCalificacionActo),
-      idTipoAsesoria: tipoAsesoria ? Number(tipoAsesoria) : null,
+      idTipoAsesoria: Number(tipoAsesoria),
       problematica: formData.problematica,
       seguimientoAsesoria: formData.asesoriaProporcionada,
       monto: formData.monto,
-      idTipoEntrada: TIPO_ENTRADA_ID_POR_NOMBRE[formData.canalEntrada] ?? null,
-      nombreTipoEntrada: formData.canalEntrada,
+      idTipoEntrada: tipoEntradaId,
+      nombreTipoEntrada: tipoEntradaItem.nombre,
       idEstatusDetalleExpediente: estatusDetalleId,
-      nombreEstatusDetalle: formData.estatusExpediente,
+      nombreEstatusDetalle: estatusDetalleItem.nombre,
       calificacionActo: calificacionNombre,
       nombreAutoridad: autoridadNombre,
       nombreTipoActo: tipoActoNombre,
@@ -155,30 +182,11 @@ export const ClasificacionJuridicaPage = () => {
       actualizarExpediente({ estatus: 'Calificado' });
       setModalOpen(false);
       setToast({ type: 'success', message: result.message });
-      setBanner({
-        status: 'success',
-        message: result.message,
-      });
+      setBanner({ status: 'success', message: result.message });
     } else {
-      setToast({ type: 'error', message: result.message });
-      setBanner({
-        status: 'error',
-        message: result.message,
-      });
+      mostrarError(result.message);
     }
   };
-
-  const tipoAsesoriaNombre = TIPOS_ASESORIA_VIEW.find((t) => t.id === tipoAsesoria)?.nombre;
-  const autoridadNombre = autoridadesFiscales.find((a) => String(a.id) === String(formData.idAutoridadFiscal))?.nombre;
-  const tipoActoNombre = tiposActo.find((t) => String(t.id) === String(formData.idTipoActo))?.nombre;
-  const calificacionNombre = calificaciones.find((c) => String(c.id) === String(formData.idCalificacionActo))?.nombre;
-  const formularioCompleto = !!(
-    formData.idAutoridadFiscal &&
-    formData.idTipoActo &&
-    formData.idCalificacionActo &&
-    tipoAsesoria &&
-    formData.confirmoAnalisis
-  );
 
   return (
     <div className="aj-page">
@@ -200,12 +208,12 @@ export const ClasificacionJuridicaPage = () => {
         }
         onCerrar={() => setBanner(null)}
       />
+
       <div className="aj-header">
         <div className="aj-title-wrap">
-          <h1 className="aj-title">CLASIFICACIÓN DE ATENCIÓN</h1>
+          <h1 className="aj-title">CLASIFICACION DE ATENCION</h1>
           <div className="aj-subtitle">
-            Folio {expediente?.folioGobierno || '—'} · {expediente?.nombreContribuyente || '—'} ·{' '}
-            {expediente?.estatus || '—'}
+            Folio {expediente?.folioGobierno || '-'} / {expediente?.nombreContribuyente || '-'} / {expediente?.estatus || '-'}
           </div>
         </div>
       </div>
@@ -222,25 +230,31 @@ export const ClasificacionJuridicaPage = () => {
       />
 
       <section className="aj-card aj-card--tipo">
-        <div className="aj-card-title">CLASIFICACIÓN DE ATENCIÓN</div>
+        <div className="aj-card-title">CLASIFICACION DE ATENCION</div>
         <div className="aj-tipo-grid">
-          {TIPOS_ASESORIA_VIEW.map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              className={`aj-tipo-option ${tipoAsesoria === opt.id ? 'is-selected' : ''}`}
-              onClick={() => handleSelectTipoAsesoria(opt.id)}
-            >
-              <span className="aj-radio" aria-hidden="true">
-                <span className="aj-radio-dot" />
-              </span>
-              <span className="aj-tipo-text">
-                <span className="aj-tipo-title">{opt.titulo}</span>
-                <span className="aj-tipo-subtitle">{opt.subtitulo}</span>
-              </span>
-            </button>
-          ))}
+          {tiposAsesoria.map((opt) => {
+            const meta = getTipoAsesoriaMeta(opt.nombre);
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                className={`aj-tipo-option ${String(tipoAsesoria) === String(opt.id) ? 'is-selected' : ''}`}
+                onClick={() => handleSelectTipoAsesoria(opt.id)}
+                disabled={catalogosBloqueados}
+              >
+                <span className="aj-radio" aria-hidden="true">
+                  <span className="aj-radio-dot" />
+                </span>
+                <span className="aj-tipo-text">
+                  <span className="aj-tipo-title">{meta.titulo}</span>
+                  <span className="aj-tipo-subtitle">{meta.subtitulo}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
+        {cargandoCatalogos && <div className="aj-inline-info">Cargando catalogos juridicos...</div>}
+        {errorCatalogos && <div className="aj-inline-error">{errorCatalogos}</div>}
       </section>
 
       <section className="aj-card aj-card--analisis">
@@ -248,7 +262,7 @@ export const ClasificacionJuridicaPage = () => {
           <FileText size={22} />
         </div>
         <div className="aj-analisis-content">
-          <div className="aj-analisis-title">ANÁLISIS DE CASO OBLIGATORIO</div>
+          <div className="aj-analisis-title">ANALISIS DE CASO OBLIGATORIO</div>
           <div className="aj-analisis-subtitle">
             Para finalizar el registro, es necesario detallar el asunto legal y confirmar el compromiso del contribuyente.
           </div>
@@ -265,7 +279,7 @@ export const ClasificacionJuridicaPage = () => {
             <div className="aj-modal-header">
               <div className="aj-modal-title">
                 <FileText size={18} />
-                <span>ANÁLISIS DE CASO Y COMPROMISO LEGAL</span>
+                <span>ANALISIS DE CASO Y COMPROMISO LEGAL</span>
               </div>
               <button type="button" className="aj-icon-btn" onClick={() => setModalOpen(false)} aria-label="Cerrar">
                 <X size={18} />
@@ -275,19 +289,13 @@ export const ClasificacionJuridicaPage = () => {
             <div className="aj-modal-body">
               <div className="aj-section-title">ESTATUS DEL EXPEDIENTE</div>
               <div className="aj-pill-row">
-                {[
-                  'ASESORÍA EN PROCESO',
-                  'QUEJAS Y RECLAMACIONES',
-                  'REPRESENTACIÓN LEGAL',
-                  'CONCLUIDO',
-                  'ACUERDO CONCLUSIVO',
-                  'ACUERDO ANTICIPADO DE PAGO',
-                ].map((pill) => (
+                {estatusOpciones.map((pill) => (
                   <button
                     key={pill}
                     type="button"
-                    className={`aj-pill ${formData.estatusExpediente === pill ? 'is-selected' : ''}`}
+                    className={`aj-pill ${normalizarTexto(formData.estatusExpediente) === normalizarTexto(pill) ? 'is-selected' : ''}`}
                     onClick={() => handleSelectEstatus(pill)}
+                    disabled={catalogosBloqueados}
                   >
                     {pill}
                   </button>
@@ -302,9 +310,9 @@ export const ClasificacionJuridicaPage = () => {
                     name="idAutoridadFiscal"
                     value={formData.idAutoridadFiscal}
                     onChange={handleChange}
-                    disabled={cargandoCatalogos}
+                    disabled={catalogosBloqueados}
                   >
-                    <option value="">Ej: SAT, Finanzas...</option>
+                    <option value="">Seleccione autoridad...</option>
                     {autoridadesFiscales.map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.nombre}
@@ -320,7 +328,7 @@ export const ClasificacionJuridicaPage = () => {
                     name="idTipoActo"
                     value={formData.idTipoActo}
                     onChange={handleChange}
-                    disabled={cargandoCatalogos}
+                    disabled={catalogosBloqueados}
                   >
                     <option value="">Seleccione acto...</option>
                     {tiposActo.map((t) => (
@@ -332,15 +340,15 @@ export const ClasificacionJuridicaPage = () => {
                 </div>
 
                 <div className="aj-field">
-                  <label className="aj-label">CALIFICACIÓN DEL ACTO</label>
+                  <label className="aj-label">CALIFICACION DEL ACTO</label>
                   <select
                     className="aj-input"
                     name="idCalificacionActo"
                     value={formData.idCalificacionActo}
                     onChange={handleChange}
-                    disabled={cargandoCatalogos}
+                    disabled={catalogosBloqueados}
                   >
-                    <option value="">Seleccione calificación...</option>
+                    <option value="">Seleccione calificacion...</option>
                     {calificaciones.map((c) => (
                       <option key={c.id} value={c.id}>
                         {c.nombre}
@@ -360,23 +368,24 @@ export const ClasificacionJuridicaPage = () => {
                 </div>
               </div>
 
-              <div className="aj-section-title">CANAL DE ENTRADA DEL TRÁMITE</div>
+              <div className="aj-section-title">CANAL DE ENTRADA DEL TRAMITE</div>
               <div className="aj-segment">
-                {['PRESENCIAL', 'CORREO ELECTRÓNICO', 'TELEFÓNICO'].map((c) => (
+                {canalOpciones.map((canal) => (
                   <button
-                    key={c}
+                    key={canal}
                     type="button"
-                    className={`aj-seg ${formData.canalEntrada === c ? 'is-selected' : ''}`}
-                    onClick={() => handleSelectCanal(c)}
+                    className={`aj-seg ${normalizarTexto(formData.canalEntrada) === normalizarTexto(canal) ? 'is-selected' : ''}`}
+                    onClick={() => handleSelectCanal(canal)}
+                    disabled={catalogosBloqueados}
                   >
-                    {c}
+                    {canal}
                   </button>
                 ))}
               </div>
 
               <div className="aj-form-row aj-form-row--2">
                 <div className="aj-field">
-                  <label className="aj-label">PROBLEMÁTICA DETECTADA POR EL CONTRIBUYENTE</label>
+                  <label className="aj-label">PROBLEMATICA DETECTADA POR EL CONTRIBUYENTE</label>
                   <textarea
                     className="aj-textarea"
                     name="problematica"
@@ -386,26 +395,26 @@ export const ClasificacionJuridicaPage = () => {
                   />
                 </div>
                 <div className="aj-field">
-                  <label className="aj-label">SEGUIMIENTO / ASESORÍA</label>
+                  <label className="aj-label">SEGUIMIENTO / ASESORIA</label>
                   <textarea
                     className="aj-textarea"
                     name="asesoriaProporcionada"
                     value={formData.asesoriaProporcionada}
                     onChange={handleChange}
-                    placeholder="Describa el seguimiento o asesoría brindada..."
+                    placeholder="Describa el seguimiento o asesoria brindada..."
                   />
                 </div>
               </div>
 
               <div className="aj-form-row aj-form-row--2">
                 <div className="aj-field">
-                  <label className="aj-label">ANÁLISIS LEGAL DETALLADO</label>
+                  <label className="aj-label">ANALISIS LEGAL DETALLADO</label>
                   <textarea
                     className="aj-textarea"
                     name="analisisLegal"
                     value={formData.analisisLegal}
                     onChange={handleChange}
-                    placeholder="Ingrese el fundamento legal y análisis técnico del caso..."
+                    placeholder="Ingrese el fundamento legal y analisis tecnico del caso..."
                   />
                 </div>
                 <div className="aj-field">
@@ -413,13 +422,13 @@ export const ClasificacionJuridicaPage = () => {
                   <div className="aj-normativo">
                     <div className="aj-normativo-title">V. DERECHOS DE LA PERSONA CONTRIBUYENTE</div>
                     <div className="aj-normativo-text">
-                      Conforme al artículo 3 de la Ley de los Derechos y Defensa del Contribuyente del Estado de Zacatecas y sus Municipios:
+                      Conforme al articulo 3 de la Ley de los Derechos y Defensa del Contribuyente del Estado de Zacatecas y sus Municipios:
                       <br />
                       <br />
-                      1. Que la Comisión le preste el servicio de Asesoría, Representación Legal y Defensa de manera gratuita de conformidad con lo previsto en la Ley de los Derechos y Defensa del Contribuyente para el Estado de Zacatecas y sus Municipios, el presente documento y las demás disposiciones que resulten aplicables.
+                      1. Que la Comision le preste el servicio de Asesoria, Representacion Legal y Defensa de manera gratuita de conformidad con lo previsto en la Ley de los Derechos y Defensa del Contribuyente para el Estado de Zacatecas y sus Municipios, el presente documento y las demas disposiciones que resulten aplicables.
                       <br />
                       <br />
-                      2. A recibir un trato digno, respetuoso y no discriminatorio durante la atención del expediente.
+                      2. A recibir un trato digno, respetuoso y no discriminatorio durante la atencion del expediente.
                     </div>
                   </div>
                 </div>
@@ -430,9 +439,9 @@ export const ClasificacionJuridicaPage = () => {
                   <input
                     type="checkbox"
                     checked={!!formData.confirmoAnalisis}
-                    onChange={(e) => setFormData((p) => ({ ...p, confirmoAnalisis: e.target.checked }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, confirmoAnalisis: e.target.checked }))}
                   />
-                  Confirmo que he realizado el análisis legal
+                  Confirmo que he realizado el analisis legal
                 </label>
               </div>
 
@@ -447,10 +456,10 @@ export const ClasificacionJuridicaPage = () => {
               <button
                 type="button"
                 className="aj-btn aj-btn-primary"
-                disabled={guardando || cargandoCatalogos || !formularioCompleto}
-                onClick={(e) => handleConfirmar(e)}
+                disabled={guardando || catalogosBloqueados || !formularioCompleto}
+                onClick={handleConfirmar}
               >
-                {guardando ? 'CONFIRMANDO...' : 'CONFIRMAR CLASIFICACIÓN'}
+                {guardando ? 'CONFIRMANDO...' : 'CONFIRMAR CLASIFICACION'}
               </button>
             </div>
           </div>
@@ -459,4 +468,3 @@ export const ClasificacionJuridicaPage = () => {
     </div>
   );
 };
-
