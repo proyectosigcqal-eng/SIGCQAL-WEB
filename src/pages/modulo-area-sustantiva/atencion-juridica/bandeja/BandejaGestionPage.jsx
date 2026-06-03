@@ -13,7 +13,7 @@ export const BandejaGestionPage = () => {
     setEstatusSeleccionado,
     tabActiva,
     setTabActiva,
-    tramitesFiltrados,
+    tramites,
     handleFiltrar,
     ESTATUS_OPTIONS,
     TABS,
@@ -91,7 +91,7 @@ export const BandejaGestionPage = () => {
 
         {/* ── Tabla ─────────────────────────────────────────────────────── */}
         <TablaTramites
-          tramites={tramitesFiltrados}
+          tramites={tramites}
           onFicha={abrirFicha}         // ← abre modal ficha
         />
       </div>
