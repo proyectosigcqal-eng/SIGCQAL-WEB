@@ -39,6 +39,26 @@ export const getTiposCorrespondencia = async () => {
                 const response = await axios.get(`${CATALOGOS_BASE}/tipos-correspondencia`);
     return response.data;
 };
+
+export const getAutoridadesFiscales = async () => {
+        const response = await axios.get(`${CATALOGOS_BASE}/autoridades`);
+        return response.data;
+};
+
+export const getTiposActo = async () => {
+        const response = await axios.get(`${CATALOGOS_BASE}/tipo-acto-emitido`);
+        return response.data;
+};
+
+export const getCalificacionesActo = async () => {
+        const response = await axios.get(`${CATALOGOS_BASE}/calificaciones-acto`);
+        return response.data;
+};
+
+export const getTiposAsesoria = async () => {
+        const response = await axios.get(`${CATALOGOS_BASE}/tipos-asesoria`);
+        return response.data;
+};
 export const getPersonas = async () => {
     const response = await axios.get(`${CATALOGOS_BASE}/personas`);
     return response.data;
