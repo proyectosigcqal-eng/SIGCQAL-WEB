@@ -17,13 +17,14 @@ export const MainLayout = () => {
         { label: 'Memorándum asignados', to: '/correspondencia/memorandums-por-area', icon: <CheckSquare size={16} /> },
         { label: 'Acuses de Oficio por Área', to: '/correspondencia/oficios-por-area', icon: <FolderCheck size={16} /> },
         { label: 'Contestación', to: '/correspondencia/bandeja', icon: <Archive size={16} /> },
-        { label: 'Bandeja Trámites IRL', to: '/correspondencia/bandeja-tramites-irl', icon: <Archive size={16} /> },
+        
     ];
 
     const juridicoItems = [
         { label: 'Registro y Calificación', to: '/atencion-juridica/clasificacion/260100001', icon: <CheckSquare size={16} /> },
-        { label: 'Asignación (CU-MARSU-03)', to: '/atencion-juridica/asignacion', icon: <FolderCheck size={16} /> },
-        { label: 'Bandeja de Gestión (CU-MARSU-04)', to: '/atencion-juridica/bandeja', icon: <Archive size={16} /> },
+        { label: 'Asignación', to: '/atencion-juridica/asignacion', icon: <FolderCheck size={16} /> },
+        { label: 'Bandeja de Gestión ', to: '/atencion-juridica/bandeja', icon: <Archive size={16} /> },
+    
     ];
 
     const breadcrumb = pathname.startsWith('/atencion-juridica') ? 'Atención Jurídica' : 'Memorándum';

@@ -1,28 +1,62 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import '@/features/modulo-correspondencia/bandeja-tramites-irl/styles/bandejaTramitesIrl.css';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { useFicha } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useFicha';
+import { BloqueInformacionGeneral } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/BloqueInformacionGeneral';
+import { BloqueAnalisisLegal } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/BloqueAnalisisLegal';
+import { BloqueLineaTiempo } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/BloqueLineaTiempo';
+import { TarjetaEstatusLateral } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TarjetaEstatusLateral';
+import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
 
-export default function DetalleTramiteIrlPage() {
+export const DetalleTramiteIrlPage = () => {
+  const { folio } = useParams();       // captura {folio} de la URL
   const navigate = useNavigate();
-  const { folioId } = useParams();
+  const { detalle, cargando, error, verDocumentos } = useFicha(folio);
+
+  if (cargando) {
+    return (
+      <div className="ficha-page ficha-estado-center">
+        <div className="ficha-spinner" />
+        <p>Cargando expediente...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="ficha-page ficha-estado-center">
+        <p className="ficha-error">{error}</p>
+        <button className="ficha-btn-back" onClick={() => navigate(-1)}>← Regresar</button>
+      </div>
+    );
+  }
 
   return (
-    <div className="irl-bandeja-wrapper">
-      <div className="irl-bandeja-header">
-        <h1 className="irl-bandeja-title">Ficha del trámite</h1>
-        <p className="irl-bandeja-subtitle">{folioId ? decodeURIComponent(folioId) : '-'}</p>
-      </div>
+    <div className="ficha-page">
+      <button className="ficha-btn-back" onClick={() => navigate(-1)}>
+        <ArrowLeft size={16} />
+        FICHA DEL EXPEDIENTE
+      </button>
 
-      <div className="irl-card">
-        <div className="irl-table-wrap">
-          <div className="irl-state">Detalle extendido pendiente de integración con backend.</div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button type="button" className="irl-btn irl-btn-secondary" onClick={() => navigate(-1)}>
-              Volver
-            </button>
-          </div>
+      <div className="ficha-layout">
+        <div className="ficha-main">
+          <BloqueInformacionGeneral
+            folio={detalle.folio}
+            fechaRegistro={detalle.fecha_registro}
+            contribuyente={detalle.contribuyente}
+          />
+          <BloqueAnalisisLegal analisis={detalle.analisis_legal} />
+          {/* ── Ahora recibe bitacora con los 3 eventos ── */}
+          <BloqueLineaTiempo bitacora={detalle.bitacora} />
+        </div>
+
+        <div className="ficha-aside">
+          <TarjetaEstatusLateral
+            estatusActual={detalle.estatus_actual}
+            progresoPorcentaje={detalle.progreso_porcentaje}
+            onVerDocumentos={verDocumentos}
+          />
         </div>
       </div>
     </div>
   );
-}
-
+};
