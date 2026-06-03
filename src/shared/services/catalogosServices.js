@@ -64,3 +64,67 @@ export const getTiposAsesoria = async () => {
         const response = await axios.get(`${CATALOGOS_BASE}/tipos-asesoria`);
         return response.data;
 };
+export const getPersonas = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/personas`);
+    return response.data;
+};
+
+export const getDirecciones = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/direcciones`);
+    return response.data;
+};
+
+export const getEmpleados = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/empleados`);
+    return response.data;
+};
+
+export const getAutoridades = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/autoridades`);
+    return response.data;
+};
+
+export const getCatAutoridades = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/cat-autoridades`);
+    return response.data;
+};
+
+export const getCatEstatusSustantiva = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/cat-estatus-sustantiva`);
+    return response.data;
+};
+
+export const getCatTipoProceso = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/cat-tipo-proceso`);
+    return response.data;
+};
+
+export const getEstatusDetalleExpediente = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/estatus-detalle-expediente`);
+    return response.data;
+};
+
+export const getEstatusExpediente = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/estatus-expediente`);
+    return response.data;
+};
+
+export const getTipoActoEmitido = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/tipo-acto-emitido`);
+    return response.data;
+};
+
+export const getTipoEntrada = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/tipo-entrada`);
+    return response.data;
+};
+
+export const getTipoTramite = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/tipo-tramite`);
+    return response.data;
+};
+
+export const getControlFoliosConfig = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/control-folios-config`);
+    return response.data;
+};
