@@ -40,26 +40,31 @@ export const TablaTramites = ({ tramites, onBitacora, onFicha }) => {
         </tr>
       </thead>
       <tbody>
-        {tramites.map((t) => (
-          <tr key={t.id}>
-            <td>
-              <div className="bdg-folio">{t.folio}</div>
-              <div className="bdg-sub">{t.municipio}</div>
-            </td>
-            <td>
-              <div className="bdg-contribuyente">{t.contribuyente}</div>
-              <div className="bdg-sub bdg-impuesto">{t.impuesto}</div>
-            </td>
-            <td>
-              <div className="bdg-estatus-col">
-                <BadgeEstatus label={t.estatusPrincipal} />
-                <BadgeEstatus label={t.estatusSecundario} />
-              </div>
-            </td>
-            <td>
-              <div className="bdg-modificacion">{t.ultimaModificacion}</div>
-              <div className="bdg-sub">{t.fecha}</div>
-            </td>
+       {tramites.map((t) => (
+  <tr key={t.id}> {/* Ahora t.id existe gracias al adaptador */}
+    <td>
+      <div className="bdg-folio">{t.folio}</div>
+      <div className="bdg-sub">{t.municipio}</div> {/* t.municipio ahora existe */}
+    </td>
+    <td>
+      <div className="bdg-contribuyente">{t.contribuyente}</div>
+      <div className="bdg-sub bdg-impuesto">{t.impuesto}</div>
+    </td>
+    <td>
+      <div className="bdg-estatus-col">
+        <BadgeEstatus label={t.estatusPrincipal} /> {/* t.estatusPrincipal ahora existe */}
+        <BadgeEstatus label={t.estatusSecundario} />
+      </div>
+    </td>
+    <td>
+      <div className="bdg-modificacion">{t.ultimaModificacion}</div>
+      <div className="bdg-sub">{t.fecha}</div>
+    </td>
+          <td>
+            {/* Acceso seguro al objeto anidado */}
+            <div className="bdg-modificacion">{t.ultima_modificacion?.descripcion}</div>
+            <div className="bdg-sub">{t.ultima_modificacion?.timestamp}</div>
+          </td>
             <td className="bdg-action-cell">
               <button
                 className="bdg-icon-btn"
