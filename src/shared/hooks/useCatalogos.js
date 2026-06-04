@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAreas, getUsuarios, getPlantillas, getRoles, getTiposCorrespondencia } from '../services/catalogosServices';
+import { getAreas, getUsuarios, getPlantillas, getRoles, getTiposCorrespondencia, getAsesores } from '../services/catalogosServices';
 
 export const useCatalogos = () => {
     const [areas, setAreas] = useState([]);
@@ -8,17 +8,19 @@ export const useCatalogos = () => {
     const [roles, setRoles] = useState([]);
     const [tiposCorrespondencia, setTiposCorrespondencia] = useState([]);
     const [cargandoCatalogos, setCargandoCatalogos] = useState(true);
+    const [asesores, setAsesores] = useState([])
 
     useEffect(() => {
         const cargarDatos = async () => {
             setCargandoCatalogos(true);
             try {
-                const [areasData, usuariosData, plantillasData, rolesData, tiposData] = await Promise.all([
+                const [areasData, usuariosData, plantillasData, rolesData, tiposData, asesoresData] = await Promise.all([
                     getAreas(),
                     getUsuarios(),
                     getPlantillas(),
                     getRoles(),
-                    getTiposCorrespondencia()
+                    getTiposCorrespondencia(),
+                    getAsesores()
                 ]);
 
                 setAreas(areasData);
@@ -26,6 +28,7 @@ export const useCatalogos = () => {
                 setPlantillas(plantillasData);
                 setRoles(rolesData);
                 setTiposCorrespondencia(tiposData);
+                setAsesores(asesoresData);
             } catch (error) {
                 console.error("Fallo al cargar los catálogos globales.", error);
             } finally {
@@ -42,6 +45,7 @@ export const useCatalogos = () => {
         plantillas, 
         roles,
         tiposCorrespondencia,
+        asesores,
         cargandoCatalogos 
     };
 };

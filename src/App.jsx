@@ -26,6 +26,7 @@ import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseofici
 import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
 import { BandejaGestionPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage';
 import { ClasificacionJuridicaPage } from './pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
+import { RegistroExpedientePage } from './pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
@@ -290,11 +291,22 @@ function App() {
             }
           />
 
+
           <Route
             path="atencion-juridica/clasificacion/:idExpediente"
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/clasificacion']}>
                 <ClasificacionJuridicaPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Módulo Área Sustantiva - Registro de Expediente */}
+          <Route
+            path="area-sustantiva/registro-expediente"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/registro-expediente']}>
+                <RegistroExpedientePage />
               </ProtectedRoute>
             }
           />

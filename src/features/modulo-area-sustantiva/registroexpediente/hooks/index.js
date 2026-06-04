@@ -1,0 +1,1 @@
+export { useRegistroExpediente } from './useRegistroExpediente';
