@@ -40,7 +40,7 @@ export const registrarExpediente = async (formData) => {
     // El municipio se extrae directo de la raíz del formulario
     idMunicipio: formData.idMunicipio ? parseNumber(formData.idMunicipio) : null
   };
-  console.log("🚀 PAYLOAD REAL ENVIADO A CREATE_DIRECCION:", direccionPayload);
+  console.log("PAYLOAD REAL ENVIADO A CREATE_DIRECCION:", direccionPayload);
 
   const direccion = await createDireccion(direccionPayload);
 
@@ -104,13 +104,26 @@ export const registrarExpediente = async (formData) => {
     throw new Error('No se pudo crear la persona del representante legal.');
   }
 
+  const getIdTipoTramite = (clasificacion) => {
+    switch (clasificacion) {
+      case 'asesoria':
+        return 1;
+      case 'queja':
+        return 2;
+      case 'representacion':
+        return 3;
+      default:
+        return null;
+    }
+  };
+
   // 6. Registro final del Expediente
   const expedientePayload = {
     folioGobierno: formData.folioGobierno,
     fechaSolicitud: `${formData.fechaSolicitud}T00:00:00`,
     idMunicipio: parseNumber(formData.idMunicipio),
     idAsesor: parseNumber(formData.idAsesorResponsable),
-    idTipoTramite: 1,
+    idTipoTramite: getIdTipoTramite(formData.clasificacionAtencion),
     idEstatusExpediente: 1,
     documentoAcreditaPersonalidad: formData.documentoPersonalidad || null,
     archivoDocumentoAcreditaPersonalidad: formData.archivoDocumentoPersonalidad?.name || null,
