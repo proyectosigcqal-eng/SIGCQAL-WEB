@@ -15,6 +15,30 @@ export const getUsuarios = async () => {
 
 };
 
+
+export const getContribuyentes = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/contribuyentes`);
+    return response.data;
+};
+
+// POST de Persona
+export const createPersona = async (personaData) => {
+    const response = await axios.post(`${CATALOGOS_BASE}/personas`, personaData);
+    return response.data;
+};
+
+// POST de Dirección
+export const createDireccion = async (direccionData) => {
+    const response = await axios.post(`${CATALOGOS_BASE}/direcciones`, direccionData);
+    return response.data;
+};
+
+// POST de Contribuyente
+export const createContribuyente = async (contribuyenteData) => {
+    const response = await axios.post(`${CATALOGOS_BASE}/contribuyentes`, contribuyenteData);
+    return response.data;
+};
+
 export const getPlantillas = async () => {
         const response = await axios.get(`${CATALOGOS_BASE}/plantillas/listar`);
         return response.data;
