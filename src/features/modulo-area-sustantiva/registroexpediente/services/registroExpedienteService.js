@@ -59,6 +59,7 @@ export const registrarExpediente = async (formData) => {
     rfc: formData.rfc || null,
     rec: formData.rec || null,
     identificacionOficial: formData.identificacionNumero || null,
+    tipoIdentificacion: formData.identificacionTipo || null,
     correo: formData.correoElectronico || null,
     comunidad: formData.tipoPersona || null,
     idDireccion: direccionId, // Mapeado correctamente a camelCase
