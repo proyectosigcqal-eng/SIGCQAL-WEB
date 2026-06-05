@@ -25,6 +25,7 @@ export const useRegistroExpediente = () => {
     identificacionNumero: '',
     correoElectronico: '',
     telefono: '',
+    telefonoFijo: '',
     documentoPersonalidad: '',
     archivoDocumentoPersonalidad: null,
     domicilioFiscal: {

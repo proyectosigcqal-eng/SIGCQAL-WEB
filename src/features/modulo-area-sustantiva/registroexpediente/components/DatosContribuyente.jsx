@@ -167,6 +167,10 @@ export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handl
             <label htmlFor="telefono">Teléfono</label>
             <input id="telefono" name="telefono" type="text" value={formData.telefono} onChange={handleChange} placeholder="(xxx) xxx-xxxx" />
           </div>
+          <div className="form-group">
+            <label htmlFor="telefonoFijo">Teléfono Fijo</label>
+            <input id="telefonoFijo" name="telefonoFijo" type="text" value={formData.telefonoFijo} onChange={handleChange} placeholder="(xxx) xxx-xxxx" />
+          </div>
         </div>
 
         <div className="domicilio-section">

@@ -55,6 +55,7 @@ export const registrarExpediente = async (formData) => {
     apellidoPaterno: formData.apellidoPaterno,
     apellidoMaterno: formData.apellidoMaterno,
     telefono: formData.telefono || null,
+    telefonoFijo: formData.telefonoFijo || null,
     rfc: formData.rfc || null,
     rec: formData.rec || null,
     identificacionOficial: formData.identificacionNumero || null,
