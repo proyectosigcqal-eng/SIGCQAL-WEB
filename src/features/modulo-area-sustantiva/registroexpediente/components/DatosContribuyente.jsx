@@ -142,13 +142,7 @@ export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handl
 
           <div className="form-group">
             <label htmlFor="identificacionTipo">Tipo de Identificación *</label>
-            <select id="identificacionTipo" name="identificacionTipo" value={formData.identificacionTipo} onChange={handleChange} className={erroresCampo.identificacionTipo ? 'campo-con-error' : ''}>
-              <option value="">Seleccionar tipo...</option>
-              <option value="ine">INE</option>
-              <option value="pasaporte">Pasaporte</option>
-              <option value="curp">CURP</option>
-              <option value="otro">Otro</option>
-            </select>
+            <input id="identificacionTipo" name="identificacionTipo" type="text" value={formData.identificacionTipo} onChange={handleChange} placeholder="Ej. INE, Pasaporte, CURP" className={erroresCampo.identificacionTipo ? 'campo-con-error' : ''} />
             {erroresCampo.identificacionTipo && <span className="error-text">{erroresCampo.identificacionTipo}</span>}
           </div>
 
