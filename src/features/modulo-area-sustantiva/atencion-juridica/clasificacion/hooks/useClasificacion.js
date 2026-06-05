@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { API_HOST } from '@/shared/config/api';
+import { endpointApi } from '@/shared/config/api';
 
-const CLASIFICACION_JURIDICA_URL = `${API_HOST}/api/clasificacion-juridica`;
+const CLASIFICACION_JURIDICA_URL = endpointApi('/clasificacion-juridica');
 
 const getApiErrorMessage = (err) => {
   const data = err?.response?.data;
