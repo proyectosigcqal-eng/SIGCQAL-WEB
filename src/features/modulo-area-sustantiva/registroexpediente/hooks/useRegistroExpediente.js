@@ -9,7 +9,6 @@ export const useRegistroExpediente = () => {
 
   const [formData, setFormData] = useState({
     // Control Operativo
-    folioGobierno: '',
     fechaSolicitud: hoy,
     idMunicipio: '',
     idAsesorResponsable: '',
@@ -112,7 +111,6 @@ export const useRegistroExpediente = () => {
     const errores = {};
 
     // Validar Control Operativo
-    if (!formData.folioGobierno) errores.folioGobierno = 'El folio de gobierno es obligatorio.';
     if (!formData.fechaSolicitud) errores.fechaSolicitud = 'La fecha de solicitud es obligatoria.';
     if (!formData.idMunicipio) errores.idMunicipio = 'El municipio es obligatorio.';
     if (!formData.idAsesorResponsable) errores.idAsesorResponsable = 'El asesor responsable es obligatorio.';
@@ -191,8 +189,13 @@ export const useRegistroExpediente = () => {
       };
 
       // 2. Reensamblar los datos finales listos para enviar al Backend
+      const {
+        folioGobierno, // Ignorado porque el backend genera el folio automáticamente
+        ...formDataSinFolio
+      } = formData;
+
       const payloadListoParaEnviar = {
-        ...formData, // Mantenemos los demás datos raíz (folios, nombres, solicitantes)
+        ...formDataSinFolio,
         idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
         idAsesorResponsable: formData.idAsesorResponsable ? parseInt(formData.idAsesorResponsable, 10) : null,
         

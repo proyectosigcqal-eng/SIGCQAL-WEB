@@ -120,7 +120,6 @@ export const registrarExpediente = async (formData) => {
 
   // 6. Registro final del Expediente
   const expedientePayload = {
-    folioGobierno: formData.folioGobierno,
     fechaSolicitud: `${formData.fechaSolicitud}T00:00:00`,
     idMunicipio: parseNumber(formData.idMunicipio),
     idAsesor: parseNumber(formData.idAsesorResponsable),
