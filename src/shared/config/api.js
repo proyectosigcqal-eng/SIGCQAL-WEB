@@ -12,6 +12,11 @@ export function endpoint(path) {
 // Host root without the trailing /api/v1 — useful for constructing file links
 export const API_HOST = import.meta?.env?.VITE_API_HOST || 'http://localhost:8081/SIGCQAL_dev';
 
+export function endpointApi(path) {
+  if (!path) return `${API_HOST}/api`;
+  return `${API_HOST}/api${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
 /**
  * Build an absolute URL to a file returned by the backend.
  * The backend typically returns paths like `/api/files/...` (already absolute to the app root).
