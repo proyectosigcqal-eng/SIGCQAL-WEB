@@ -1,8 +1,8 @@
 import axios from 'axios';
-import API_BASE_URL from '@/shared/config/api';
+import { API_HOST } from '@/shared/config/api';
 
 // The legacy catalogos endpoint lives at /SIGCQAL_dev/catalogos (outside /api/v1)
-const CATALOGOS_BASE = API_BASE_URL.replace('/api/v1', '') + '/catalogos';
+const CATALOGOS_BASE = `${API_HOST}/catalogos`;
 
 export const getAreas = async () => {
         const response = await axios.get(`${CATALOGOS_BASE}/areas`);

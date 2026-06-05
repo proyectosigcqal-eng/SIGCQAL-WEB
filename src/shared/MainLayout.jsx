@@ -21,8 +21,8 @@ export const MainLayout = () => {
     ];
 
     const juridicoItems = [
-        { label: 'Registro y Calificación', to: '/atencion-juridica/clasificacion/260100001', icon: <CheckSquare size={16} /> },
-        { label: 'Asignación', to: '/atencion-juridica/asignacion', icon: <FolderCheck size={16} /> },
+        { label: 'Registro de Expedientes', to: '/area-sustantiva/registro-expediente', icon: <FolderCheck size={16} /> },
+        { label: 'Calificación', to: '/atencion-juridica/clasificacion/260100001', icon: <CheckSquare size={16} /> },
         { label: 'Bandeja de Gestión ', to: '/atencion-juridica/bandeja', icon: <Archive size={16} /> },
     
     ];

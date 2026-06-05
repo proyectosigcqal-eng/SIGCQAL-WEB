@@ -133,5 +133,18 @@ export const registrarExpediente = async (formData) => {
   };
 
   const response = await axios.post(EXPEDIENTES_URL, expedientePayload);
-  return response.data;
+  const expedienteGuardado = response.data;
+  const folio = expedienteGuardado.folioGobierno;
+
+  // 7. ✅ Subir archivo de personalidad si existe
+  if (formData.archivoDocumentoPersonalidad && folio) {
+    const fd = new FormData();
+    fd.append('archivo', formData.archivoDocumentoPersonalidad);
+    await axios.post(`${EXPEDIENTES_URL}/${folio}/documento-personalidad`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+
+  return expedienteGuardado;
+
 };

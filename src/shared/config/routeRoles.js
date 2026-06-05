@@ -28,6 +28,7 @@ export const ROUTE_ROLES = {
   '/atencion-juridica/tramites-irl': ['Administrador', 'Revisor', 'Capturista'],
    '/atencion-juridica/asignacion': ['Administrador', 'Abogado', 'Abogado Calificador'],
   '/atencion-juridica/bandeja':    ['Administrador', 'Abogado', 'Abogado Calificador'],
+  '/area-sustantiva/registro-expediente': ['Administrador', 'Abogado', 'Abogado Calificador'],
 };
 
 export default ROUTE_ROLES;
