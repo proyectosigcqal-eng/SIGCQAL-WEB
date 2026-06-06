@@ -1,7 +1,16 @@
-export const TarjetaEstatusLateral = ({ estatusActual, progresoPorcentaje, onVerDocumentos }) => (
+import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
+
+export const TarjetaEstatusLateral = ({ folio, estatusActual, progresoPorcentaje, onVerDocumentos }) => (
   <div className="ficha-lateral-card">
     <div className="ficha-lateral-label">ESTATUS ACTUAL</div>
     <div className="ficha-lateral-estatus">{estatusActual}</div>
+
+    {/* --- AQUÍ AGREGAMOS LA CONDICIÓN Y EL SEMÁFORO --- */}
+    {estatusActual?.toUpperCase().includes('PREVENCI') && (
+      <div style={{ marginTop: '12px', marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+        <SemaforoPlazo folio={folio} />
+      </div>
+    )}
 
     <div className="ficha-progress-bar">
       <div

@@ -6,9 +6,10 @@ import { BloqueAnalisisLegal } from '@/features/modulo-area-sustantiva/atencion-
 import { BloqueLineaTiempo } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/BloqueLineaTiempo';
 import { TarjetaEstatusLateral } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TarjetaEstatusLateral';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
+import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
 
 export const DetalleTramiteIrlPage = () => {
-  const { folio } = useParams();       // captura {folio} de la URL
+  const { folio } = useParams();
   const navigate = useNavigate();
   const { detalle, cargando, error, verDocumentos } = useFicha(folio);
 
@@ -45,12 +46,13 @@ export const DetalleTramiteIrlPage = () => {
             contribuyente={detalle.contribuyente}
           />
           <BloqueAnalisisLegal analisis={detalle.analisis_legal} />
-          {/* ── Ahora recibe bitacora con los 3 eventos ── */}
           <BloqueLineaTiempo bitacora={detalle.bitacora} />
+          {/* El semáforo ya no va aquí */}
         </div>
 
         <div className="ficha-aside">
           <TarjetaEstatusLateral
+            folio={folio} 
             estatusActual={detalle.estatus_actual}
             progresoPorcentaje={detalle.progreso_porcentaje}
             onVerDocumentos={verDocumentos}
