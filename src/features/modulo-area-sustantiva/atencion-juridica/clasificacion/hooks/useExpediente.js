@@ -47,7 +47,9 @@ const mapDetalleToViewModel = (data) => {
   const idExpedienteNum = Number(folio);
 
   return {
-    idExpediente: Number.isFinite(idExpedienteNum) ? idExpedienteNum : null,
+    idExpediente: pickFirst(data, ['idExpediente', 'id_expediente', 'id']) 
+    ? Number(pickFirst(data, ['idExpediente', 'id_expediente', 'id'])) 
+    : null,
     folioGobierno: folio || null,
     nombreContribuyente: nombreContribuyente || null,
     nombreTramite: 'Atención Jurídica',

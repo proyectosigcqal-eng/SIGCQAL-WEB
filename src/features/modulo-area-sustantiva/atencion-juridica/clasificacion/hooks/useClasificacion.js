@@ -43,8 +43,8 @@ export const useClasificacion = (idExpediente) => {
     }
 
     const idExpedienteNum = Number(idExpediente);
-    if (!Number.isFinite(idExpedienteNum) || idExpedienteNum <= 0) {
-      const msg = 'No se encontro el identificador del expediente.';
+     if (!Number.isFinite(idExpedienteNum) || idExpedienteNum <= 0) {
+      const msg = 'No se encontró el ID numérico del expediente. Revisa la consola.';
       setMensaje(msg);
       setError(msg);
       return { ok: false, message: msg };

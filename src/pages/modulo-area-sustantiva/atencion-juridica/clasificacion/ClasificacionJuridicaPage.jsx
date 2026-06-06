@@ -48,7 +48,8 @@ const getTipoAsesoriaMeta = (nombre) => {
 };
 
 export const ClasificacionJuridicaPage = () => {
-  const { idExpediente } = useParams();
+  // 1. Extraemos el folio alfanumérico de la URL (ej. "FOL-2026-0025")
+  const { idExpediente: folioUrl } = useParams();
 
   const {
     autoridadesFiscales,
@@ -61,8 +62,15 @@ export const ClasificacionJuridicaPage = () => {
     error: errorCatalogos,
   } = useCatalogosJuridicos();
 
-  const { confirmarClasificacion, guardando, error } = useClasificacion(idExpediente);
-  const { expediente, actualizarExpediente } = useExpediente(idExpediente);
+  // 2. Traemos los datos del expediente usando el folio de la URL
+  const { expediente, actualizarExpediente } = useExpediente(folioUrl);
+  console.log("DATOS DEL EXPEDIENTE:", expediente);
+
+  // 3. Extraemos el ID numérico del objeto expediente (ajusta "id" por "idExpediente" si tu backend lo llama distinto)
+  const idNumerico = expediente?.id || expediente?.idExpediente;
+
+  // 4. Le pasamos el ID numérico real al hook de clasificación
+  const { confirmarClasificacion, guardando, error } = useClasificacion(idNumerico);
 
   const [tipoAsesoria, setTipoAsesoria] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -133,8 +141,18 @@ export const ClasificacionJuridicaPage = () => {
     setBanner({ status: 'error', message });
   };
 
-  const handleConfirmar = async (e) => {
+ const handleConfirmar = async (e) => {
     e.preventDefault();
+
+    // 1. Extraemos el ID justo al hacer clic (Cambia "idExpediente" por el nombre real que viste en el console.log)
+    const idRealParaGuardar = expediente?.id || expediente?.idExpediente; 
+
+    // 2. Si sigue sin existir, detenemos todo y avisamos
+    if (!idRealParaGuardar) {
+      console.error("El objeto expediente es:", expediente);
+      mostrarError('No se encontró el ID numérico del expediente. Revisa la consola.');
+      return;
+    }
 
     if (catalogosBloqueados) {
       mostrarError(errorCatalogos || 'Espera a que terminen de cargar los catalogos.');
@@ -161,7 +179,10 @@ export const ClasificacionJuridicaPage = () => {
       return;
     }
 
+    // 3. Le pasamos el idRealParaGuardar directamente a la función
+    // NOTA: Si tu hook useClasificacion espera el ID dentro de este objeto, asegúrate de agregarlo.
     const result = await confirmarClasificacion({
+      idExpediente: idRealParaGuardar, // <-- Agrégalo aquí si tu API lo necesita en el body
       idAutoridadFiscal: Number(formData.idAutoridadFiscal),
       idTipoActo: Number(formData.idTipoActo),
       idCalificacionActo: Number(formData.idCalificacionActo),
@@ -187,7 +208,6 @@ export const ClasificacionJuridicaPage = () => {
       mostrarError(result.message);
     }
   };
-
   return (
     <div className="aj-page">
       <Toast visible={!!toast} type={toast?.type} message={toast?.message} onClose={() => setToast(null)} />
