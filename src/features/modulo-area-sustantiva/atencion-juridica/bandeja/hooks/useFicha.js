@@ -7,6 +7,13 @@ export const useFicha = (folio) => {
   const [cargando, setCargando] = useState(true);
   const [error, setError]       = useState(null);
 
+  const actualizarExpediente = (nuevosDatos) => {
+    setDetalle((prevDetalle) => ({
+      ...prevDetalle,
+      ...nuevosDatos
+    }));
+  };
+  
   useEffect(() => {
     if (!folio) return;
     setCargando(true);
@@ -29,5 +36,5 @@ export const useFicha = (folio) => {
     );
   };
 
-  return { detalle, cargando, error, verDocumentos };
+  return { detalle, cargando, error, verDocumentos, actualizarExpediente };
 };
