@@ -7,11 +7,12 @@ import { BloqueLineaTiempo } from '@/features/modulo-area-sustantiva/atencion-ju
 import { TarjetaEstatusLateral } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TarjetaEstatusLateral';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
 import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
+import { AsesorAsignado } from '@/features/modulo-area-sustantiva/turnado/components/AsesorAsignado';
 
 export const DetalleTramiteIrlPage = () => {
   const { folio } = useParams();
   const navigate = useNavigate();
-  const { detalle, cargando, error, verDocumentos } = useFicha(folio);
+  const { detalle, cargando, error, verDocumentos, actualizarExpediente } = useFicha(folio);
 
   if (cargando) {
     return (
@@ -47,6 +48,14 @@ export const DetalleTramiteIrlPage = () => {
           />
           <BloqueAnalisisLegal analisis={detalle.analisis_legal} />
           <BloqueLineaTiempo bitacora={detalle.bitacora} />
+          <AsesorAsignado
+            folio={detalle.folio}
+            nombreAsesor={detalle.nombre_asesor}
+            onReasignado={(resultado) => {
+              // Actualiza el detalle localmente sin recargar
+              actualizarExpediente({ nombre_asesor: resultado.nombre_asesor });
+            }}
+          />
           {/* El semáforo ya no va aquí */}
         </div>
 
