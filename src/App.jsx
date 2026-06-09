@@ -27,6 +27,7 @@ import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/of
 import { BandejaGestionPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage';
 import { ClasificacionJuridicaPage } from './pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
 import { RegistroExpedientePage } from './pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage';
+import { RegistroInformeAutoridadPage } from './pages/modulo-area-sustantiva/atencion-juridica/informe-autoridad/RegistroInformeAutoridadPage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
@@ -186,6 +187,15 @@ function App() {
             <BandejaGestionPage />
           </ProtectedRoute>
         } />
+
+        <Route
+          path="atencion-juridica/informe-autoridad/:folio"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/informe-autoridad']}>
+              <RegistroInformeAutoridadPage />
+            </ProtectedRoute>
+          }
+        />
           
 
           <Route

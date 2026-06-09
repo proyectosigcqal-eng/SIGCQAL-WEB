@@ -290,6 +290,28 @@
   text-align: center;
 }
 
+.bdg-actions-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bdg-btn-informe {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.bdg-btn-informe:hover {
+  background: #15803d;
+}
+
 .bdg-icon-btn {
   background: none;
   border: none;
