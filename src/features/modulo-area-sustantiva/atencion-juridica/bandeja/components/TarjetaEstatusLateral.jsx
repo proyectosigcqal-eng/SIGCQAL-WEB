@@ -1,4 +1,12 @@
-export const TarjetaEstatusLateral = ({ estatusActual, progresoPorcentaje, onVerDocumentos }) => (
+export const TarjetaEstatusLateral = ({
+  estatusActual,
+  progresoPorcentaje,
+  onVerDocumentos,
+  onAbrirConstancia,
+  puedeAbrirConstancia,
+  generandoConstancia,
+  mensajeConstancia,
+}) => (
   <div className="ficha-lateral-card">
     <div className="ficha-lateral-label">ESTATUS ACTUAL</div>
     <div className="ficha-lateral-estatus">{estatusActual}</div>
@@ -13,5 +21,17 @@ export const TarjetaEstatusLateral = ({ estatusActual, progresoPorcentaje, onVer
     <button className="ficha-btn-documentos" onClick={onVerDocumentos}>
       VER DOCUMENTOS
     </button>
+
+    <button
+      className="ficha-btn-constancia"
+      onClick={onAbrirConstancia}
+      disabled={!puedeAbrirConstancia || generandoConstancia}
+    >
+      {generandoConstancia ? 'GENERANDO CONSTANCIA...' : 'GENERAR CONSTANCIA INTERNA DE REMISIÓN'}
+    </button>
+
+    {mensajeConstancia ? (
+      <div className="ficha-constancia-msg">{mensajeConstancia}</div>
+    ) : null}
   </div>
 );

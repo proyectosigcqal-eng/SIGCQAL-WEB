@@ -1,20 +1,24 @@
-import { Scale, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const normalizar = (value) =>
+  (value ?? '')
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '');
 
+const BadgeEstatus = ({ label }) => (
+  <span className="bdg-badge bdg-badge--estatus">{label}</span>
+);
 
-const BadgeEstatus = ({ label }) => {
-  const getClass = (text) => {
-    const t = text?.toUpperCase();
-    if (t?.includes('CALIFICACION') || t?.includes('CALIFICACIÓN')) return 'badge-calificacion';
-    if (t?.includes('REGISTRO')) return 'badge-registro';
-    if (t?.includes('PROCESO')) return 'badge-proceso';
-    if (t?.includes('ASIGNADO')) return 'badge-asignado';
-    if (t?.includes('CONCLUIDO')) return 'badge-concluido';
-    return 'badge-default';
-  };
-
-  return <span className={`bdg-badge ${getClass(label)}`}>{label}</span>;
+const BadgeContador = ({ value }) => {
+  const t = normalizar(value);
+  const match = /^(\d+)/.exec(t);
+  const dias = match?.[1] ? Number(match[1]) : null;
+  const cls = dias !== null && dias <= 1 ? 'bdg-badge--rojo' : 'bdg-badge--verde';
+  return <span className={`bdg-badge ${cls}`}>{value || '--'}</span>;
 };
 
 export const TablaTramites = ({ tramites, onBitacora, onFicha }) => {
@@ -32,50 +36,38 @@ export const TablaTramites = ({ tramites, onBitacora, onFicha }) => {
     <table className="bdg-table">
       <thead>
         <tr>
-          <th>FOLIO</th>
-          <th>CONTRIBUYENTE</th>
+          <th>FOLIO ASESORÍA</th>
+          <th>EXPEDIENTE QUEJA</th>
+          <th>QUEJOSO</th>
+          <th>ASUNTO</th>
           <th>ESTATUS</th>
-          <th>ÚLTIMA MODIFICACIÓN</th>
-          <th>FICHA</th>
+          <th>SEMÁFORO/CONTADOR</th>
+          <th>ACCIONES</th>
         </tr>
       </thead>
       <tbody>
-       {tramites.map((t) => (
-  <tr key={t.id}> {/* Ahora t.id existe gracias al adaptador */}
-    <td>
-      <div className="bdg-folio">{t.folio}</div>
-      <div className="bdg-sub">{t.municipio}</div> {/* t.municipio ahora existe */}
-    </td>
-    <td>
-      <div className="bdg-contribuyente">{t.contribuyente}</div>
-      <div className="bdg-sub bdg-impuesto">{t.impuesto}</div>
-    </td>
-    <td>
-      <div className="bdg-estatus-col">
-        <BadgeEstatus label={t.estatusPrincipal} /> {/* t.estatusPrincipal ahora existe */}
-        <BadgeEstatus label={t.estatusSecundario} />
-      </div>
-    </td>
-    <td>
-      <div className="bdg-modificacion">{t.ultimaModificacion}</div>
-      <div className="bdg-sub">{t.fecha}</div>
-    </td>
-          <td>
-            {/* Acceso seguro al objeto anidado */}
-            <div className="bdg-modificacion">{t.ultima_modificacion?.descripcion}</div>
-            <div className="bdg-sub">{t.ultima_modificacion?.timestamp}</div>
-          </td>
-            <td className="bdg-action-cell">
-              <button
-                className="bdg-icon-btn"
-                title="Ver Ficha del Expediente"
-                onClick={() => navigate(`/atencion-juridica/tramites-irl/${t.folio}`)}
-              >
-                <ExternalLink size={18} />
-              </button>
-            </td>
-          </tr>
-        ))}
+        {tramites.map((t) => {
+          const estatusNorm = normalizar(t.estatus);
+          const etiquetaAccion = estatusNorm.includes('cir') ? 'GENERAR CIR' : 'VER';
+          return (
+            <tr key={t.id}>
+              <td><div className="bdg-folio">{t.folio}</div></td>
+              <td><div className="bdg-folio">{t.folio}</div></td>
+              <td><div className="bdg-contribuyente">{t.contribuyente}</div></td>
+              <td><div className="bdg-asunto">{t.asunto}</div></td>
+              <td><BadgeEstatus label={t.estatus} /></td>
+              <td><BadgeContador value={t.seguimiento} /></td>
+              <td className="bdg-action-cell">
+                <button
+                  className="bdg-btn-action"
+                  onClick={() => navigate(`/atencion-juridica/tramites-irl/${t.folio}`)}
+                >
+                  {etiquetaAccion} <ExternalLink size={16} />
+                </button>
+              </td>
+            </tr>
+          );
+        })}
       </tbody>
     </table>
   );
