@@ -1,6 +1,18 @@
+
+
 import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
 
-export const TarjetaEstatusLateral = ({ folio, estatusActual, progresoPorcentaje, onVerDocumentos }) => (
+export const TarjetaEstatusLateral = ({
+  estatusActual,
+  progresoPorcentaje,
+  onVerDocumentos,
+  onAbrirConstancia,
+  puedeAbrirConstancia,
+  generandoConstancia,
+  mensajeConstancia,
+}) => (
+
+
   <div className="ficha-lateral-card">
     <div className="ficha-lateral-label">ESTATUS ACTUAL</div>
     <div className="ficha-lateral-estatus">{estatusActual}</div>
@@ -22,5 +34,17 @@ export const TarjetaEstatusLateral = ({ folio, estatusActual, progresoPorcentaje
     <button className="ficha-btn-documentos" onClick={onVerDocumentos}>
       VER DOCUMENTOS
     </button>
+
+    <button
+      className="ficha-btn-constancia"
+      onClick={onAbrirConstancia}
+      disabled={!puedeAbrirConstancia || generandoConstancia}
+    >
+      {generandoConstancia ? 'GENERANDO CONSTANCIA...' : 'GENERAR CONSTANCIA INTERNA DE REMISIÓN'}
+    </button>
+
+    {mensajeConstancia ? (
+      <div className="ficha-constancia-msg">{mensajeConstancia}</div>
+    ) : null}
   </div>
 );

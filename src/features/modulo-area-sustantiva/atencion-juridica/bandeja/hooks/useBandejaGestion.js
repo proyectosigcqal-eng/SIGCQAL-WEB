@@ -2,19 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
-const ESTATUS_OPTIONS = [
-  { value: '',            label: 'TODOS LOS ESTATUS' },
-  { value: 'CALIFICACION', label: 'CALIFICACIÓN' },
-  { value: 'REGISTRO',    label: 'REGISTRO' },
-  { value: 'EN PROCESO',  label: 'EN PROCESO' },
-  { value: 'ASIGNADO',    label: 'ASIGNADO' },
-  { value: 'CONCLUIDO',   label: 'CONCLUIDO' },
-];
-
-const TABS = [
-  { key: 'ASESORIA_SIMPLIFICADA',   label: 'ASESORÍA SIMPLIFICADA' },
-  { key: 'QUEJAS_Y_RECLAMACIONES',  label: 'QUEJAS Y RECLAMACIONES' },
-  { key: 'REPRESENTACION_LEGAL',    label: 'REPRESENTACIÓN LEGAL' },
+const ETAPAS = [
+  { key: 'TODOS', label: 'TODOS', estatus: '' },
+  { key: 'SEGUIMIENTO', label: 'SEGUIMIENTO', estatus: 'SEGUIMIENTO' },
+  { key: 'REQUIERE_ACLARACION', label: 'REQUIERE ACLARACIÓN', estatus: 'REQUIERE ACLARACIÓN' },
+  { key: 'EMISION_CIR', label: 'EMISIÓN DE CIR', estatus: 'EMISIÓN DE CIR' },
+  { key: 'ARI_EMITIDO', label: 'ARI EMITIDO', estatus: 'ARI EMITIDO' },
+  { key: 'OFICIO_ENVIADO', label: 'OFICIO ENVIADO', estatus: 'OFICIO ENVIADO' },
+  { key: 'RESPUESTA_RECIBIDA', label: 'RESPUESTA RECIBIDA', estatus: 'RESPUESTA RECIBIDA' },
+  { key: 'INVESTIGACION_ACCI', label: 'INVESTIGACIÓN ACCI', estatus: 'INVESTIGACIÓN ACCI' },
+  { key: 'RESOLUCION_EMITIDA', label: 'RESOLUCIÓN EMITIDA', estatus: 'RESOLUCIÓN EMITIDA' },
+  { key: 'FINALIZADO', label: 'FINALIZADO', estatus: 'FINALIZADO' },
 ];
 
 // Adapta el JSON del backend al shape que usan los componentes
@@ -23,30 +21,31 @@ const adaptarTramite = (item) => ({
   folio:            item.folio,
   municipio:        item.municipio_procedencia ?? '',
   contribuyente:    item.contribuyente ?? '',
-  impuesto:         item.tipo_acto ?? '',
-  estatusPrincipal: item.estatus_principal ?? '',
-  estatusSecundario:item.estatus_secundario ?? '',
-  ultimaModificacion: item.ultima_modificacion?.descripcion ?? '',
+  asunto:           item.tipo_acto ?? '',
+  estatus:          item.estatus_principal ?? '',
+  seguimiento:      item.ultima_modificacion?.descripcion ?? '',
   fecha:            item.ultima_modificacion?.timestamp ?? '',
-  tipoTramite:      item.tipo_tramite ?? '',
 });
 
 export const useBandejaGestion = () => {
   const [busqueda, setBusqueda]                     = useState('');
-  const [estatusSeleccionado, setEstatusSeleccionado] = useState('');
-  const [tabActiva, setTabActiva]                   = useState('ASESORIA_SIMPLIFICADA');
+  const [etapaActiva, setEtapaActiva]               = useState('TODOS');
   const [tramites, setTramites]                     = useState([]);
   const [cargando, setCargando]                     = useState(false);
   const [error, setError]                           = useState(null);
 
-  const fetchBandeja = useCallback(() => {
+  const fetchBandeja = useCallback((searchValue) => {
     setCargando(true);
     setError(null);
 
     const params = new URLSearchParams();
-    if (busqueda)           params.append('search',       busqueda);
-    if (estatusSeleccionado) params.append('estatus',      estatusSeleccionado);
-    if (tabActiva)          params.append('tipo_tramite', tabActiva);
+    const s = searchValue ?? busqueda;
+    if (s) params.append('search', s);
+
+    const etapa = ETAPAS.find((e) => e.key === etapaActiva);
+    if (etapa?.estatus) params.append('estatus', etapa.estatus);
+
+    params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
 
     fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`)
       .then((res) => {
@@ -56,27 +55,21 @@ export const useBandejaGestion = () => {
       .then((data) => setTramites(data.map(adaptarTramite)))
       .catch((err) => setError(err.message))
       .finally(() => setCargando(false));
-  }, [busqueda, estatusSeleccionado, tabActiva]);
+  }, [busqueda, etapaActiva]);
 
-  // Re-fetch automático cuando cambia la tab o el estatus
   useEffect(() => {
-    fetchBandeja();
-  }, [tabActiva, estatusSeleccionado]);
-
-  const handleFiltrar = () => fetchBandeja();
+    const id = window.setTimeout(() => fetchBandeja(busqueda), 350);
+    return () => window.clearTimeout(id);
+  }, [busqueda, etapaActiva, fetchBandeja]);
 
   return {
     busqueda,
     setBusqueda,
-    estatusSeleccionado,
-    setEstatusSeleccionado,
-    tabActiva,
-    setTabActiva,
+    etapaActiva,
+    setEtapaActiva,
     tramites,
     cargando,
     error,
-    handleFiltrar,
-    ESTATUS_OPTIONS,
-    TABS,
+    ETAPAS,
   };
 };

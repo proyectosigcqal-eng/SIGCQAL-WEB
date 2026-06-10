@@ -21,19 +21,33 @@ export const MainLayout = () => {
     ];
 
     const juridicoItems = [
+
+        { label: 'Gestión de Quejas', to: '/atencion-juridica/bandeja', icon: <Archive size={16} /> },
+        { label: 'Seguimiento de Queja', to: '/atencion-juridica/bandeja-tramites-irl', icon: <Archive size={16} /> },
+        { label: 'Registro y Calificación', to: '/atencion-juridica/clasificacion/260100001', icon: <CheckSquare size={16} /> },
+        { label: 'Asignación', to: '/atencion-juridica/asignacion', icon: <FolderCheck size={16} /> },
+
         { label: 'Registro de Expedientes', to: '/area-sustantiva/registro-expediente', icon: <FolderCheck size={16} /> },
-        { label: 'Calificación', to: '/atencion-juridica/clasificacion/260100001', icon: <CheckSquare size={16} /> },
+    
         { label: 'Bandeja de Gestión ', to: '/atencion-juridica/bandeja', icon: <Archive size={16} /> },
+
     
     ];
 
-    const breadcrumb = pathname.startsWith('/atencion-juridica') ? 'Atención Jurídica' : 'Memorándum';
+    const breadcrumb = pathname.startsWith('/atencion-juridica') ? 'Quejas' : 'Correspondencia';
 
     return (
         <div className="app-container">
             <aside className="sidebar">
                 <div className="sidebar-logo"><h1>SIGCQAL</h1></div>
                 <nav className="sidebar-nav">
+                    <Link
+                        to="/correspondencia/bandeja"
+                        className={`nav-item ${pathname === '/correspondencia/bandeja' ? 'active' : ''}`}
+                    >
+                        <Archive size={16} /> <span>Bandeja de Entrada</span>
+                    </Link>
+
                     <div className="module-header-wrap">
                         <button
                             onClick={() => setModuleOpen(!moduleOpen)}
@@ -69,7 +83,7 @@ export const MainLayout = () => {
                             className={`module-header ${pathname.startsWith('/atencion-juridica') ? 'active' : ''}`}
                         >
                             <CheckSquare size={18} />
-                            <strong className="module-title">Atención Jurídica</strong>
+                            <strong className="module-title">Quejas</strong>
                             <span className="chevron-wrap">
                                 <ChevronDown className="chevron" size={16} />
                             </span>

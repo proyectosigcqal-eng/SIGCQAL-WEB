@@ -1,5 +1,15 @@
 import { FileDown, User, Scale, CheckCircle } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+
+const resolverUrlApi = (pathOrUrl) => {
+  if (!pathOrUrl) return '';
+  const v = pathOrUrl.toString();
+  if (v.startsWith('http://') || v.startsWith('https://')) return v;
+  if (v.startsWith('/')) return `${API_BASE}${v}`;
+  return v;
+};
+
 const EVENTOS_CONFIG = [
   {
     key: 'registro',
@@ -69,7 +79,7 @@ const EventoItem = ({ config, datos, isLast }) => {
             {/* Botón descarga PDF si hay adjunto */}
             {datos.adjunto && (
               <a
-                href={datos.adjunto}
+                href={resolverUrlApi(datos.adjunto)}
                 download
                 target="_blank"
                 rel="noreferrer"
