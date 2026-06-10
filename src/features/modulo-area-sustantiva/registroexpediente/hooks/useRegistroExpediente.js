@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { formatForBackend } from '@/shared/utils/dateUtils';
+import { registrarExpediente } from '../services/registroExpedienteService';
 
 const FE_CAMPOS_OBLIGATORIOS = 'Todos los campos obligatorios deben estar completos.';
 
@@ -8,9 +9,8 @@ export const useRegistroExpediente = () => {
 
   const [formData, setFormData] = useState({
     // Control Operativo
-    fechaRegistro: hoy,
+    fechaSolicitud: hoy,
     idMunicipio: '',
-    idLocalidad: '',
     idAsesorResponsable: '',
 
     // Datos del Contribuyente
@@ -24,6 +24,7 @@ export const useRegistroExpediente = () => {
     identificacionNumero: '',
     correoElectronico: '',
     telefono: '',
+    telefonoFijo: '',
     documentoPersonalidad: '',
     archivoDocumentoPersonalidad: null,
     domicilioFiscal: {
@@ -57,6 +58,7 @@ export const useRegistroExpediente = () => {
   const [erroresCampo, setErroresCampo] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
 
   const handleChange = (e) => {
@@ -109,8 +111,8 @@ export const useRegistroExpediente = () => {
     const errores = {};
 
     // Validar Control Operativo
+    if (!formData.fechaSolicitud) errores.fechaSolicitud = 'La fecha de solicitud es obligatoria.';
     if (!formData.idMunicipio) errores.idMunicipio = 'El municipio es obligatorio.';
-    if (!formData.idLocalidad) errores.idLocalidad = 'La localidad es obligatoria.';
     if (!formData.idAsesorResponsable) errores.idAsesorResponsable = 'El asesor responsable es obligatorio.';
 
     // Validar Datos del Contribuyente
@@ -163,12 +165,54 @@ export const useRegistroExpediente = () => {
   const handleConfirmarGuardar = async () => {
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
-      console.log('Datos del formulario listos para enviar:', formData);
+      // 1. Construir el payload estructurado de la dirección para que coincida con DireccionRequestDto.java
+      const direccionPayload = {
+        calle: formData.domicilioFiscal.calle || null,
+        
+        // Mapea 'numero' de React a 'numExt' de Java
+        numExt: formData.domicilioFiscal.numero ? String(formData.domicilioFiscal.numero) : null,
+        
+        // Mapea 'numeroInterior' de React a 'numInt' de Java
+        numInt: formData.domicilioFiscal.numeroInterior ? String(formData.domicilioFiscal.numeroInterior) : null,
+        
+        colonia: formData.domicilioFiscal.colonia || null,
+        cp: formData.domicilioFiscal.codigoPostal ? String(formData.domicilioFiscal.codigoPostal) : null,
+        
+        // Convierte el ID del estado seleccionado a un número entero
+        idEstado: formData.domicilioFiscal.estado ? parseInt(formData.domicilioFiscal.estado, 10) : null,
+        
+        // Inyecta el ID del municipio (seleccionado en Control Operativo) a la dirección como un entero
+        idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null
+      };
+
+      // 2. Reensamblar los datos finales listos para enviar al Backend
+      const {
+        folioGobierno, // Ignorado porque el backend genera el folio automáticamente
+        ...formDataSinFolio
+      } = formData;
+
+      const payloadListoParaEnviar = {
+        ...formDataSinFolio,
+        idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
+        idAsesorResponsable: formData.idAsesorResponsable ? parseInt(formData.idAsesorResponsable, 10) : null,
+        
+        // Sobrescribimos el domicilioFiscal viejo con el payload que sí entiende el DTO de Java
+        domicilioFiscal: direccionPayload 
+      };
+
+      console.log('Payload corregido y estructurado enviado al servicio:', payloadListoParaEnviar);
+      
+      // 3. Enviar el objeto corregido
+      await registrarExpediente(payloadListoParaEnviar);
+      
+      setSuccessMessage('Expediente guardado correctamente.');
       setMostrarModalGuardar(false);
     } catch (err) {
-      setError(err.message || 'Error al guardar el expediente. Intenta de nuevo.');
+      setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
+      setMostrarModalGuardar(false);
     } finally {
       setIsLoading(false);
     }
@@ -183,6 +227,7 @@ export const useRegistroExpediente = () => {
     erroresCampo,
     isLoading,
     error,
+    successMessage,
     mostrarModalGuardar,
     handleChange,
     handleChangeNested,

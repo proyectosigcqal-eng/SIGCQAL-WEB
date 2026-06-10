@@ -4,6 +4,8 @@ import { ArrowLeft, Download } from 'lucide-react';
 import { ModalConstanciaRemision } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/ModalConstanciaRemision';
 import { useFicha } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useFicha';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
+import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
+import { AsesorAsignado } from '@/features/modulo-area-sustantiva/turnado/components/AsesorAsignado';
 
 const normalizarTexto = (value) => {
   if (value === null || value === undefined) return '';
@@ -18,8 +20,9 @@ const normalizarTexto = (value) => {
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 export const DetalleTramiteIrlPage = () => {
-  const { folio } = useParams();       // captura {folio} de la URL
+  const { folio } = useParams();
   const navigate = useNavigate();
+
   const {
     detalle,
     cargando,
@@ -228,6 +231,7 @@ export const DetalleTramiteIrlPage = () => {
               </div>
             </div>
           )}
+
         </div>
       </div>
 

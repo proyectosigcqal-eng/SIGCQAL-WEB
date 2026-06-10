@@ -1,9 +1,34 @@
 import React from 'react';
 
 export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handleFileChange, handleChangeNested, handleTipoPersonaChange, estados = [] }) => {
-  // Defensas para estructura de datos y keys del estado
-  const getEstadoId = (e, index) => e?.id || e?.idEstado || `estado-${index}`;
-  const getEstadoNombre = (e) => e?.nombre || e?.nombreEstado || 'Sin nombre';
+  const extractId = (item) => {
+    if (!item || typeof item !== 'object') return '';
+    if (item.id !== undefined && item.id !== null) return String(item.id);
+    if (item.idEstado !== undefined && item.idEstado !== null) return String(item.idEstado);
+    if (item.id_estado !== undefined && item.id_estado !== null) return String(item.id_estado);
+    if (item.idEstados !== undefined && item.idEstados !== null) return String(item.idEstados);
+    for (const key of Object.keys(item)) {
+      if (/^id(_|-)?[a-zA-Z]+$/.test(key) && item[key] !== undefined && item[key] !== null) {
+        return String(item[key]);
+      }
+    }
+    return '';
+  };
+
+  const extractNombre = (item) => {
+    if (!item || typeof item !== 'object') return 'Sin nombre';
+    return (
+      item.nombre ||
+      item.nombreEstado ||
+      item.estado ||
+      item.descripcion ||
+      item.label ||
+      'Sin nombre'
+    );
+  };
+
+  const getEstadoId = (e) => extractId(e);
+  const getEstadoNombre = (e) => extractNombre(e);
 
   return (
     <section className="form-section section-card">
@@ -117,13 +142,7 @@ export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handl
 
           <div className="form-group">
             <label htmlFor="identificacionTipo">Tipo de Identificación *</label>
-            <select id="identificacionTipo" name="identificacionTipo" value={formData.identificacionTipo} onChange={handleChange} className={erroresCampo.identificacionTipo ? 'campo-con-error' : ''}>
-              <option value="">Seleccionar tipo...</option>
-              <option value="ine">INE</option>
-              <option value="pasaporte">Pasaporte</option>
-              <option value="curp">CURP</option>
-              <option value="otro">Otro</option>
-            </select>
+            <input id="identificacionTipo" name="identificacionTipo" type="text" value={formData.identificacionTipo} onChange={handleChange} placeholder="Ej. INE, Pasaporte, CURP" className={erroresCampo.identificacionTipo ? 'campo-con-error' : ''} />
             {erroresCampo.identificacionTipo && <span className="error-text">{erroresCampo.identificacionTipo}</span>}
           </div>
 
@@ -141,6 +160,10 @@ export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handl
           <div className="form-group">
             <label htmlFor="telefono">Teléfono</label>
             <input id="telefono" name="telefono" type="text" value={formData.telefono} onChange={handleChange} placeholder="(xxx) xxx-xxxx" />
+          </div>
+          <div className="form-group">
+            <label htmlFor="telefonoFijo">Teléfono Fijo</label>
+            <input id="telefonoFijo" name="telefonoFijo" type="text" value={formData.telefonoFijo} onChange={handleChange} placeholder="(xxx) xxx-xxxx" />
           </div>
         </div>
 
@@ -186,9 +209,15 @@ export const DatosContribuyente = ({ formData, erroresCampo, handleChange, handl
               <select id="domicilioFiscal_estado" value={formData.domicilioFiscal.estado} onChange={(e) => handleChangeNested('domicilioFiscal', 'estado', e.target.value)}>
                 <option value="">Seleccionar estado...</option>
                 {Array.isArray(estados) && estados.length > 0 ? (
-                  estados.map((e, index) => (
-                    <option key={getEstadoId(e, index)} value={getEstadoId(e, index)}>{getEstadoNombre(e)}</option>
-                  ))
+                  estados.map((estado, index) => {
+                    const estadoId = getEstadoId(estado);
+                    const optionValue = String(estadoId || `estado-${index}`);
+                    return (
+                      <option key={optionValue} value={optionValue}>
+                        {getEstadoNombre(estado)}
+                      </option>
+                    );
+                  })
                 ) : (
                   <option disabled>No hay estados disponibles</option>
                 )}

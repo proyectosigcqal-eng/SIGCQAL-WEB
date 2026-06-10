@@ -86,8 +86,17 @@ export const useFicha = (folio) => {
   const [previewConstancia, setPreviewConstancia] = useState(null);
   const [urlConstanciaGenerada, setUrlConstanciaGenerada] = useState('');
 
-  const fetchDetalle = useCallback(() => {
-    if (!folio) return Promise.resolve();
+
+  const actualizarExpediente = (nuevosDatos) => {
+    setDetalle((prevDetalle) => ({
+      ...prevDetalle,
+      ...nuevosDatos
+    }));
+  };
+  
+  useEffect(() => {
+    if (!folio) return;
+
     setCargando(true);
     setError(null);
 
@@ -173,6 +182,7 @@ export const useFicha = (folio) => {
       setCargandoPreviewConstancia(false);
     }
   };
+
 
   const confirmarGeneracionConstancia = async ({ analisisJuridico, determinacion } = {}) => {
     if (!expedienteId) return { ok: false, message: 'Expediente no disponible.' };
@@ -272,3 +282,4 @@ export const useFicha = (folio) => {
     expedienteId,
   };
 };
+

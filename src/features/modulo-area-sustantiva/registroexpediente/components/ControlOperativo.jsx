@@ -1,11 +1,17 @@
 import React from 'react';
 
 export const ControlOperativo = ({ formData, erroresCampo, handleChange, municipios = [], asesores = [] }) => {
-  // Defensas para estructura de datos y keys
-  const getMunicipioId = (m, index) => m?.id || m?.idMunicipio || `municipio-${index}`;
-  const getMunicipioNombre = (m) => m?.nombre || m?.nombreMunicipio || 'Sin nombre';
   
-  const getAsesorId = (a, index) => a?.id || a?.idAsesor || `asesor-${index}`;
+  // Extrae el ID real devuelto por tu API
+  const extractId = (item) => {
+    if (!item || typeof item !== 'object') return '';
+    if (item.id !== undefined && item.id !== null) return String(item.id);
+    if (item.idMunicipio !== undefined && item.idMunicipio !== null) return String(item.idMunicipio);
+    if (item.idAsesor !== undefined && item.idAsesor !== null) return String(item.idAsesor);
+    return '';
+  };
+
+  const getMunicipioNombre = (m) => m?.nombreMunicipio || m?.nombre || 'Sin nombre';
   const getAsesorNombre = (a) => a?.nombre || a?.nombreAsesor || 'Sin nombre';
 
   return (
@@ -16,17 +22,34 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
       <div className="section-body">
         <div className="form-grid">
           <div className="form-group">
-            <label htmlFor="fechaRegistro">Fecha de Registro *</label>
+            <label>Folio de Gobierno</label>
+            <p style={{ margin: 0, color: '#333', fontSize: '0.95rem' }}>
+              El folio se generará automáticamente.
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="fechaSolicitud">Fecha de Solicitud *</label>
             <input
-              id="fechaRegistro"
-              name="fechaRegistro"
+              id="fechaSolicitud"
+              name="fechaSolicitud"
               type="date"
-              value={formData.fechaRegistro}
+              value={formData.fechaSolicitud}
               onChange={handleChange}
               disabled
-              className={erroresCampo.fechaRegistro ? 'campo-con-error' : ''}
+              className={erroresCampo.fechaSolicitud ? 'campo-con-error' : ''}
             />
-            {erroresCampo.fechaRegistro && <span className="error-text">{erroresCampo.fechaRegistro}</span>}
+            {erroresCampo.fechaSolicitud && <span className="error-text">{erroresCampo.fechaSolicitud}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="idEstado">Estado *</label>
+            <span 
+              id="idLocalidad" 
+              style={{ display: 'block', paddingTop: '12px', color: '#333', marginLeft:'4px' }}
+            >
+              Zacatecas
+            </span>
           </div>
 
           <div className="form-group">
@@ -40,30 +63,23 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
             >
               <option value="">Seleccionar municipio...</option>
               {Array.isArray(municipios) && municipios.length > 0 ? (
-                municipios.map((m, index) => (
-                  <option key={getMunicipioId(m, index)} value={getMunicipioId(m, index)}>
-                    {getMunicipioNombre(m)}
-                  </option>
-                ))
+                municipios.map((m, index) => {
+                  const municipioId = extractId(m);
+                  // El value toma el ID real de la base de datos (Ej: "1", "2")
+                  const optionValue = municipioId || "";
+                  const reactKey = municipioId ? `mun-${municipioId}` : `mun-index-${index}`;
+
+                  return (
+                    <option key={reactKey} value={optionValue}>
+                      {getMunicipioNombre(m)}
+                    </option>
+                  );
+                })
               ) : (
                 <option disabled>No hay municipios disponibles</option>
               )}
             </select>
             {erroresCampo.idMunicipio && <span className="error-text">{erroresCampo.idMunicipio}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="idLocalidad">Localidad *</label>
-            <input
-              id="idLocalidad"
-              name="idLocalidad"
-              type="text"
-              value={formData.idLocalidad}
-              onChange={handleChange}
-              placeholder="Ingrese la localidad"
-              className={erroresCampo.idLocalidad ? 'campo-con-error' : ''}
-            />
-            {erroresCampo.idLocalidad && <span className="error-text">{erroresCampo.idLocalidad}</span>}
           </div>
 
           <div className="form-group">
@@ -77,11 +93,17 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
             >
               <option value="">Seleccionar asesor...</option>
               {Array.isArray(asesores) && asesores.length > 0 ? (
-                asesores.map((a, index) => (
-                  <option key={getAsesorId(a, index)} value={getAsesorId(a, index)}>
-                    {getAsesorNombre(a)}
-                  </option>
-                ))
+                asesores.map((a, index) => {
+                  const asesorId = extractId(a);
+                  const optionValue = asesorId || "";
+                  const reactKey = asesorId ? `ase-${asesorId}` : `ase-index-${index}`;
+
+                  return (
+                    <option key={reactKey} value={optionValue}>
+                      {getAsesorNombre(a)}
+                    </option>
+                  );
+                })
               ) : (
                 <option disabled>No hay asesores disponibles</option>
               )}

@@ -23,6 +23,7 @@ export const RegistroExpedienteForm = () => {
     erroresCampo,
     isLoading,
     error,
+    successMessage,
     mostrarModalGuardar,
     handleChange,
     handleChangeNested,
@@ -74,6 +75,11 @@ export const RegistroExpedienteForm = () => {
           {(error || catalogosError) && (
             <div className="alerta-error" style={{ marginBottom: '1.5rem' }}>
               {error || catalogosError}
+            </div>
+          )}
+          {successMessage && (
+            <div className="alerta-exito" style={{ marginBottom: '1.5rem', color: '#0B6623' }}>
+              {successMessage}
             </div>
           )}
 
