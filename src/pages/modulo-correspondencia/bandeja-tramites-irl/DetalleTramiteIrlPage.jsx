@@ -1,11 +1,10 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, Upload } from 'lucide-react';
 import { ModalConstanciaRemision } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/ModalConstanciaRemision';
 import { useFicha } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useFicha';
+import { usePlazosAutoridad } from '@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/hooks/usePlazosAutoridad';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
-import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
-import { AsesorAsignado } from '@/features/modulo-area-sustantiva/turnado/components/AsesorAsignado';
 
 const normalizarTexto = (value) => {
   if (value === null || value === undefined) return '';
@@ -18,6 +17,17 @@ const normalizarTexto = (value) => {
 };
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+
+const formatFecha = (value) => {
+  if (!value) return '--';
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('es-MX');
+  } catch {
+    return value;
+  }
+};
 
 export const DetalleTramiteIrlPage = () => {
   const { folio } = useParams();
@@ -37,6 +47,8 @@ export const DetalleTramiteIrlPage = () => {
     textoCalificacionJuridica,
     descargarConstancia,
     constanciaUrl,
+    expedienteId,
+    refrescarDetalle,
   } = useFicha(folio);
 
   const [toast, setToast] = useState(null);
@@ -44,6 +56,20 @@ export const DetalleTramiteIrlPage = () => {
   const [modalAbierta, setModalAbierta] = useState(false);
   const [analisisJuridico, setAnalisisJuridico] = useState('');
   const [determinacion, setDeterminacion] = useState('');
+  const [formInforme, setFormInforme] = useState({
+    numeroOficioRespuesta: '',
+    fojas: '',
+    fechaRecepcion: new Date().toISOString().split('T')[0],
+  });
+  const [pdfInforme, setPdfInforme] = useState(null);
+  const [guardandoInforme, setGuardandoInforme] = useState(false);
+
+  const {
+    semaforo,
+    cargando: cargandoSemaforo,
+    error: errorPlazo,
+    registrarInforme,
+  } = usePlazosAutoridad(expedienteId);
 
   useEffect(() => {
     if (!toast) return;
@@ -59,6 +85,21 @@ export const DetalleTramiteIrlPage = () => {
   const estatusNormalizado = useMemo(
     () => normalizarTexto(detalle?.estatus_actual),
     [detalle?.estatus_actual]
+  );
+
+  const esRecepcionInformeAutoridad = useMemo(
+    () =>
+      estatusNormalizado.includes('oficio enviado') ||
+      estatusNormalizado.includes('informe rendido') ||
+      estatusNormalizado.includes('respuesta recibida'),
+    [estatusNormalizado],
+  );
+
+  const informeYaRegistrado = useMemo(
+    () =>
+      estatusNormalizado.includes('informe rendido') ||
+      estatusNormalizado.includes('respuesta recibida'),
+    [estatusNormalizado],
   );
 
   const resumen = useMemo(() => {
@@ -81,6 +122,26 @@ export const DetalleTramiteIrlPage = () => {
     }
     return null;
   }, [errorConstancia, puedeGenerarConstancia, tieneConstancia]);
+
+  const autoridadResponsable = detalle?.autoridad_responsable || detalle?.analisis_legal?.autoridad_fiscal_emisora || '--';
+  const fechaOficio = semaforo?.fechaEnvioOficioAutoridad || '--';
+  const fechaVencimiento = semaforo?.fechaLimiteInforme || '--';
+
+  const handleRegistrarInforme = async (e) => {
+    e.preventDefault();
+    if (!expedienteId || guardandoInforme) return;
+
+    setGuardandoInforme(true);
+    try {
+      await registrarInforme(formInforme, pdfInforme);
+      await refrescarDetalle?.();
+      setToast({ tipo: 'ok', mensaje: 'Informe de autoridad registrado correctamente.' });
+    } catch (err) {
+      setToast({ tipo: 'error', mensaje: err?.message || 'No fue posible registrar el informe.' });
+    } finally {
+      setGuardandoInforme(false);
+    }
+  };
 
   const abrirModalConstancia = async () => {
     const r = await generarConstanciaInternaRemision();
@@ -127,6 +188,162 @@ export const DetalleTramiteIrlPage = () => {
       <div className="ficha-page ficha-estado-center">
         <p className="ficha-error">{error}</p>
         <button className="ficha-btn-back" onClick={() => navigate(-1)}>← Regresar</button>
+      </div>
+    );
+  }
+
+  if (esRecepcionInformeAutoridad) {
+    return (
+      <div className="ficha-page">
+        {toast ? (
+          <div className={`ficha-toast ${toast.tipo === 'ok' ? 'ficha-toast--ok' : 'ficha-toast--error'}`}>
+            {toast.mensaje}
+          </div>
+        ) : null}
+
+        <button className="ficha-btn-back" onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} />
+          SEGUIMIENTO DE QUEJA
+        </button>
+
+        <div className="cir-resumen">
+          <div className="cir-resumen-item">
+            <div className="cir-label">FOLIO ASESORÍA</div>
+            <div className="cir-value-link">{resumen.folioAsesoria || '--'}</div>
+          </div>
+          <div className="cir-resumen-item">
+            <div className="cir-label">EXPEDIENTE QUEJA</div>
+            <div className="cir-value">{resumen.expedienteQueja || '--'}</div>
+          </div>
+          <div className="cir-resumen-item">
+            <div className="cir-label">QUEJOSO</div>
+            <div className="cir-value">{resumen.quejoso || '--'}</div>
+          </div>
+          <div className="cir-resumen-item">
+            <div className="cir-label">ASUNTO</div>
+            <div className="cir-value">{resumen.asunto || '--'}</div>
+          </div>
+        </div>
+
+        <div className="ira-layout">
+          <div className="ira-main-card">
+            <div className="ira-title-row">
+              <span className="ira-icon">📄</span>
+              <h2 className="ira-title">RECEPCIÓN Y REGISTRO DE INFORME DE AUTORIDAD</h2>
+            </div>
+            <div className="ira-divider" />
+
+            <form className="ira-form" onSubmit={handleRegistrarInforme}>
+              <div className="ira-field">
+                <label className="ira-label">FECHA DE RECEPCIÓN DEL INFORME</label>
+                <input
+                  type="date"
+                  className="ira-input"
+                  value={formInforme.fechaRecepcion}
+                  disabled={informeYaRegistrado}
+                  onChange={(e) => setFormInforme((prev) => ({ ...prev, fechaRecepcion: e.target.value }))}
+                />
+              </div>
+
+              <div className="ira-field ira-field-grid">
+                <div>
+                  <label className="ira-label">OFICIO DE RESPUESTA</label>
+                  <input
+                    type="text"
+                    className="ira-input"
+                    value={formInforme.numeroOficioRespuesta}
+                    disabled={informeYaRegistrado}
+                    onChange={(e) => setFormInforme((prev) => ({ ...prev, numeroOficioRespuesta: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="ira-label">FOJAS</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className="ira-input"
+                    value={formInforme.fojas}
+                    disabled={informeYaRegistrado}
+                    onChange={(e) => setFormInforme((prev) => ({ ...prev, fojas: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="ira-field">
+                <label className="ira-label">CARGAR INFORME FIRMADO (PDF)</label>
+                <label className={`ira-upload ${informeYaRegistrado ? 'is-disabled' : ''}`}>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    disabled={informeYaRegistrado}
+                    onChange={(e) => setPdfInforme(e.target.files?.[0] ?? null)}
+                  />
+                  <Upload size={30} />
+                  <div className="ira-upload-title">
+                    {pdfInforme ? pdfInforme.name : 'Subir Informe de Autoridad'}
+                  </div>
+                  <div className="ira-upload-subtitle">PDF ESCANEADO CON SELLO</div>
+                </label>
+              </div>
+
+              {errorPlazo ? <div className="cir-hint">{errorPlazo}</div> : null}
+
+              <button
+                type="submit"
+                className="ira-submit"
+                disabled={guardandoInforme || informeYaRegistrado || !expedienteId}
+              >
+                {informeYaRegistrado
+                  ? 'INFORME YA REGISTRADO'
+                  : guardandoInforme
+                    ? 'GUARDANDO INFORME...'
+                    : 'GUARDAR INFORME Y CONCLUIR REQUERIMIENTO'}
+              </button>
+            </form>
+          </div>
+
+          <div className="ira-side">
+            <div className="ira-side-card">
+              <div className="ira-side-title">DETALLES DEL REQUERIMIENTO</div>
+              <div className="ira-side-row">
+                <span className="ira-side-label">AUTORIDAD</span>
+                <span className="ira-side-value">{autoridadResponsable}</span>
+              </div>
+              <div className="ira-side-row">
+                <span className="ira-side-label">FECHA OFICIO</span>
+                <span className="ira-side-value">{formatFecha(fechaOficio)}</span>
+              </div>
+              <div className="ira-side-row">
+                <span className="ira-side-label">VENCIMIENTO</span>
+                <span className="ira-side-value ira-side-value--danger">
+                  {cargandoSemaforo ? 'Calculando...' : formatFecha(fechaVencimiento)}
+                </span>
+              </div>
+            </div>
+
+            <div className="ira-history-card">
+              <div className="ira-side-title">HISTORIAL</div>
+              <div className="ira-history-item is-active">
+                <div className="ira-history-dot" />
+                <div>
+                  <div className="ira-history-title">OFICIO ENVIADO</div>
+                  <div className="ira-history-subtitle">{formatFecha(fechaOficio)}</div>
+                </div>
+              </div>
+              <div className={`ira-history-item ${informeYaRegistrado ? 'is-active' : ''}`}>
+                <div className="ira-history-dot" />
+                <div>
+                  <div className="ira-history-title">
+                    {informeYaRegistrado ? 'INFORME REGISTRADO' : 'PENDIENTE RECEPCIÓN'}
+                  </div>
+                  <div className="ira-history-subtitle">
+                    {informeYaRegistrado ? 'El informe ya fue capturado.' : 'En espera de autoridad.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

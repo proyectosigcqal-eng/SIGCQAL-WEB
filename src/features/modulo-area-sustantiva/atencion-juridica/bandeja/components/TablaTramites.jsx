@@ -1,5 +1,6 @@
 import { ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SemaforoPlazosAutoridad } from '@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/components/SemaforoPlazosAutoridad';
 
 const normalizar = (value) =>
   (value ?? '')
@@ -21,7 +22,17 @@ const BadgeContador = ({ value }) => {
   return <span className={`bdg-badge ${cls}`}>{value || '--'}</span>;
 };
 
-export const TablaTramites = ({ tramites, onBitacora, onFicha }) => {
+const BadgeSinSemaforo = ({ estatus }) => {
+  const estatusNorm = normalizar(estatus);
+
+  if (estatusNorm.includes('informe rendido') || estatusNorm.includes('respuesta recibida')) {
+    return <span className="bdg-badge badge-concluido">ATENDIDO</span>;
+  }
+
+  return <span className="bdg-badge badge-default">--</span>;
+};
+
+export const TablaTramites = ({ tramites, onInforme, onBitacora, onFicha }) => {
   if (!tramites || tramites.length === 0) {
     return (
       <div className="bdg-empty">
@@ -49,6 +60,7 @@ export const TablaTramites = ({ tramites, onBitacora, onFicha }) => {
         {tramites.map((t) => {
           const estatusNorm = normalizar(t.estatus);
           const etiquetaAccion = estatusNorm.includes('cir') ? 'GENERAR CIR' : 'VER';
+          const puedeRegistrarInforme = estatusNorm.includes('oficio enviado') && t.expedienteId;
           return (
             <tr key={t.id}>
               <td><div className="bdg-folio">{t.folio}</div></td>
@@ -56,14 +68,32 @@ export const TablaTramites = ({ tramites, onBitacora, onFicha }) => {
               <td><div className="bdg-contribuyente">{t.contribuyente}</div></td>
               <td><div className="bdg-asunto">{t.asunto}</div></td>
               <td><BadgeEstatus label={t.estatus} /></td>
-              <td><BadgeContador value={t.seguimiento} /></td>
+              <td>
+                {t.semaforoPlazos
+                  ? <SemaforoPlazosAutoridad semaforo={t.semaforoPlazos} />
+                  : <BadgeSinSemaforo estatus={t.estatus} />}
+              </td>
               <td className="bdg-action-cell">
-                <button
-                  className="bdg-btn-action"
-                  onClick={() => navigate(`/atencion-juridica/tramites-irl/${t.folio}`)}
-                >
-                  {etiquetaAccion} <ExternalLink size={16} />
-                </button>
+                <div style={{ display: 'inline-flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                  <button
+                    className="bdg-btn-action"
+                    onClick={() => navigate(`/atencion-juridica/tramites-irl/${t.folio}`)}
+                    type="button"
+                  >
+                    {etiquetaAccion} <ExternalLink size={16} />
+                  </button>
+                  {onInforme && (
+                    <button
+                      className="bdg-btn-action"
+                      onClick={() => onInforme(t.expedienteId)}
+                      disabled={!puedeRegistrarInforme}
+                      type="button"
+                      style={{ background: puedeRegistrarInforme ? '#166534' : '#9ca3af' }}
+                    >
+                      INFORME
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           );

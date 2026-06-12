@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useBandejaGestion } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion';
 import { TablaTramites } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites';
+import { RegistroInformeAutoridadModal } from '@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/components/RegistroInformeAutoridadModal';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css';
 
 export const BandejaGestionPage = () => {
@@ -13,7 +15,10 @@ export const BandejaGestionPage = () => {
     cargando,
     error,
     ETAPAS,
+    refrescar,
   } = useBandejaGestion();
+
+  const [modal, setModal] = useState({ open: false, expedienteId: null });
 
   return (
     <div className="bdg-page">
@@ -59,9 +64,16 @@ export const BandejaGestionPage = () => {
             <p>{error}</p>
           </div>
         ) : (
-          <TablaTramites tramites={tramites} />
+          <TablaTramites tramites={tramites} onInforme={(expedienteId) => setModal({ open: true, expedienteId })} />
         )}
       </div>
+      {modal.open && (
+        <RegistroInformeAutoridadModal
+          expedienteId={modal.expedienteId}
+          onClose={() => setModal({ open: false, expedienteId: null })}
+          onSuccess={() => refrescar?.()}
+        />
+      )}
     </div>
   );
 };

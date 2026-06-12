@@ -19,13 +19,27 @@ const ETAPAS = [
 const adaptarTramite = (item) => ({
   id:               item.folio,
   folio:            item.folio,
+  expedienteId:     item.expedienteId ?? item.expediente_id ?? item.idExpediente ?? item.id_expediente ?? item.expediente ?? null,
   municipio:        item.municipio_procedencia ?? '',
   contribuyente:    item.contribuyente ?? '',
   asunto:           item.tipo_acto ?? '',
   estatus:          item.estatus_principal ?? '',
   seguimiento:      item.ultima_modificacion?.descripcion ?? '',
   fecha:            item.ultima_modificacion?.timestamp ?? '',
+  semaforoPlazos:   item.semaforoPlazos ?? item.semaforo_plazos ?? item.semaforo_plazos_autoridad ?? null,
 });
+
+const obtenerSemaforo = async (expedienteId) => {
+  if (!expedienteId) return null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/expedientes/${expedienteId}/plazo-autoridad/semaforo`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
 
 export const useBandejaGestion = () => {
   const [busqueda, setBusqueda]                     = useState('');
@@ -34,7 +48,7 @@ export const useBandejaGestion = () => {
   const [cargando, setCargando]                     = useState(false);
   const [error, setError]                           = useState(null);
 
-  const fetchBandeja = useCallback((searchValue) => {
+  const fetchBandeja = useCallback(async (searchValue) => {
     setCargando(true);
     setError(null);
 
@@ -47,14 +61,25 @@ export const useBandejaGestion = () => {
 
     params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
 
-    fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        return res.json();
-      })
-      .then((data) => setTramites(data.map(adaptarTramite)))
-      .catch((err) => setError(err.message))
-      .finally(() => setCargando(false));
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`);
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+
+      const data = await res.json();
+      const tramitesAdaptados = data.map(adaptarTramite);
+      const tramitesConSemaforo = await Promise.all(
+        tramitesAdaptados.map(async (tramite) => ({
+          ...tramite,
+          semaforoPlazos: tramite.semaforoPlazos ?? await obtenerSemaforo(tramite.expedienteId),
+        })),
+      );
+
+      setTramites(tramitesConSemaforo);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setCargando(false);
+    }
   }, [busqueda, etapaActiva]);
 
   useEffect(() => {
@@ -71,5 +96,6 @@ export const useBandejaGestion = () => {
     cargando,
     error,
     ETAPAS,
+    refrescar: () => fetchBandeja(busqueda),
   };
 };

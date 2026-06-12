@@ -94,7 +94,7 @@ export const MainLayout = () => {
                         <div className="module-items">
                             {juridicoItems.map(({ label, to, icon }) => (
                                 <Link
-                                    key={to}
+                                    key={`${to}-${label}`}
                                     to={to}
                                     className={`nav-item sub-item ${pathname === to ? 'active' : ''}`}
                                 >
