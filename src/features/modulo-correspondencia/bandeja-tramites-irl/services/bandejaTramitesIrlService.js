@@ -1,59 +1,72 @@
-const MOCK_TRAMITES = [
-  {
-    idFolio: 'IRL-2026-000154',
-    municipio: 'San Pedro Garza García',
-    contribuyente: 'María Fernanda López Ruiz',
-    impuestoOActo: 'Impuesto predial',
-    estatusPrimario: { id: 1, nombre: 'EN ANÁLISIS', tipo: 'info' },
-    estatusSecundario: { id: 11, nombre: 'SIN REQUERIMIENTO', tipo: 'neutral' },
-    ultimaModificacion: { usuario: 'JPérez', fechaHora: '2026-05-28T10:42:00' },
-    tipoTramite: 'ASESORIA_SIMPLIFICADA',
+// features/modulo-correspondencia/bandeja-tramites-irl/services/bandejaTramitesIrlService.js
+
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+
+// Adapta el JSON del backend al shape que usa BandejaTramitesIrlPage
+const adaptarItem = (item) => ({
+  idFolio:        item.folio ?? '',
+  municipio:      item.municipio_procedencia ?? '',
+  contribuyente:  item.contribuyente ?? '',
+  impuestoOActo:  item.tipo_acto ?? '',
+  estatusPrimario: {
+    id:     item.estatus_principal ?? '',
+    nombre: item.estatus_principal ?? '',
+    tipo:   resolverTipoEstatus(item.estatus_principal),
   },
-  {
-    idFolio: 'IRL-2026-000155',
-    municipio: 'Monterrey',
-    contribuyente: 'Comercializadora del Norte S.A. de C.V.',
-    impuestoOActo: 'Multa',
-    estatusPrimario: { id: 2, nombre: 'PENDIENTE', tipo: 'warning' },
-    estatusSecundario: { id: 12, nombre: 'CON DOCUMENTOS', tipo: 'success' },
-    ultimaModificacion: { usuario: 'AGarcía', fechaHora: '2026-05-27T16:18:00' },
-    tipoTramite: 'QUEJAS_RECLAMACIONES',
+  estatusSecundario: {
+    id:     item.estatus_secundario ?? '',
+    nombre: item.estatus_secundario ?? '',
+    tipo:   resolverTipoEstatus(item.estatus_secundario),
   },
-  {
-    idFolio: 'IRL-2026-000156',
-    municipio: 'Guadalupe',
-    contribuyente: 'Juan Carlos Méndez Soto',
-    impuestoOActo: 'Acto administrativo',
-    estatusPrimario: { id: 3, nombre: 'CONCLUIDO', tipo: 'success' },
-    estatusSecundario: { id: 13, nombre: 'ARCHIVADO', tipo: 'neutral' },
-    ultimaModificacion: { usuario: 'LRamírez', fechaHora: '2026-05-26T09:05:00' },
-    tipoTramite: 'REPRESENTACION_LEGAL_IRL',
+  ultimaModificacion: {
+    usuario:  item.ultima_modificacion?.descripcion ?? '',
+    fechaHora: item.ultima_modificacion?.timestamp ?? '',
   },
-];
+  tipoTramite: item.tipo_tramite ?? '',
+});
 
-function normalizeText(val) {
-  return String(val ?? '').toLowerCase().trim();
-}
+// Mapea el estatus a un color para los badges
+const resolverTipoEstatus = (estatus) => {
+  if (!estatus) return 'neutral';
+  const t = estatus.toUpperCase();
+  if (t.includes('CONCLUIDO') || t.includes('APROBADO') || t.includes('RESUELTO'))
+    return 'success';
+  if (t.includes('PENDIENTE') || t.includes('REVISION') || t.includes('PREVENCI'))
+    return 'warning';
+  if (t.includes('VENCIDO') || t.includes('NO PRESENTADA') || t.includes('BLOQUEADO'))
+    return 'danger';
+  if (t.includes('ANALISIS') || t.includes('PROCESO') || t.includes('ASIGNADO'))
+    return 'info';
+  return 'neutral';
+};
 
-export async function listarTramitesBandeja({ tipoTramite, query, estatusId } = {}) {
-  const q = normalizeText(query);
-  const estatus = estatusId === '' || estatusId === null || estatusId === undefined ? null : Number(estatusId);
+export async function listarTramitesBandeja({
+  tipoTramite,
+  query,
+  estatusId,
+  signal,
+} = {}) {
+  const params = new URLSearchParams();
 
-  const items = MOCK_TRAMITES.filter((t) => {
-    if (tipoTramite && t.tipoTramite !== tipoTramite) return false;
-    if (estatus !== null) {
-      const a = Number(t.estatusPrimario?.id);
-      const b = Number(t.estatusSecundario?.id);
-      if (a !== estatus && b !== estatus) return false;
-    }
-    if (!q) return true;
-    const folio = normalizeText(t.idFolio);
-    const contrib = normalizeText(t.contribuyente);
-    return folio.includes(q) || contrib.includes(q);
-  });
+  if (query && query.trim())    params.append('search',       query.trim());
+  if (estatusId)                params.append('estatus',      estatusId);
+  if (tipoTramite)              params.append('tipo_tramite', tipoTramite);
 
-  await new Promise((r) => setTimeout(r, 250));
-  return { items };
+  const url = `${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`;
+
+  const res = await fetch(url, { signal });
+
+  if (!res.ok) {
+    throw new Error(`Error ${res.status}: no se pudo cargar la bandeja`);
+  }
+
+  const data = await res.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error('Respuesta inesperada del servidor');
+  }
+
+  return { items: data.map(adaptarItem) };
 }
 
 export default { listarTramitesBandeja };

@@ -58,7 +58,8 @@ export const useClasificacion = (idExpediente) => {
     try {
       const montoNum = Number(monto);
       const payload = {
-        idExpediente: idExpedienteNum,
+         idExpediente:  Number(idExpediente), // puede ser NaN si es folio — el back lo resuelve
+        folioGobierno: String(idExpediente),
         tipoActo: Number(idTipoActo),
         tipoAsesoria: Number(idTipoAsesoria),
         idTipoActo: Number(idTipoActo),

@@ -1,39 +1,43 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const ETAPAS = [
-  { key: 'TODOS', label: 'TODOS', estatus: '' },
-  { key: 'SEGUIMIENTO', label: 'SEGUIMIENTO', estatus: 'SEGUIMIENTO' },
-  { key: 'REQUIERE_ACLARACION', label: 'REQUIERE ACLARACIÓN', estatus: 'REQUIERE ACLARACIÓN' },
-  { key: 'EMISION_CIR', label: 'EMISIÓN DE CIR', estatus: 'EMISIÓN DE CIR' },
-  { key: 'ARI_EMITIDO', label: 'ARI EMITIDO', estatus: 'ARI EMITIDO' },
-  { key: 'OFICIO_ENVIADO', label: 'OFICIO ENVIADO', estatus: 'OFICIO ENVIADO' },
-  { key: 'RESPUESTA_RECIBIDA', label: 'RESPUESTA RECIBIDA', estatus: 'RESPUESTA RECIBIDA' },
-  { key: 'INVESTIGACION_ACCI', label: 'INVESTIGACIÓN ACCI', estatus: 'INVESTIGACIÓN ACCI' },
-  { key: 'RESOLUCION_EMITIDA', label: 'RESOLUCIÓN EMITIDA', estatus: 'RESOLUCIÓN EMITIDA' },
-  { key: 'FINALIZADO', label: 'FINALIZADO', estatus: 'FINALIZADO' },
+  { key: 'ASIGNADA_ASESOR', label: 'Asignada a Asesor',                    estatus: 'Asignada a Asesor' },
+  { key: 'VALIDACION',      label: 'En Validación de Requisitos',           estatus: 'En Validación de Requisitos' },
+  { key: 'CIR_GENERADA',   label: 'CIR Generada',                          estatus: 'CIR Generada (Constancia Interna de Remisión)' },
+  { key: 'ARI_GENERADO',   label: 'ARI Generado',                          estatus: 'ARI Generado (Acuerdo con Requerimiento de Informe)' },
+  { key: 'OFICIO_EMITIDO', label: 'Oficio de Notificación Emitido',        estatus: 'Oficio de Notificación Emitido' },
+  { key: 'CONTESTACION',   label: 'Contestación de Autoridad Recibida',    estatus: 'Contestación de Autoridad Recibida' },
+  { key: 'ACCI_GENERADO',  label: 'ACCI Generado',                         estatus: 'ACCI Generado (Acuerdo de Informe de Investigación)' },
+  { key: 'RESOLUCION',     label: 'Informe de Resolución Emitido',         estatus: 'Informe de Resolución Emitido' },
+  { key: 'NOTIFICACION',   label: 'En Proceso de Notificación Final',      estatus: 'En Proceso de Notificación Final' },
+  { key: 'CERRADA',        label: 'Cerrada / Concluida',                   estatus: 'Cerrada / Concluida' },
 ];
 
-// Adapta el JSON del backend al shape que usan los componentes
 const adaptarTramite = (item) => ({
-  id:               item.folio,
-  folio:            item.folio,
-  expedienteId:     item.expedienteId ?? item.expediente_id ?? item.idExpediente ?? item.id_expediente ?? item.expediente ?? null,
-  municipio:        item.municipio_procedencia ?? '',
-  contribuyente:    item.contribuyente ?? '',
-  asunto:           item.tipo_acto ?? '',
-  estatus:          item.estatus_principal ?? '',
-  seguimiento:      item.ultima_modificacion?.descripcion ?? '',
-  fecha:            item.ultima_modificacion?.timestamp ?? '',
-  semaforoPlazos:   item.semaforoPlazos ?? item.semaforo_plazos ?? item.semaforo_plazos_autoridad ?? null,
+  id:            item.folio,
+  folio:         item.folio,
+  // ← expedienteId viene de feature — necesario para botón INFORME y semáforo autoridad
+  expedienteId:  item.expedienteId ?? item.expediente_id
+               ?? item.idExpediente ?? item.id_expediente ?? null,
+  municipio:     item.municipio_procedencia ?? '',
+  contribuyente: item.contribuyente ?? '',
+  asunto:        item.tipo_acto ?? '',
+  estatus:       item.estatus_principal ?? '',
+  seguimiento:   item.ultima_modificacion?.descripcion ?? '',
+  fecha:         item.ultima_modificacion?.timestamp ?? '',
+  // semaforoPlazos se enriquece después de forma no bloqueante
+  semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
 });
 
+// Enriquecimiento opcional — no bloquea el render principal
 const obtenerSemaforo = async (expedienteId) => {
   if (!expedienteId) return null;
-
   try {
-    const res = await fetch(`${API_BASE}/api/v1/expedientes/${expedienteId}/plazo-autoridad/semaforo`);
+    const res = await fetch(
+      `${API_BASE}/api/v1/expedientes/${expedienteId}/plazo-autoridad/semaforo`
+    );
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -42,60 +46,76 @@ const obtenerSemaforo = async (expedienteId) => {
 };
 
 export const useBandejaGestion = () => {
-  const [busqueda, setBusqueda]                     = useState('');
-  const [etapaActiva, setEtapaActiva]               = useState('TODOS');
-  const [tramites, setTramites]                     = useState([]);
-  const [cargando, setCargando]                     = useState(false);
-  const [error, setError]                           = useState(null);
+  const [busqueda, setBusqueda]       = useState('');
+  const [etapaActiva, setEtapaActiva] = useState('ASIGNADA_ASESOR');
+  const [tramites, setTramites]       = useState([]);
+  const [cargando, setCargando]       = useState(false);
+  const [error, setError]             = useState(null);
+  const controllerRef                 = useRef(null);
 
-  const fetchBandeja = useCallback(async (searchValue) => {
+  const fetchBandeja = useCallback(() => {
+    if (controllerRef.current) controllerRef.current.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
     setCargando(true);
     setError(null);
 
     const params = new URLSearchParams();
-    const s = searchValue ?? busqueda;
-    if (s) params.append('search', s);
+    if (busqueda.trim()) params.append('search', busqueda.trim());
 
     const etapa = ETAPAS.find((e) => e.key === etapaActiva);
     if (etapa?.estatus) params.append('estatus', etapa.estatus);
-
     params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
 
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`);
-      if (!res.ok) throw new Error(`Error ${res.status}`);
+    fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        return res.json();
+      })
+      .then(async (data) => {
+        if (!Array.isArray(data)) throw new Error('Respuesta inesperada');
 
-      const data = await res.json();
-      const tramitesAdaptados = data.map(adaptarTramite);
-      const tramitesConSemaforo = await Promise.all(
-        tramitesAdaptados.map(async (tramite) => ({
-          ...tramite,
-          semaforoPlazos: tramite.semaforoPlazos ?? await obtenerSemaforo(tramite.expedienteId),
-        })),
-      );
+        const tramitesBase = data.map(adaptarTramite);
+        // Renderiza inmediatamente sin esperar semáforos
+        setTramites(tramitesBase);
 
-      setTramites(tramitesConSemaforo);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setCargando(false);
-    }
+        // Enriquece con semáforo de autoridad en segundo plano
+        // sin bloquear la UI ni lanzar un nuevo fetch si fue abortado
+        if (controller.signal.aborted) return;
+        const enriquecidos = await Promise.all(
+          tramitesBase.map(async (t) => ({
+            ...t,
+            semaforoPlazos: t.semaforoPlazos ?? await obtenerSemaforo(t.expedienteId),
+          }))
+        );
+        if (!controller.signal.aborted) setTramites(enriquecidos);
+      })
+      .catch((err) => {
+        if (err.name === 'AbortError') return;
+        setError(err.message);
+        setTramites([]);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCargando(false);
+      });
   }, [busqueda, etapaActiva]);
 
   useEffect(() => {
-    const id = window.setTimeout(() => fetchBandeja(busqueda), 350);
+    const id = window.setTimeout(fetchBandeja, 350);
     return () => window.clearTimeout(id);
-  }, [busqueda, etapaActiva, fetchBandeja]);
+  }, [fetchBandeja]);
+
+  useEffect(() => () => controllerRef.current?.abort(), []);
 
   return {
-    busqueda,
-    setBusqueda,
-    etapaActiva,
-    setEtapaActiva,
-    tramites,
-    cargando,
-    error,
+    busqueda, setBusqueda,
+    etapaActiva, setEtapaActiva,
+    tramites, cargando, error,
     ETAPAS,
-    refrescar: () => fetchBandeja(busqueda),
+    recargar:  fetchBandeja,  // nombre de develop
+    refrescar: fetchBandeja,  // alias de feature — para no romper si alguien lo usa
   };
 };
