@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SemaforoContador } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
+import { SemaforoPlazosAutoridad } from '@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/components/SemaforoPlazosAutoridad';
 
 const TIPO_TRAMITE_TABS = [
   { id: 'ASESORIA_SIMPLIFICADA',    label: 'Asesoría Simplificada' },
@@ -14,11 +15,18 @@ const BadgeEstatus = ({ label, bloqueado }) => (
   </span>
 );
 
-export const TablaTramites = ({ tramites }) => {
-  const navigate = useNavigate();
+const BadgeSinSemaforo = ({ estatus }) => {
+  const t = (estatus ?? '').toLowerCase();
+  if (t.includes('informe rendido') || t.includes('respuesta recibida')) {
+    return <span className="bdg-badge badge-concluido">ATENDIDO</span>;
+  }
+  return <span className="bdg-badge badge-default">--</span>;
+};
+
+export const TablaTramites = ({ tramites, onInforme }) => {
+  const navigate   = useNavigate();
   const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
 
-  // ✅ Solo QUEJAS_RECLAMACIONES muestra datos — los otros dos están vacíos por ahora
   const tramitesFiltrados = tipoActivo === 'QUEJAS_RECLAMACIONES'
     ? (tramites ?? [])
     : [];
@@ -41,10 +49,8 @@ export const TablaTramites = ({ tramites }) => {
               border: 'none', whiteSpace: 'nowrap', cursor: 'pointer',
               borderRight: i < TIPO_TRAMITE_TABS.length - 1
                 ? '0.5px solid var(--color-border-secondary)' : 'none',
-              background: tipoActivo === tab.id
-                ? '#1e3a8a' : 'var(--color-background-primary)',
-              color: tipoActivo === tab.id
-                ? '#fff' : 'var(--color-text-secondary)',
+              background: tipoActivo === tab.id ? '#1e3a8a' : 'var(--color-background-primary)',
+              color:      tipoActivo === tab.id ? '#fff'    : 'var(--color-text-secondary)',
               transition: 'background 0.12s, color 0.12s',
             }}
           >
@@ -53,7 +59,6 @@ export const TablaTramites = ({ tramites }) => {
         ))}
       </div>
 
-      {/* ── Tabla existente — sin cambios ── */}
       {tramitesFiltrados.length === 0 ? (
         <div className="bdg-empty">
           <p>
@@ -79,16 +84,18 @@ export const TablaTramites = ({ tramites }) => {
             {tramitesFiltrados.map((t) => {
               const bloqueado =
                 t.estatus?.toUpperCase().includes('NO PRESENTADA') ||
-                t.estatus?.toUpperCase().includes('BLOQUEADO') ||
+                t.estatus?.toUpperCase().includes('BLOQUEADO')     ||
                 t.estatus?.toUpperCase().includes('FINALIZADO');
 
-              const estUp = (t.estatus ?? '').toUpperCase();
-              const etiqueta = bloqueado                  ? 'CERRADO'
-                : estUp.includes('CIR')                  ? 'GENERAR CIR'
-                : estUp.includes('OFICIO')               ? 'VER OFICIO'
+              const estUp    = (t.estatus ?? '').toUpperCase();
+              const etiqueta = bloqueado                 ? 'CERRADO'
+                : estUp.includes('CIR')                 ? 'GENERAR CIR'
+                : estUp.includes('OFICIO')              ? 'VER OFICIO'
                 : estUp.includes('VALIDACIÓN') || estUp.includes('VALIDACION')
-                                                         ? 'VALIDAR DOCS'
-                :                                          'ATENDER';
+                                                        ? 'VALIDAR DOCS'
+                :                                         'ATENDER';
+
+              const puedeInforme = estUp.includes('OFICIO ENVIADO') && t.expedienteId;
 
               return (
                 <tr key={t.id} className={bloqueado ? 'bdg-row--bloqueado' : ''}>
@@ -109,19 +116,37 @@ export const TablaTramites = ({ tramites }) => {
                     <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
                   </td>
                   <td>
-                    <SemaforoContador folio={t.folio} estatus={t.estatus} />
+                    {/* Semáforo de prevención (3 días hábiles) */}
+                    {t.semaforoPlazos
+                      ? <SemaforoPlazosAutoridad semaforo={t.semaforoPlazos} />
+                      : <SemaforoContador folio={t.folio} />
+                    }
                   </td>
                   <td className="bdg-action-cell">
-                    <button
-                      className={`bdg-btn-action ${bloqueado ? 'bdg-btn-action--disabled' : ''}`}
-                      disabled={bloqueado}
-                      onClick={() => {
-                        if (bloqueado) return;
-                        navigate(`/atencion-juridica/checklist/${t.folio}`);
-                      }}
-                    >
-                      {etiqueta}
-                    </button>
+                    <div style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+                      <button
+                        className={`bdg-btn-action ${bloqueado ? 'bdg-btn-action--disabled' : ''}`}
+                        disabled={bloqueado}
+                        onClick={() => {
+                          if (bloqueado) return;
+                          navigate(`/atencion-juridica/checklist/${t.folio}`);
+                        }}
+                      >
+                        {etiqueta}
+                      </button>
+
+                      {/* Botón INFORME — solo si el asesor de feature lo requiere */}
+                      {onInforme && puedeInforme && (
+                        <button
+                          className="bdg-btn-action"
+                          style={{ background: '#166534' }}
+                          onClick={() => onInforme(t.expedienteId)}
+                          type="button"
+                        >
+                          INFORME
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

@@ -93,25 +93,35 @@ export const useFicha = (folio) => {
       ...nuevosDatos
     }));
   };
-  
- const fetchDetalle = useCallback(() => {
-  if (!folio) return;
-  setCargando(true);
-  setError(null);
 
-  fetch(`${API_BASE}/api/v1/expedientes/${folio}/detalle-asesoria`)
-    .then((res) => {
+  const fetchDetalle = useCallback(async () => {
+    if (!folio) {
+      setDetalle(null);
+      setCargando(false);
+      setError(null);
+      return null;
+    }
+
+    setCargando(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/expedientes/${folio}/detalle-asesoria`);
       if (!res.ok) throw new Error(`Error ${res.status}: expediente no encontrado`);
-      return res.json();
-    })
-    .then(setDetalle)
-    .catch((err) => setError(err.message))
-    .finally(() => setCargando(false));
-}, [folio]);
-
-useEffect(() => {
-  fetchDetalle();
-}, [fetchDetalle]);
+      const data = await res.json();
+      setDetalle(data);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setCargando(false);
+    }
+  }, [folio]);
+  
+  useEffect(() => {
+    fetchDetalle().catch(() => {});
+  }, [fetchDetalle]);
 
   const expedienteId = useMemo(() => {
     const raw = detalle?.id_expediente ?? detalle?.idExpediente ?? null;

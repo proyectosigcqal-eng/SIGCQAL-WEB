@@ -2,32 +2,48 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
-// Las pestañas son las etapas del flujo de queja
 const ETAPAS = [
-  { key: 'ASIGNADA_ASESOR',   label: 'Asignada a Asesor',                                  estatus: 'Asignada a Asesor' },
-  { key: 'VALIDACION',        label: 'En Validación de Requisitos',                         estatus: 'En Validación de Requisitos' },
-  { key: 'CIR_GENERADA',      label: 'CIR Generada',       estatus: 'CIR Generada (Constancia Interna de Remisión)' },
-  { key: 'ARI_GENERADO',      label: 'ARI Generado', estatus: 'ARI Generado (Acuerdo con Requerimiento de Informe)' },
-  { key: 'OFICIO_EMITIDO',    label: 'Oficio de Notificación Emitido',                      estatus: 'Oficio de Notificación Emitido' },
-  { key: 'CONTESTACION',      label: 'Contestación de Autoridad Recibida',                  estatus: 'Contestación de Autoridad Recibida' },
-  { key: 'ACCI_GENERADO',     label: 'ACCI Generado', estatus: 'ACCI Generado (Acuerdo de Informe de Investigación)' },
-  { key: 'RESOLUCION',        label: 'Informe de Resolución Emitido',                       estatus: 'Informe de Resolución Emitido' },
-  { key: 'NOTIFICACION',      label: 'En Proceso de Notificación Final',                    estatus: 'En Proceso de Notificación Final' },
-  { key: 'CERRADA',           label: 'Cerrada / Concluida',                                 estatus: 'Cerrada / Concluida' },
+  { key: 'ASIGNADA_ASESOR', label: 'Asignada a Asesor',                    estatus: 'Asignada a Asesor' },
+  { key: 'VALIDACION',      label: 'En Validación de Requisitos',           estatus: 'En Validación de Requisitos' },
+  { key: 'CIR_GENERADA',   label: 'CIR Generada',                          estatus: 'CIR Generada (Constancia Interna de Remisión)' },
+  { key: 'ARI_GENERADO',   label: 'ARI Generado',                          estatus: 'ARI Generado (Acuerdo con Requerimiento de Informe)' },
+  { key: 'OFICIO_EMITIDO', label: 'Oficio de Notificación Emitido',        estatus: 'Oficio de Notificación Emitido' },
+  { key: 'CONTESTACION',   label: 'Contestación de Autoridad Recibida',    estatus: 'Contestación de Autoridad Recibida' },
+  { key: 'ACCI_GENERADO',  label: 'ACCI Generado',                         estatus: 'ACCI Generado (Acuerdo de Informe de Investigación)' },
+  { key: 'RESOLUCION',     label: 'Informe de Resolución Emitido',         estatus: 'Informe de Resolución Emitido' },
+  { key: 'NOTIFICACION',   label: 'En Proceso de Notificación Final',      estatus: 'En Proceso de Notificación Final' },
+  { key: 'CERRADA',        label: 'Cerrada / Concluida',                   estatus: 'Cerrada / Concluida' },
 ];
 
 const adaptarTramite = (item) => ({
-  id:           item.folio,
-  folio:        item.folio,
-  municipio:    item.municipio_procedencia ?? '',
+  id:            item.folio,
+  folio:         item.folio,
+  // ← expedienteId viene de feature — necesario para botón INFORME y semáforo autoridad
+  expedienteId:  item.expedienteId ?? item.expediente_id
+               ?? item.idExpediente ?? item.id_expediente ?? null,
+  municipio:     item.municipio_procedencia ?? '',
   contribuyente: item.contribuyente ?? '',
-  asunto:       item.tipo_acto ?? '',
-  estatus:      item.estatus_principal ?? '',
-  seguimiento:  item.ultima_modificacion?.descripcion ?? '',
-  fecha:        item.ultima_modificacion?.timestamp ?? '',
-  // ← Datos del plazo que vendrán del endpoint de plazo
-  plazo:        null, // se enriquece después
+  asunto:        item.tipo_acto ?? '',
+  estatus:       item.estatus_principal ?? '',
+  seguimiento:   item.ultima_modificacion?.descripcion ?? '',
+  fecha:         item.ultima_modificacion?.timestamp ?? '',
+  // semaforoPlazos se enriquece después de forma no bloqueante
+  semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
 });
+
+// Enriquecimiento opcional — no bloquea el render principal
+const obtenerSemaforo = async (expedienteId) => {
+  if (!expedienteId) return null;
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/v1/expedientes/${expedienteId}/plazo-autoridad/semaforo`
+    );
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
 
 export const useBandejaGestion = () => {
   const [busqueda, setBusqueda]       = useState('');
@@ -59,16 +75,32 @@ export const useBandejaGestion = () => {
         if (!res.ok) throw new Error(`Error ${res.status}`);
         return res.json();
       })
-      .then((data) => {
+      .then(async (data) => {
         if (!Array.isArray(data)) throw new Error('Respuesta inesperada');
-        setTramites(data.map(adaptarTramite));
+
+        const tramitesBase = data.map(adaptarTramite);
+        // Renderiza inmediatamente sin esperar semáforos
+        setTramites(tramitesBase);
+
+        // Enriquece con semáforo de autoridad en segundo plano
+        // sin bloquear la UI ni lanzar un nuevo fetch si fue abortado
+        if (controller.signal.aborted) return;
+        const enriquecidos = await Promise.all(
+          tramitesBase.map(async (t) => ({
+            ...t,
+            semaforoPlazos: t.semaforoPlazos ?? await obtenerSemaforo(t.expedienteId),
+          }))
+        );
+        if (!controller.signal.aborted) setTramites(enriquecidos);
       })
       .catch((err) => {
         if (err.name === 'AbortError') return;
         setError(err.message);
         setTramites([]);
       })
-      .finally(() => setCargando(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setCargando(false);
+      });
   }, [busqueda, etapaActiva]);
 
   useEffect(() => {
@@ -83,6 +115,7 @@ export const useBandejaGestion = () => {
     etapaActiva, setEtapaActiva,
     tramites, cargando, error,
     ETAPAS,
-    recargar: fetchBandeja,
+    recargar:  fetchBandeja,  // nombre de develop
+    refrescar: fetchBandeja,  // alias de feature — para no romper si alguien lo usa
   };
 };
