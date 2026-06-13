@@ -25,6 +25,7 @@ export const RegistroExpedienteForm = () => {
     error,
     successMessage,
     mostrarModalGuardar,
+    asesorAsignado,
     handleChange,
     handleChangeNested,
     handleTipoPersonaChange,
@@ -127,6 +128,7 @@ export const RegistroExpedienteForm = () => {
         isLoading={isLoading}
         onConfirmar={handleConfirmarGuardar}
         onCancelar={handleCancelarGuardar}
+        asesorAsignado={asesorAsignado}
       />
     </div>
   );

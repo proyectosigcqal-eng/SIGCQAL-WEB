@@ -4,7 +4,7 @@ import { ArrowLeft, Download } from 'lucide-react';
 import { ModalConstanciaRemision } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/ModalConstanciaRemision';
 import { useFicha } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useFicha';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
-import { SemaforoPlazo } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
+import { SemaforoContador } from "@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo";
 import { AsesorAsignado } from '@/features/modulo-area-sustantiva/turnado/components/AsesorAsignado';
 
 const normalizarTexto = (value) => {

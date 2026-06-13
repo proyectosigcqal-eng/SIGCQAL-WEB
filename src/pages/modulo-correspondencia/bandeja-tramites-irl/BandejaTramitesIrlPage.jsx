@@ -38,6 +38,7 @@ export default function BandejaTramitesIrlPage() {
   const [folioSeleccionado, setFolioSeleccionado] = useState(null);
 
   const lastRequestId = useRef(0);
+  const abortRef = useRef(null);
 
   const statusSelectOptions = useMemo(() => {
     return estatusOptions
@@ -57,29 +58,36 @@ export default function BandejaTramitesIrlPage() {
     }
   };
 
-  const loadData = async ({ reason } = {}) => {
-    const requestId = ++lastRequestId.current;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await listarTramitesBandeja({
-        tipoTramite: activeTipoTramite,
-        query: searchInput,
-        estatusId: estatusSeleccionado,
-        reason,
-      });
-      if (requestId !== lastRequestId.current) return;
-      setItems(Array.isArray(res?.items) ? res.items : []);
-    } catch {
-      if (requestId !== lastRequestId.current) return;
-      setItems([]);
-      setError('No fue posible cargar la información. Intenta nuevamente.');
-    } finally {
-      if (requestId !== lastRequestId.current) return;
-      setIsLoading(false);
-    }
-  };
+ const loadData = async ({ reason } = {}) => {
+  const requestId = ++lastRequestId.current;
 
+  // Cancela el request anterior
+  if (abortRef.current) abortRef.current.abort();
+  const controller = new AbortController();
+  abortRef.current = controller;  // ← agrega este ref arriba: const abortRef = useRef(null);
+
+  setIsLoading(true);
+  setError(null);
+  try {
+    const res = await listarTramitesBandeja({
+      tipoTramite: activeTipoTramite,
+      query: searchInput,
+      estatusId: estatusSeleccionado,
+      signal: controller.signal,  // ← pasa el signal
+      reason,
+    });
+    if (requestId !== lastRequestId.current) return;
+    setItems(Array.isArray(res?.items) ? res.items : []);
+  } catch (err) {
+    if (err.name === 'AbortError') return; // ignorar cancelaciones
+    if (requestId !== lastRequestId.current) return;
+    setItems([]);
+    setError('No fue posible cargar la información. Intenta nuevamente.');
+  } finally {
+    if (requestId !== lastRequestId.current) return;
+    setIsLoading(false);
+  }
+};
   useEffect(() => {
     loadEstatus();
   }, []);
@@ -108,7 +116,7 @@ export default function BandejaTramitesIrlPage() {
   };
 
   const handleOpenFicha = (folioId) => {
-    navigate(`/correspondencia/tramites-irl/${encodeURIComponent(folioId)}`);
+    navigate(`/atencion-juridica/tramites-irl/${encodeURIComponent(folioId)}`);
   };
 
   return (

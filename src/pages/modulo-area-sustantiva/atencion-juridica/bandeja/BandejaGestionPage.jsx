@@ -5,18 +5,15 @@ import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bande
 
 export const BandejaGestionPage = () => {
   const {
-    busqueda,
-    setBusqueda,
-    etapaActiva,
-    setEtapaActiva,
-    tramites,
-    cargando,
-    error,
+    busqueda, setBusqueda,
+    etapaActiva, setEtapaActiva,
+    tramites, cargando, error,
     ETAPAS,
   } = useBandejaGestion();
 
   return (
     <div className="bdg-page">
+
       <div className="bdg-header">
         <div>
           <h1 className="bdg-title">Bandeja de Gestión</h1>
@@ -25,6 +22,8 @@ export const BandejaGestionPage = () => {
       </div>
 
       <div className="bdg-filtros-card">
+
+        {/* ── Buscador ── */}
         <div className="bdg-filtros-row">
           <div className="bdg-search-wrap">
             <Search className="bdg-search-icon" size={16} />
@@ -38,29 +37,33 @@ export const BandejaGestionPage = () => {
           </div>
         </div>
 
-        <div className="bdg-tabs">
-          {ETAPAS.map((tab) => (
+        {/* ── Switch de etapas ── */}
+        <div className="bdg-switch-bar">
+          {ETAPAS.map((etapa, i) => (
             <button
-              key={tab.key}
-              className={`bdg-tab ${etapaActiva === tab.key ? 'is-active' : ''}`}
-              onClick={() => setEtapaActiva(tab.key)}
+              key={etapa.key}
+              className={`bdg-switch-btn ${etapaActiva === etapa.key ? 'is-active' : ''}`}
+              onClick={() => setEtapaActiva(etapa.key)}
+              style={{
+                borderRight: i < ETAPAS.length - 1
+                  ? '0.5px solid var(--color-border-secondary)'
+                  : 'none',
+              }}
             >
-              {tab.label}
+              {etapa.label}
             </button>
           ))}
         </div>
 
+        {/* ── Contenido ── */}
         {cargando ? (
-          <div className="bdg-empty">
-            <p>Cargando...</p>
-          </div>
+          <div className="bdg-empty"><p>Cargando...</p></div>
         ) : error ? (
-          <div className="bdg-empty">
-            <p>{error}</p>
-          </div>
+          <div className="bdg-empty"><p>{error}</p></div>
         ) : (
           <TablaTramites tramites={tramites} />
         )}
+
       </div>
     </div>
   );
