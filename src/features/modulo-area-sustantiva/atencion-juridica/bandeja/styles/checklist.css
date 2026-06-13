@@ -1,0 +1,127 @@
+/* ── Layout ──────────────────────────────────────────────────── */
+.chk-page { padding: 2rem; max-width: 1200px; margin: 0 auto; }
+
+.chk-header-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  background: #fff;
+  border-left: 4px solid #1e3a5f;
+  border-radius: 10px;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.chk-header-label { font-size: .7rem; font-weight: 700; color: #9ca3af; letter-spacing:.06em; margin-bottom:4px; }
+.chk-header-folio { font-size: 1.1rem; font-weight: 700; color: #1d4ed8; }
+.chk-header-value { font-size: .9rem; color: #374151; }
+
+.chk-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ── Card lista ────────────────────────────────────────────────── */
+.chk-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.chk-card-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: 1.25rem;
+  color: #374151;
+}
+.chk-card-title { font-size: .85rem; font-weight: 700; letter-spacing:.04em; margin:0; }
+
+/* ── Items ─────────────────────────────────────────────────────── */
+.chk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .75rem; }
+
+.chk-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .9rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.chk-item:hover { background: #f9fafb; }
+.chk-item--checked { background: #f0fdf4; border-color: #86efac; }
+
+.chk-checkbox {
+  width: 22px; height: 22px; min-width: 22px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+}
+.chk-checkbox--checked { background: #1d4ed8; border-color: #1d4ed8; }
+.chk-checkbox svg { width: 12px; height: 10px; }
+
+.chk-item-body { flex: 1; }
+.chk-item-titulo { font-size: .88rem; font-weight: 600; color: #1f2937; }
+.chk-item-desc   { font-size: .78rem; color: #6b7280; margin-top: 2px; }
+.chk-item-icon   { color: #9ca3af; }
+
+/* ── Aside ──────────────────────────────────────────────────────── */
+.chk-aside {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  display: flex; flex-direction: column; gap: .75rem;
+}
+.chk-aside-label { font-size: .7rem; font-weight: 700; color: #6b7280; letter-spacing:.06em; }
+
+.chk-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  border: none; border-radius: 10px;
+  font-size: .82rem; font-weight: 700; letter-spacing:.04em;
+  cursor: pointer;
+  transition: opacity .15s, filter .15s;
+  width: 100%;
+}
+.chk-btn--procede    { background: #1d4ed8; color: #fff; }
+.chk-btn--aclaracion { background: #f59e0b; color: #fff; }
+.chk-btn--disabled   { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+.chk-btn:not(.chk-btn--disabled):hover { filter: brightness(1.08); }
+
+.chk-hint {
+  font-size: .72rem; color: #6b7280;
+  margin: 0; line-height: 1.4;
+}
+
+.chk-aviso {
+  background: #1e3a5f; color: #e0e7ff;
+  border-radius: 10px; padding: 1rem;
+  font-size: .78rem; line-height: 1.5;
+}
+.chk-aviso-title { font-weight: 700; margin-bottom: .4rem; }
+
+/* ── Semáforo solo días ─────────────────────────────────────────── */
+.semaforo-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  min-width: 100px;
+  text-align: center;
+}
+.semaforo-pill--verde    { background: #dcfce7; color: #166534; }
+.semaforo-pill--amarillo { background: #fef9c3; color: #854d0e; }
+.semaforo-pill--rojo     { background: #fee2e2; color: #991b1b; }
+.semaforo-pill--bloqueado { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+.semaforo-na     { color: #9ca3af; font-size: .8rem; }
+.semaforo-cargando { color: #9ca3af; font-size: .8rem; }

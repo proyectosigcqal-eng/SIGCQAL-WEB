@@ -31,6 +31,7 @@ import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
 import { Login } from './pages/auth/login/LoginPage';
+import { ChecklistDocumentosPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage';
 
 
 
@@ -293,7 +294,7 @@ function App() {
 
 
           <Route
-            path="atencion-juridica/clasificacion/:idExpediente"
+            path="atencion-juridica/clasificacion/:idExpediente?"
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/clasificacion']}>
                 <ClasificacionJuridicaPage />
@@ -316,6 +317,15 @@ function App() {
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>
+
+        <Route
+        path="atencion-juridica/checklist/:folio"
+        element={
+          <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/checklist']}>
+            <ChecklistDocumentosPage />
+          </ProtectedRoute>
+        }
+      />
       </Routes>
     </BrowserRouter>
   );

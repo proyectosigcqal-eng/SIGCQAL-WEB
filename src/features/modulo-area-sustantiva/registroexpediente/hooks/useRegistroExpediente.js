@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { formatForBackend } from '@/shared/utils/dateUtils';
 import { registrarExpediente } from '../services/registroExpedienteService';
+import { useNavigate } from 'react-router-dom';
 
 const FE_CAMPOS_OBLIGATORIOS = 'Todos los campos obligatorios deben estar completos.';
 
 export const useRegistroExpediente = () => {
   const hoy = useMemo(() => formatForBackend(new Date()), []);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     // Control Operativo
@@ -60,6 +62,9 @@ export const useRegistroExpediente = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
+  
+  // NUEVO: Estado para guardar el asesor consultado automáticamente
+  const [asesorAsignado, setAsesorAsignado] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,7 +118,9 @@ export const useRegistroExpediente = () => {
     // Validar Control Operativo
     if (!formData.fechaSolicitud) errores.fechaSolicitud = 'La fecha de solicitud es obligatoria.';
     if (!formData.idMunicipio) errores.idMunicipio = 'El municipio es obligatorio.';
-    if (!formData.idAsesorResponsable) errores.idAsesorResponsable = 'El asesor responsable es obligatorio.';
+    
+    // MODIFICADO: Se comenta porque la asignación ahora es 100% automática y el usuario no llena este campo
+    // if (!formData.idAsesorResponsable) errores.idAsesorResponsable = 'El asesor responsable es obligatorio.';
 
     // Validar Datos del Contribuyente
     if (formData.tipoPersona === 'fisica') {
@@ -149,7 +156,8 @@ export const useRegistroExpediente = () => {
     return errores;
   };
 
-  const handleSubmit = (e) => {
+  // NUEVO: Se cambia a async para poder hacer el fetch antes de abrir el modal
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errores = validarFormulario();
 
@@ -159,64 +167,75 @@ export const useRegistroExpediente = () => {
       return;
     }
 
+    // NUEVO: Consultar el asesor automático antes de mostrar el modal
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+      const res = await fetch(`${API_BASE}/api/v1/quejas/siguiente-asesor`);
+      if (res.ok) {
+        const data = await res.json();
+        setAsesorAsignado(data);
+      } else {
+        setAsesorAsignado(null);
+      }
+    } catch (err) {
+      console.error("No se pudo obtener el asesor en preview:", err);
+      setAsesorAsignado(null);
+    }
+
     setMostrarModalGuardar(true);
   };
 
   const handleConfirmarGuardar = async () => {
-    setIsLoading(true);
-    setError(null);
-    setSuccessMessage(null);
+  setIsLoading(true);
+  setError(null);
+  setSuccessMessage(null);
 
-    try {
-      // 1. Construir el payload estructurado de la dirección para que coincida con DireccionRequestDto.java
-      const direccionPayload = {
-        calle: formData.domicilioFiscal.calle || null,
-        
-        // Mapea 'numero' de React a 'numExt' de Java
-        numExt: formData.domicilioFiscal.numero ? String(formData.domicilioFiscal.numero) : null,
-        
-        // Mapea 'numeroInterior' de React a 'numInt' de Java
-        numInt: formData.domicilioFiscal.numeroInterior ? String(formData.domicilioFiscal.numeroInterior) : null,
-        
-        colonia: formData.domicilioFiscal.colonia || null,
-        cp: formData.domicilioFiscal.codigoPostal ? String(formData.domicilioFiscal.codigoPostal) : null,
-        
-        // Convierte el ID del estado seleccionado a un número entero
-        idEstado: formData.domicilioFiscal.estado ? parseInt(formData.domicilioFiscal.estado, 10) : null,
-        
-        // Inyecta el ID del municipio (seleccionado en Control Operativo) a la dirección como un entero
-        idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null
-      };
+  try {
+    const direccionPayload = {
+      calle:      formData.domicilioFiscal.calle || null,
+      numExt:     formData.domicilioFiscal.numero ? String(formData.domicilioFiscal.numero) : null,
+      numInt:     formData.domicilioFiscal.numeroInterior ? String(formData.domicilioFiscal.numeroInterior) : null,
+      colonia:    formData.domicilioFiscal.colonia || null,
+      cp:         formData.domicilioFiscal.codigoPostal ? String(formData.domicilioFiscal.codigoPostal) : null,
+      idEstado:   formData.domicilioFiscal.estado ? parseInt(formData.domicilioFiscal.estado, 10) : null,
+      idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
+    };
 
-      // 2. Reensamblar los datos finales listos para enviar al Backend
-      const {
-        folioGobierno, // Ignorado porque el backend genera el folio automáticamente
-        ...formDataSinFolio
-      } = formData;
+    const payloadListoParaEnviar = {
+      ...formData,
+      idMunicipio:         formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
+      idAsesorResponsable: formData.idAsesorResponsable ? parseInt(formData.idAsesorResponsable, 10) : null,
+      domicilioFiscal:     direccionPayload,
+    };
 
-      const payloadListoParaEnviar = {
-        ...formDataSinFolio,
-        idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
-        idAsesorResponsable: formData.idAsesorResponsable ? parseInt(formData.idAsesorResponsable, 10) : null,
-        
-        // Sobrescribimos el domicilioFiscal viejo con el payload que sí entiende el DTO de Java
-        domicilioFiscal: direccionPayload 
-      };
+    // ✅ UNA SOLA llamada — guarda el resultado
+    const resultado = await registrarExpediente(payloadListoParaEnviar);
+    console.log('Respuesta del backend:', resultado);
 
-      console.log('Payload corregido y estructurado enviado al servicio:', payloadListoParaEnviar);
-      
-      // 3. Enviar el objeto corregido
-      await registrarExpediente(payloadListoParaEnviar);
-      
-      setSuccessMessage('Expediente guardado correctamente.');
-      setMostrarModalGuardar(false);
-    } catch (err) {
-      setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
-      setMostrarModalGuardar(false);
-    } finally {
-      setIsLoading(false);
+    // ✅ Extrae el folio del resultado
+    const folioOId = resultado?.folioGobierno
+      || resultado?.folio
+      || resultado?.idExpediente
+      || resultado?.id;
+
+    setSuccessMessage('Expediente guardado correctamente.');
+    setMostrarModalGuardar(false);
+
+    // ✅ Navega con el folio real
+    if (folioOId) {
+      navigate(`/atencion-juridica/clasificacion/${folioOId}`);
+    } else {
+      console.error('El backend no devolvió un folio/id para redirigir:', resultado);
+      setError('Expediente guardado pero no se pudo obtener el folio para continuar.');
     }
-  };
+
+  } catch (err) {
+    setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
+    setMostrarModalGuardar(false);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleCancelarGuardar = () => {
     setMostrarModalGuardar(false);
@@ -229,6 +248,7 @@ export const useRegistroExpediente = () => {
     error,
     successMessage,
     mostrarModalGuardar,
+    asesorAsignado, // NUEVO: Se expone el asesor asignado para usarlo en el modal
     handleChange,
     handleChangeNested,
     handleTipoPersonaChange,
