@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Download, Upload } from 'lucide-react';
-import { ModalConstanciaRemision } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/ModalConstanciaRemision';
+import { ArrowLeft, Upload } from 'lucide-react';
+import { GenerarConstanciaModal } from '@/features/modulo-area-sustantiva/atencion-juridica/constancia/components/GenerarConstanciaModal';
 import { useFicha } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useFicha';
 import { usePlazosAutoridad } from '@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/hooks/usePlazosAutoridad';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/ficha.css';
@@ -37,25 +37,14 @@ export const DetalleTramiteIrlPage = () => {
     detalle,
     cargando,
     error,
-    generarConstanciaInternaRemision,
-    confirmarGeneracionConstancia,
     puedeGenerarConstancia,
-    cargandoPreviewConstancia,
-    previewConstancia,
-    generandoConstancia,
-    errorConstancia,
     textoCalificacionJuridica,
-    descargarConstancia,
-    constanciaUrl,
     expedienteId,
     refrescarDetalle,
   } = useFicha(folio);
 
   const [toast, setToast] = useState(null);
-  const [previewKey, setPreviewKey] = useState(0);
-  const [modalAbierta, setModalAbierta] = useState(false);
-  const [analisisJuridico, setAnalisisJuridico] = useState('');
-  const [determinacion, setDeterminacion] = useState('');
+  const [showConstanciaModal, setShowConstanciaModal] = useState(false);
   const [formInforme, setFormInforme] = useState({
     numeroOficioRespuesta: '',
     fojas: '',
@@ -76,11 +65,6 @@ export const DetalleTramiteIrlPage = () => {
     const id = window.setTimeout(() => setToast(null), 5000);
     return () => window.clearTimeout(id);
   }, [toast]);
-
-  useEffect(() => {
-    if (!constanciaUrl) return;
-    setPreviewKey((v) => v + 1);
-  }, [constanciaUrl]);
 
   const estatusNormalizado = useMemo(
     () => normalizarTexto(detalle?.estatus_actual),
@@ -110,18 +94,17 @@ export const DetalleTramiteIrlPage = () => {
     return { folioAsesoria, expedienteQueja, quejoso, asunto };
   }, [detalle, folio]);
 
-  const tieneConstancia = !!constanciaUrl;
-  const iframeSrc = tieneConstancia
-    ? `${constanciaUrl}${constanciaUrl.includes('?') ? '&' : '?'}t=${previewKey}`
-    : '';
-
   const mensajeConstancia = useMemo(() => {
-    if (errorConstancia) return errorConstancia;
-    if (!puedeGenerarConstancia && !tieneConstancia) {
-      return 'La vista previa indicará si la generación está bloqueada por estatus, calificación o duplicado.';
+    if (!expedienteId) {
+      return 'El expediente aún no está disponible para generar la constancia.';
     }
-    return null;
-  }, [errorConstancia, puedeGenerarConstancia, tieneConstancia]);
+
+    if (!puedeGenerarConstancia) {
+      return 'La generación puede ser rechazada por estatus o calificación jurídica.';
+    }
+
+    return 'La constancia se genera en formato DOCX y se descarga automáticamente.';
+  }, [expedienteId, puedeGenerarConstancia]);
 
   const autoridadResponsable = detalle?.autoridad_responsable || detalle?.analisis_legal?.autoridad_fiscal_emisora || '--';
   const fechaOficio = semaforo?.fechaEnvioOficioAutoridad || '--';
@@ -141,37 +124,6 @@ export const DetalleTramiteIrlPage = () => {
     } finally {
       setGuardandoInforme(false);
     }
-  };
-
-  const abrirModalConstancia = async () => {
-    const r = await generarConstanciaInternaRemision();
-    if (r?.ok) {
-      setModalAbierta(true);
-      return;
-    }
-    setToast({ tipo: 'error', mensaje: r?.message || 'No fue posible cargar la vista previa.' });
-  };
-
-  const cerrarModalConstancia = () => {
-    if (generandoConstancia) return;
-    setModalAbierta(false);
-  };
-
-  const handleConfirmarConstancia = async () => {
-    const r = await confirmarGeneracionConstancia({
-      analisisJuridico,
-      determinacion,
-    });
-
-    if (r?.ok) {
-      setModalAbierta(false);
-      setAnalisisJuridico('');
-      setDeterminacion('');
-      setToast({ tipo: 'ok', mensaje: r?.message || 'Constancia generada exitosamente.' });
-      return;
-    }
-
-    setToast({ tipo: 'error', mensaje: r?.message || 'No fue posible generar la constancia.' });
   };
 
   if (cargando) {
@@ -389,32 +341,15 @@ export const DetalleTramiteIrlPage = () => {
               La Constancia Interna de Remisión (CIR) se basa en el Art. 41 de los Lineamientos. Este documento formaliza el turno del expediente al área de Quejas.
             </div>
 
-            {tieneConstancia ? (
-              <button
-                className="cir-btn cir-btn--download"
-                onClick={async () => {
-                  const r = await descargarConstancia();
-                  if (!r?.ok) {
-                    setToast({ tipo: 'error', mensaje: r?.message || 'No fue posible descargar la constancia.' });
-                  }
-                }}
-              >
-                <Download size={16} />
-                DESCARGAR PDF
-              </button>
-            ) : (
-              <button
-                className="cir-btn cir-btn--primary"
-                disabled={cargandoPreviewConstancia || generandoConstancia}
-                onClick={abrirModalConstancia}
-              >
-                {cargandoPreviewConstancia ? 'CARGANDO VISTA PREVIA...' : 'GENERAR CONSTANCIA (ART. 41)'}
-              </button>
-            )}
+            <button
+              className="cir-btn cir-btn--primary"
+              disabled={!expedienteId}
+              onClick={() => setShowConstanciaModal(true)}
+            >
+              GENERAR CONSTANCIA INTERNA DE REMISIÓN
+            </button>
 
-            {!tieneConstancia && mensajeConstancia ? (
-              <div className="cir-hint">{mensajeConstancia}</div>
-            ) : null}
+            {mensajeConstancia ? <div className="cir-hint">{mensajeConstancia}</div> : null}
           </div>
 
           <div className="cir-card cir-card--estatus">
@@ -433,38 +368,22 @@ export const DetalleTramiteIrlPage = () => {
         </div>
 
         <div className="cir-right">
-          {tieneConstancia ? (
-            <iframe
-              key={iframeSrc}
-              className="cir-iframe"
-              title="Constancia Interna de Remisión"
-              src={iframeSrc}
-            />
-          ) : (
-            <div className="cir-placeholder">
-              <div className="cir-placeholder-icon" />
-              <div className="cir-placeholder-texto">
-                PRESIONE “GENERAR CONSTANCIA” PARA PREVISUALIZAR
-              </div>
+          <div className="cir-placeholder">
+            <div className="cir-placeholder-icon" />
+            <div className="cir-placeholder-texto">
+              LA CONSTANCIA SE DESCARGA EN FORMATO DOCX AL CONFIRMAR EL FORMULARIO
             </div>
-          )}
-
+          </div>
         </div>
       </div>
 
-      <ModalConstanciaRemision
-        abierta={modalAbierta}
-        onCerrar={cerrarModalConstancia}
-        onConfirmar={handleConfirmarConstancia}
-        cargandoPreview={cargandoPreviewConstancia}
-        generando={generandoConstancia}
-        preview={previewConstancia}
-        analisisJuridico={analisisJuridico}
-        determinacion={determinacion}
-        onChangeAnalisisJuridico={setAnalisisJuridico}
-        onChangeDeterminacion={setDeterminacion}
-        error={errorConstancia}
-      />
+      {showConstanciaModal ? (
+        <GenerarConstanciaModal
+          expedienteId={expedienteId}
+          onClose={() => setShowConstanciaModal(false)}
+          onSuccess={() => setToast({ tipo: 'ok', mensaje: 'La constancia se generó y descargó correctamente.' })}
+        />
+      ) : null}
     </div>
   );
 };
