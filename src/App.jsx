@@ -31,6 +31,7 @@ import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
 import { Login } from './pages/auth/login/LoginPage';
+import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
 
 
 
@@ -310,6 +311,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Ruta de prueba para Cierre */}
+          <Route path="area-sustantiva/cierre-test/:idExpediente?" element={<CierrePage />} />
 
           {/* Acceso restringido (página pública para usuarios autenticados) */}
           <Route path="acceso-restringido" element={<AccesoRestringidoPage />} />
