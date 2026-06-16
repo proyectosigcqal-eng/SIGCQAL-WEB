@@ -1,0 +1,228 @@
+.ca-page {
+  padding: 1.5rem 2rem;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.ca-back-btn {
+  background: none; border: none; color: #1e3a8a;
+  font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.06em; cursor: pointer;
+  margin-bottom: 1rem; padding: 0;
+}
+
+.ca-title {
+  font-size: 1.4rem; font-weight: 800;
+  color: #0f1b3d; margin: 0 0 0.25rem;
+}
+
+.ca-folio { color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+.ca-alert-error {
+  background: #fef2f2; border: 1px solid #fecaca;
+  color: #dc2626; border-radius: 8px;
+  padding: 0.75rem 1rem; margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.ca-card {
+  background: #fff; border-radius: 12px;
+  padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  margin-bottom: 1.5rem;
+}
+
+.ca-card-title {
+  font-size: 0.8rem; font-weight: 700;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: #1e3a8a; margin: 0 0 1.25rem;
+}
+
+.ca-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.ca-field { display: flex; flex-direction: column; gap: 4px; }
+
+.ca-field label {
+  font-size: 0.72rem; font-weight: 600;
+  color: #6b7280; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ca-field input,
+.ca-field textarea {
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 0.55rem 0.75rem; font-size: 0.875rem;
+  color: #111827; outline: none;
+  font-family: inherit; resize: vertical;
+  transition: border-color 0.15s;
+}
+
+.ca-field input:focus,
+.ca-field textarea:focus { border-color: #1e3a8a; }
+
+.ca-req { color: #dc2626; }
+.ca-opcional { color: #9ca3af; font-weight: 400; }
+
+/* Upload */
+.ca-upload-wrap { margin-top: 1rem; }
+.ca-upload-label {
+  font-size: 0.72rem; font-weight: 600;
+  color: #6b7280; text-transform: uppercase;
+  letter-spacing: 0.04em; display: block;
+  margin-bottom: 6px;
+}
+
+.ca-upload-box {
+  border: 2px dashed #e5e7eb; border-radius: 8px;
+  padding: 1rem; cursor: pointer;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.875rem; color: #6b7280;
+  position: relative; transition: border-color 0.15s;
+}
+
+.ca-upload-box:hover { border-color: #1e3a8a; }
+
+.ca-upload-box input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer; width: 100%;
+}
+
+/* Botón guardar */
+.ca-btn-guardar {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #1e3a8a; color: #fff;
+  border: none; border-radius: 8px;
+  padding: 0.65rem 1.5rem; font-size: 0.85rem;
+  font-weight: 700; cursor: pointer;
+  margin-top: 1.25rem;
+  transition: background 0.15s;
+}
+.ca-btn-guardar:hover:not(:disabled) { background: #1e40af; }
+.ca-btn-guardar:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Decisión */
+.ca-decision-desc { color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem; }
+
+.ca-decision-btns {
+  display: flex; gap: 1rem;
+}
+
+.ca-decision-btn {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  border: 2px solid #e5e7eb; border-radius: 12px;
+  padding: 1.25rem; cursor: pointer;
+  background: #fff; transition: all 0.15s;
+}
+
+.ca-decision-btn:hover { border-color: #1e3a8a; background: #eff6ff; }
+.ca-decision-btn.is-selected { border-color: #1e3a8a; background: #eff6ff; }
+
+.ca-decision-icon { font-size: 1.75rem; }
+.ca-decision-label { font-size: 0.9rem; font-weight: 700; color: #0f1b3d; }
+.ca-decision-sub { font-size: 0.72rem; color: #6b7280; text-align: center; }
+
+/* ── ACCI Editor ── */
+.acci-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.acci-form-title {
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: #374151; margin: 0 0 1rem;
+}
+
+/* Info readonly */
+.acci-info-readonly {
+  background: #f0f4f8; border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+
+.acci-readonly-item { display: flex; gap: 0.5rem; align-items: baseline; }
+.acci-readonly-label { font-size: 0.7rem; color: #9ca3af; font-weight: 600; min-width: 120px; }
+.acci-readonly-value { font-size: 0.82rem; color: #111827; font-weight: 500; }
+
+/* Doc preview */
+.acci-preview-panel { position: sticky; top: 1.5rem; }
+
+.acci-doc-wrap {
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  overflow-y: auto; max-height: 75vh;
+  background: #f9fafb;
+}
+
+.acci-doc {
+  background: white;
+  padding: 40px 56px;
+  font-size: 12px;
+  line-height: 1.7;
+  font-family: 'Times New Roman', Times, serif;
+  color: #111;
+  min-height: 297mm;
+}
+
+.acci-p { margin-bottom: 10px; text-align: justify; }
+.acci-right { text-align: right; }
+
+/* Colores por tipo de campo */
+.acci-precargado { color: #dc2626; font-weight: 600; } /* rojo = precargado */
+.acci-asesor-text { color: #7c3aed; font-style: italic; } /* violeta = asesor */
+.acci-asesor-inline { color: #7c3aed; font-weight: 600; font-style: italic; }
+
+.acci-firma {
+  margin-top: 48px;
+  text-align: center;
+  line-height: 1.8;
+}
+
+@media (max-width: 900px) {
+  .acci-layout { grid-template-columns: 1fr; }
+  .ca-grid-2 { grid-template-columns: 1fr; }
+}
+
+.ca-preview-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  border: 2px dashed #e5e7eb;
+  border-radius: 12px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Alerta de éxito */
+.ca-alert-exito {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #166534;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ca-btn-descargar {
+  background: #166534;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.ca-btn-descargar:hover { background: #15803d; }

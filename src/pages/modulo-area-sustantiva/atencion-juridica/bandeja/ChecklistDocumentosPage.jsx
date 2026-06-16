@@ -46,7 +46,7 @@ export const ChecklistDocumentosPage = () => {
       try {
         const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
         // Ajusta esta ruta a tu endpoint real que devuelve el detalle del expediente
-        const res = await fetch(`${API_BASE}/api/clasificacion-juridica/expedientes/${folio}`); 
+        const res = await fetch(`${API_BASE}/api/v1/expedientes/${folio}`); 
         
         if (res.ok) {
           const data = await res.json();
