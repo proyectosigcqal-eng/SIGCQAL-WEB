@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getAreas, getUsuarios, getPlantillas, getRoles, getTiposCorrespondencia, getAsesores } from '../services/catalogosServices';
+import { getAreas, getUsuarios, getPlantillas, getRoles, getTiposCorrespondencia, getAsesores, getPlantillasQuejaAri } from '../services/catalogosServices';
 
 export const useCatalogos = () => {
     const [areas, setAreas] = useState([]);
     const [usuarios, setUsuarios] = useState([]);
     const [plantillas, setPlantillas] = useState([]);
+    const [plantillasQuejaAri, setPlantillasQuejaAri] = useState([]);
     const [roles, setRoles] = useState([]);
     const [tiposCorrespondencia, setTiposCorrespondencia] = useState([]);
     const [cargandoCatalogos, setCargandoCatalogos] = useState(true);
@@ -14,13 +15,14 @@ export const useCatalogos = () => {
         const cargarDatos = async () => {
             setCargandoCatalogos(true);
             try {
-                const [areasData, usuariosData, plantillasData, rolesData, tiposData, asesoresData] = await Promise.all([
+                const [areasData, usuariosData, plantillasData, rolesData, tiposData, asesoresData, plantillasQuejaData] = await Promise.all([
                     getAreas(),
                     getUsuarios(),
                     getPlantillas(),
                     getRoles(),
                     getTiposCorrespondencia(),
-                    getAsesores()
+                    getAsesores(),
+                    getPlantillasQuejaAri()
                 ]);
 
                 setAreas(areasData);
@@ -29,6 +31,7 @@ export const useCatalogos = () => {
                 setRoles(rolesData);
                 setTiposCorrespondencia(tiposData);
                 setAsesores(asesoresData);
+                setPlantillasQuejaAri(plantillasQuejaData);
             } catch (error) {
                 console.error("Fallo al cargar los catálogos globales.", error);
             } finally {
@@ -43,6 +46,7 @@ export const useCatalogos = () => {
         areas, 
         usuarios, 
         plantillas, 
+        plantillasQuejaAri,
         roles,
         tiposCorrespondencia,
         asesores,
