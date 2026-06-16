@@ -27,6 +27,7 @@ import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/of
 import { BandejaGestionPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage';
 import { ClasificacionJuridicaPage } from './pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
 import { RegistroExpedientePage } from './pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage';
+import { CrearQuejaAriPage } from './pages/modulo-area-sustantiva/QuejasAri/CrearQuejaAriPage';
 import ProtectedRoute from './shared/components/ProtectedRoute';
 import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
@@ -307,6 +308,16 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/registro-expediente']}>
                 <RegistroExpedientePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Módulo Área Sustantiva - Crear Queja ARI */}
+          <Route
+            path="area-sustantiva/quejas-ari"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/quejas-ari']}>
+                <CrearQuejaAriPage />
               </ProtectedRoute>
             }
           />
