@@ -23,7 +23,7 @@ const BadgeSinSemaforo = ({ estatus }) => {
   return <span className="bdg-badge badge-default">--</span>;
 };
 
-export const TablaTramites = ({ tramites, onInforme }) => {
+export const TablaTramites = ({ tramites, onInforme, onCir }) => {
   const navigate   = useNavigate();
   const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
 
@@ -144,6 +144,19 @@ export const TablaTramites = ({ tramites, onInforme }) => {
                           type="button"
                         >
                           INFORME
+                        </button>
+                      )}
+
+                      {/* Botón CIR — cuando clasificación es "Procede" */}
+                      {onCir && estUp.includes('PROCEDE') && t.expedienteId && (
+                        <button
+                          className="bdg-btn-action"
+                          style={{ background: '#2563eb' }}
+                          onClick={() => onCir(t.expedienteId)}
+                          type="button"
+                          title="Generar Constancia Interna de Remisión"
+                        >
+                          GENERAR CIR
                         </button>
                       )}
                     </div>
