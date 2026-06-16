@@ -18,20 +18,22 @@ export const crearQuejaAri = async (payload) => {
     }
 };
 
-
-
 /**
  * Obtener Queja ARI por ID
  * @param {number} id
- * @returns {Promise<Object>}
+ * @returns {Promise<Object>} Objeto QuejaResponseDTO enriquecido
  */
-export const obtenerQuejaAriPorId = async (id) => {
+export const obtenerQuejaAriPorId = async (idQueja) => {
     try {
-        const response = await axios.get(`${API_URL}/${id}`);
+        // CAMBIO: Apuntamos a '/quejas' en lugar de '/quejas-ari'
+        const response = await axios.get(`${API_BASE_URL}/quejas/${idQueja}`);
+        
+        console.log("=== DATOS ENRIQUECIDOS RECIBIDOS ===", response.data);
         return response.data;
     } catch (error) {
-        console.error("Error al obtener queja ARI:", error.message);
-        throw error;
+        console.error("Error al obtener datos relacionales desde QuejaController:", error.message);
+        // Retornamos null para que el formulario no se rompa y use placeholders si el id no existe
+        return null; 
     }
 };
 

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
 import { FormularioQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/components/FormularioQuejaAri';
 import { VistaPreviaQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/components/VistaPreviaQuejaAri';
-import { crearQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/services/quejasAriService';
+import { crearQuejaAri, obtenerQuejaAriPorId } from '@/features/modulo-area-sustantiva/QuejasAri/services/quejasAriService';
 import '@/features/modulo-area-sustantiva/QuejasAri/styles/quejasAri.css';
 
 export const CrearQuejaAriPage = () => {
   const catalogos = useCatalogos();
   
-  // CORREGIDO: Estado alineado exactamente al QuejasAriRequestDTO con IDs "hardcodeados" provisionalmente
+  // Estado alineado exactamente al QuejasAriRequestDTO con IDs provisionales
+  // y propiedades extendidas añadidas para la renderización de la vista previa
   const [formData, setFormData] = useState({
     idQueja: 1, // Forzado provisionalmente
     idCir: 1,   // Forzado provisionalmente
@@ -19,10 +20,52 @@ export const CrearQuejaAriPage = () => {
     idPlantillaQuejaAri: '',
     multasRequerimientos: '',
     multasCredito: '',
-    instituto: '' // Agregado según el DTO
+    instituto: '',
+    
+    // NUEVOS: Campos enriquecidos agregados al estado para la vista previa
+    folioGobierno: '',
+    nombreAsesor: '',
+    rfcAsesor: '',
+    nombreRepresentante: '',
+    nombreContribuyente: '',
+    identificacionContribuyente: '',
+    fechaSolicitud: ''
   });
   
   const [cargando, setCargando] = useState(false);
+
+ useEffect(() => {
+  const cargarDatosEnriquecidos = async () => {
+    if (formData.idQueja) {
+      try {
+        const datosQueja = await obtenerQuejaAriPorId(formData.idQueja);
+        if (datosQueja) {
+          setFormData(prev => ({
+            ...prev,
+            // Conservamos los IDs y datos nativos del formulario
+            idQueja: datosQueja.id || prev.idQueja,
+            
+            // 🔍 Extracción segura: Soporta si el Back devuelve el objeto entidad o un DTO plano
+            folioGobierno: datosQueja.folioGobierno || datosQueja.folio || '',
+            
+            nombreAsesor: datosQueja.asesor?.nombreCompleto || datosQueja.nombreAsesor || '',
+            rfcAsesor: datosQueja.asesor?.rfc || datosQueja.rfcAsesor || '',
+            
+            nombreRepresentante: datosQueja.representanteLegal || datosQueja.nombreRepresentante || '',
+            
+            nombreContribuyente: datosQueja.contribuyente?.nombreCompleto || datosQueja.nombreContribuyente || '',
+            identificacionContribuyente: datosQueja.contribuyente?.rfc || datosQueja.identificacionContribuyente || '',
+            
+            fechaSolicitud: datosQueja.fechaSolicitud || datosQueja.fecha_solicitud || ''
+          }));
+        }
+      } catch (err) {
+        console.warn("No se pudieron pre-cargar los datos relacionales de la queja:", err.message);
+      }
+    }
+  };
+  cargarDatosEnriquecidos();
+}, [formData.idQueja]);
 
   useEffect(() => {
     if (catalogos?.plantillasQuejaAri?.length > 0 && !formData.idPlantillaQuejaAri) {
@@ -35,7 +78,6 @@ export const CrearQuejaAriPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Aseguramos que si cambias un ID manualmente en un input, se guarde como número
     const parsedValue = name.startsWith('id') && value !== '' ? Number(value) : value;
     setFormData(prev => ({ ...prev, [name]: parsedValue }));
   };
@@ -44,7 +86,7 @@ export const CrearQuejaAriPage = () => {
     e.preventDefault();
     setCargando(true);
     try {
-      // El payload ya va perfectamente estructurado para el backend
+      // El payload va perfectamente estructurado para el backend
       const payload = { ...formData };
       const res = await crearQuejaAri(payload);
       console.log('Queja ARI creada exitosamente en el backend:', res);
