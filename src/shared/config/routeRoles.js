@@ -29,6 +29,7 @@ export const ROUTE_ROLES = {
    '/atencion-juridica/asignacion': ['Administrador', 'Abogado', 'Abogado Calificador'],
   '/atencion-juridica/bandeja':    ['Administrador', 'Abogado', 'Abogado Calificador'],
   '/area-sustantiva/registro-expediente': ['Administrador', 'Abogado', 'Abogado Calificador'],
+  '/area-sustantiva/contestacion-autoridad': ['Administrador', 'Abogado', 'Abogado Calificador'],
 };
 
 export default ROUTE_ROLES;

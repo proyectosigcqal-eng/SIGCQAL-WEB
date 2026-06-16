@@ -32,6 +32,7 @@ import { ROUTE_ROLES } from './shared/config/routeRoles';
 import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
 import { Login } from './pages/auth/login/LoginPage';
 import { ChecklistDocumentosPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage';
+import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
 
 
 
@@ -301,7 +302,15 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+  
+          <Route
+  path="atencion-juridica/contestacion-autoridad/:folio"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/contestacion-autoridad']}>
+      <ContestacionAutoridadPage />
+    </ProtectedRoute>
+  }
+/>
           {/* Módulo Área Sustantiva - Registro de Expediente */}
           <Route
             path="area-sustantiva/registro-expediente"
