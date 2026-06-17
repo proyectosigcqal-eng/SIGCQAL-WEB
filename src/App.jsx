@@ -34,8 +34,7 @@ import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
 import { Login } from './pages/auth/login/LoginPage';
 import { ChecklistDocumentosPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage';
 import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
-
-
+import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
 
 function App() {
   return (
@@ -305,13 +304,13 @@ function App() {
           />
   
           <Route
-  path="atencion-juridica/contestacion-autoridad/:folio"
-  element={
-    <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/contestacion-autoridad']}>
-      <ContestacionAutoridadPage />
-    </ProtectedRoute>
-  }
-/>
+            path="atencion-juridica/contestacion-autoridad/:folio"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/contestacion-autoridad']}>
+                <ContestacionAutoridadPage />
+              </ProtectedRoute>
+            }
+          />
           {/* Módulo Área Sustantiva - Registro de Expediente */}
           <Route
             path="area-sustantiva/registro-expediente"
@@ -331,6 +330,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Ruta de prueba para Cierre */}
+          <Route path="area-sustantiva/cierre-test/:idExpediente?" element={<CierrePage />} />
 
           {/* Acceso restringido (página pública para usuarios autenticados) */}
           <Route path="acceso-restringido" element={<AccesoRestringidoPage />} />
