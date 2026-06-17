@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import cirService from '../../constancia-interna-remision/services/cirService';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
@@ -123,6 +124,15 @@ export const useFicha = (folio) => {
     fetchDetalle().catch(() => {});
   }, [fetchDetalle]);
 
+  // Cleanup: revocar blob URL cuando el componente se desmonta o previewConstancia cambia
+  useEffect(() => {
+    return () => {
+      if (previewConstancia && typeof previewConstancia === 'string' && previewConstancia.startsWith('blob:')) {
+        window.URL.revokeObjectURL(previewConstancia);
+      }
+    };
+  }, [previewConstancia]);
+
   const expedienteId = useMemo(() => {
     const raw = detalle?.id_expediente ?? detalle?.idExpediente ?? null;
     const parsed = Number(raw);
@@ -161,28 +171,22 @@ export const useFicha = (folio) => {
     [textoCalificacionJuridica, detalle?.estatus_actual]
   );
 
-  const generarConstanciaInternaRemision = async () => {
+  const generarConstanciaInternaRemision = async (formData = {}) => {
     if (!expedienteId) return { ok: false, message: 'Expediente no disponible.' };
 
     setErrorConstancia(null);
     setCargandoPreviewConstancia(true);
 
     try {
-      const response = await fetch(
-        `${API_BASE}/api/v1/expedientes/${expedienteId}/constancia-interna-remision/preview`
-      );
+      // ✅ Usar cirService que hace POST correctamente
+      const previewUrl = await cirService.previewCIR({
+        expedienteId,
+        fundamentos: formData.fundamentos || '',
+        observaciones: formData.observaciones || '',
+      });
 
-      if (!response.ok) {
-        const msg = await leerMensajeError(
-          response,
-          `Error ${response.status}: no fue posible cargar la vista previa.`
-        );
-        throw new Error(msg);
-      }
-
-      const data = await response.json();
-      setPreviewConstancia(data);
-      return { ok: true, data };
+      setPreviewConstancia(previewUrl);
+      return { ok: true, data: previewUrl };
     } catch (err) {
       const msg = err?.message || 'No fue posible cargar la vista previa de la constancia.';
       setErrorConstancia(msg);
