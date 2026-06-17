@@ -2,7 +2,7 @@ import axios from 'axios';
 import { API_HOST } from '@/shared/config/api';
 import { createDireccion, createPersona, createContribuyente } from '@/shared/services/catalogosServices';
 
-const EXPEDIENTES_URL = `${API_HOST}/api/clasificacion-juridica/expedientes`;
+const EXPEDIENTES_URL = `${API_HOST}/api/v1/expedientes`;
 
 const parseNumber = (value) => {
   const parsed = Number(value);
