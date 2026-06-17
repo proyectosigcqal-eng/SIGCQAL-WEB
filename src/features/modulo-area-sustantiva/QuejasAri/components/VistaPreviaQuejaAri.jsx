@@ -2,7 +2,7 @@ import React from 'react';
 import membreteImg from '@/assets/membrete.jpg';
 import '../styles/quejasAri.css'; 
 
-export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) => {
+export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino, downloadUrl }) => {
 
   const formatearFecha = (fechaInput) => {
     if (!fechaInput) {
@@ -31,6 +31,7 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
     : null;
 
   const instituto = formData.instituto || '';
+  const abreviaturaEncargado = formData.abreviaturaEncargado || '';
 
   // NUEVOS: Extracción de variables enriquecidas relacionales
   const folioGobierno       = formData.folioGobierno || '{{FOLIO_GOBIERNO}}';
@@ -48,7 +49,6 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
 
   return (
     <div className="panel-vista-previa" id="queja-ari-pdf-content">
-
       {/* ================= HOJA 1: INICIO Y HECHOS ================= */}
       <div className="hoja-membretada-papel" style={estiloHojaFondo}>
         <div className="membrete-contenido">
@@ -70,6 +70,10 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
 
               <p className="meta-folio" style={{ margin: '0 0 8px 0' }}>
                 <strong style={{ fontSize: '16px' }}>Expediente: {expediente}</strong>
+              </p>
+
+              <p className="meta-folio" style={{ margin: '0 0 8px 0' }}>
+                <strong style={{ fontSize: '16px' }}>Contribuyente: {nombreContribuyente}</strong>
               </p>
               <p style={{ fontSize: '15.5px', margin: '4px 0 0 0' }}>Zacatecas, Zacatecas, {fechaAcuerdo}.</p>
             </div>
@@ -108,8 +112,6 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
               </div>
             </div>
           </div>
-          
-          <div style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8' }}>Hoja 1 de 5</div>
         </div>
       </div>
 
@@ -150,8 +152,6 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
               </div>
             </div>
           </div>
-
-          <div style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8' }}>Hoja 2 de 5</div>
         </div>
       </div>
 
@@ -231,8 +231,6 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
               
             </div>
           </div>
-
-          <div style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8' }}>Hoja 3 de 5</div>
         </div>
       </div>
 
@@ -275,14 +273,12 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
               </p>
 
               <p style={{ textAlign: 'justify'}}>
-               Asimismo, se hace de su conocimiento que con independencia de que se otorgue 
+               Asimismo, se hace de su conocimiento que con independencia de que se otorgue algún beneficio al contribuyente, esa autoridad fiscal deberá rendir el informe y
               </p>
                 </div>
               </div>
             </div>
           </div>
-
-          <div style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8' }}>Hoja 4 de 5</div>
         </div>
       </div>
 
@@ -293,9 +289,9 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
           <div>
             <div className="cuerpo-memorandum" style={{ marginTop: '0px' }}>
               <div className="texto-contenido">
-                <div className="seccion-queja" style={{ marginBottom: '10px' }}>
+                <div className="seccion-queja" style={{ marginBottom: '5px' }}>
               <p style={{ textAlign: 'justify'}}>
-               algún beneficio al contribuyente, esa autoridad fiscal deberá rendir el informe y remitir las constancias atinentes en los términos señalados en el presente proveído, en el entendido de que en caso contrario se tendrá por no cumplido el requerimiento y se aplicarán las sanciones referidas en el primer párrafo de este punto.
+               remitir las constancias atinentes en los términos señalados en el presente proveído, en el entendido de que en caso contrario se tendrá por no cumplido el requerimiento y se aplicarán las sanciones referidas en el primer párrafo de este punto.
               </p>
               <p style={{ textAlign: 'justify'}}>
               <strong>VIII. Domicilio de la Comisión. </strong>A efecto de dar cabal cumplimiento al requerimiento efectuado en este acuerdo, la autoridad fiscal responsable deberá rendir su informe en el tiempo y la forma señalados y entregarlo en las oficinas que ocupa la Comisión Estatal de la Defensa del Contribuyente ubicadas en Boulevard José López Portillo, número 60, Colonia Dependencias Federales, C.P. 98600, Guadalupe, Zacatecas, en horario de 09:00 a 14:30 horas de lunes a viernes.
@@ -318,7 +314,7 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
               </p>
 
                 {/* SECCIÓN DE FIRMA IMPULSADA SIEMPRE AL BORDE INFERIOR */}
-                <div className="membrete-footer-firma" style={{ marginBottom: '10px', marginTop:'32px' }}>
+                <div className="membrete-footer-firma" style={{ marginBottom: '0px', marginTop:'16px' }}>
                   <div className="bloque-firma" style={{ marginTop: '0px', textAlign: 'center' }}>
                     <p style={{ margin: 0 }}><strong>Lic. {encargadoFirma}</strong></p>
                     <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#64748b' }}>
@@ -327,12 +323,16 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino }) =>
                   </div>
                 </div>
 
+                {abreviaturaEncargado && (
+                  <p style={{ textAlign: 'left', marginTop: '5px', fontSize: '9pt', color: '#333' }}>
+                    {abreviaturaEncargado}
+                  </p>
+                )}
+
                 </div>
               </div>
             </div>
           </div>
-
-          <div style={{ textAlign: 'center', fontSize: '11px', color: '#94a3b8' }}>Hoja 5 de 5</div>
         </div>
       </div>
 
