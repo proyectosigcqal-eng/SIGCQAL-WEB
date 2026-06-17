@@ -4,6 +4,7 @@ import { useCierreExpediente } from '../../../features/modulo-area-sustantiva/no
 import CierreForm from '../../../features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/components/CierreForm';
 import ConfirmModal from '../../../features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/components/ConfirmModal';
 import ExpedienteStatusHeader from '../../../features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/components/ExpedienteStatusHeader';
+import './CierrePage.css';
 
 const defaultDatos = {
   folio: 'PRUEBA-001',
@@ -96,30 +97,56 @@ const CierrePage = () => {
   };
 
   return (
-    <div className="page-wrapper">
-      {isLocked && <ExpedienteStatusHeader />}
-
-      {!idExpediente && (
-        <div className="route-warning" style={{ marginBottom: '1rem', padding: '1rem', background: '#fff4e5', border: '1px solid #ffe2a4' }}>
-          <strong>Ruta de prueba:</strong> Abre esta página con un `idExpediente` válido.
-          <br />Ejemplo: <code>/area-sustantiva/cierre-test/123</code>
+    <div className="cierre-page">
+      {isLocked ? (
+        <div className="cierre-page-locked">
+          <div className="locked-card">
+            <div className="locked-icon">🔒</div>
+            <div>
+              <div className="page-label">EXPEDIENTE CERRADO</div>
+              <h1 className="page-title">El expediente fue cerrado y bloqueado</h1>
+              <p className="page-description">
+                Este expediente se encuentra en estado definitivo y ya no puede ser modificado.
+                Si necesitas consultar información adicional, revisa el historial del expediente.
+              </p>
+            </div>
+          </div>
+          <ExpedienteStatusHeader />
         </div>
-      )}
+      ) : (
+        <>
+          <div className="cierre-page-header">
+            <div className="page-label">Área sustantiva · Cierre</div>
+            <h1 className="page-title">Cerrar expediente con seguridad</h1>
+            <p className="page-description">
+              Completa los datos de notificación y adjunta el acuerdo de razón para finalizar el proceso de cierre administrativo.
+              Una vez confirmado, el expediente quedará bloqueado definitivamente.
+            </p>
+          </div>
 
-      {errorMessage && (
-        <div className="error-message" style={{ marginBottom: '1rem', color: '#9d3b3b', background: '#fdecea', padding: '1rem', borderRadius: '4px' }}>
-          {errorMessage}
-        </div>
+          {!idExpediente && (
+            <div className="page-alert warning">
+              <strong>Ruta de prueba:</strong> Abre esta página con un <code>idExpediente</code> válido.
+              <br />Ejemplo: <code>/area-sustantiva/cierre-test/123</code>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="page-alert error">
+              {errorMessage}
+            </div>
+          )}
+
+          <CierreForm 
+            data={datosDelExpediente} 
+            disabled={isLocked || !idExpediente} 
+            onOpenModal={() => setShowModal(true)} 
+            onMedioChange={handleMedioChange}
+            onFileChange={handleFileChange}
+            isLoading={isLoading}
+          />
+        </>
       )}
-      
-      <CierreForm 
-        data={datosDelExpediente} 
-        disabled={isLocked || !idExpediente} 
-        onOpenModal={() => setShowModal(true)} 
-        onMedioChange={handleMedioChange}
-        onFileChange={handleFileChange}
-        isLoading={isLoading}
-      />
 
       {showModal && (
         <ConfirmModal 
