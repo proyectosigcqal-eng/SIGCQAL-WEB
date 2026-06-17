@@ -27,6 +27,7 @@ const adaptarTramite = (item) => ({
   estatus:       item.estatus_principal ?? '',
   seguimiento:   item.ultima_modificacion?.descripcion ?? '',
   fecha:         item.ultima_modificacion?.timestamp ?? '',
+  bloqueado:    item.bloqueado ?? false,
   // semaforoPlazos se enriquece después de forma no bloqueante
   semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
 });
@@ -52,6 +53,8 @@ export const useBandejaGestion = () => {
   const [cargando, setCargando]       = useState(false);
   const [error, setError]             = useState(null);
   const controllerRef                 = useRef(null);
+
+
 
   const fetchBandeja = useCallback(() => {
     if (controllerRef.current) controllerRef.current.abort();
@@ -110,12 +113,19 @@ export const useBandejaGestion = () => {
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  return {
-    busqueda, setBusqueda,
-    etapaActiva, setEtapaActiva,
-    tramites, cargando, error,
-    ETAPAS,
-    recargar:  fetchBandeja,  // nombre de develop
-    refrescar: fetchBandeja,  // alias de feature — para no romper si alguien lo usa
-  };
+const tramitesFiltradosPorEtapa = tramites.filter(t => {
+  if (etapaActiva === 'CERRADA') return t.bloqueado === true;
+  return !t.bloqueado; // bloqueados solo aparecen en CERRADA
+});
+
+return {
+  busqueda, setBusqueda,
+  etapaActiva, setEtapaActiva,
+  tramites: tramitesFiltradosPorEtapa, // ← usa este, no tramites directo
+  cargando, error,
+  ETAPAS,
+  recargar:  fetchBandeja,
+  refrescar: fetchBandeja,
+};
+
 };

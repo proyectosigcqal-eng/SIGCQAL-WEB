@@ -83,6 +83,7 @@ export const TablaTramites = ({ tramites, onInforme, onCir }) => {
           <tbody>
             {tramitesFiltrados.map((t) => {
               const bloqueado =
+                t.bloqueado === true ||
                 t.estatus?.toUpperCase().includes('NO PRESENTADA') ||
                 t.estatus?.toUpperCase().includes('BLOQUEADO')     ||
                 t.estatus?.toUpperCase().includes('FINALIZADO');
