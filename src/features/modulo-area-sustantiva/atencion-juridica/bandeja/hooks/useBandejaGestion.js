@@ -30,6 +30,13 @@ const adaptarTramite = (item) => ({
   bloqueado:    item.bloqueado ?? false,
   // semaforoPlazos se enriquece después de forma no bloqueante
   semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
+  tieneCir:          item.tiene_cir ?? false,
+  tieneAri:          item.tiene_ari ?? false,
+  tieneOficio:       item.tiene_oficio ?? false,
+  tieneContestacion: item.tiene_contestacion ?? false,
+  tieneAcci:         item.tiene_acci ?? false,
+  tieneResolucion:   item.tiene_resolucion ?? false,
+  checklistCompleto: item.checklist_completo ?? false,
 });
 
 // Enriquecimiento opcional — no bloquea el render principal
@@ -68,7 +75,10 @@ export const useBandejaGestion = () => {
     if (busqueda.trim()) params.append('search', busqueda.trim());
 
     const etapa = ETAPAS.find((e) => e.key === etapaActiva);
-    if (etapa?.estatus) params.append('estatus', etapa.estatus);
+    // ← cambio: solo manda estatus si NO es la pestaña CERRADA
+    if (etapa?.estatus && etapaActiva !== 'CERRADA') {
+      params.append('estatus', etapa.estatus);
+    }
     params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
 
     fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`, {
@@ -82,11 +92,8 @@ export const useBandejaGestion = () => {
         if (!Array.isArray(data)) throw new Error('Respuesta inesperada');
 
         const tramitesBase = data.map(adaptarTramite);
-        // Renderiza inmediatamente sin esperar semáforos
         setTramites(tramitesBase);
 
-        // Enriquece con semáforo de autoridad en segundo plano
-        // sin bloquear la UI ni lanzar un nuevo fetch si fue abortado
         if (controller.signal.aborted) return;
         const enriquecidos = await Promise.all(
           tramitesBase.map(async (t) => ({
