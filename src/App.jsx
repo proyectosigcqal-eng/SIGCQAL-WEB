@@ -35,6 +35,7 @@ import { Login } from './pages/auth/login/LoginPage';
 import { ChecklistDocumentosPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage';
 import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
 import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
+import { OficioNotificacionPage } from './pages/modulo-area-sustantiva/oficio-notificacion/OficioNotificacionPage';
 
 function App() {
   return (
@@ -302,6 +303,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+          path="atencion-juridica/oficio-notificacion/:folio"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/oficio-notificacion']}>
+              <OficioNotificacionPage />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+        path="atencion-juridica/checklist/:folio"
+        element={
+          <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/checklist']}>
+            <ChecklistDocumentosPage />
+          </ProtectedRoute>
+        }
+      />
   
           <Route
             path="atencion-juridica/contestacion-autoridad/:folio"
@@ -340,14 +359,7 @@ function App() {
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>
 
-        <Route
-        path="atencion-juridica/checklist/:folio"
-        element={
-          <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/checklist']}>
-            <ChecklistDocumentosPage />
-          </ProtectedRoute>
-        }
-      />
+       
       </Routes>
     </BrowserRouter>
   );
