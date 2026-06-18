@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
+import { fileUrl } from '@/shared/config/api';
 import { FormularioQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/components/FormularioQuejaAri';
 import { VistaPreviaQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/components/VistaPreviaQuejaAri';
 import { crearQuejaAri, obtenerQuejaAriPorId } from '@/features/modulo-area-sustantiva/QuejasAri/services/quejasAriService';
@@ -11,8 +12,8 @@ export const CrearQuejaAriPage = () => {
   // Estado alineado exactamente al QuejasAriRequestDTO con IDs provisionales
   // y propiedades extendidas añadidas para la renderización de la vista previa
   const [formData, setFormData] = useState({
-    idQueja: 1, // Forzado provisionalmente
-    idCir: 1,   // Forzado provisionalmente
+    idQueja: 2, // Forzado provisionalmente
+    idCir: 2,   // Forzado provisionalmente
     numExpedienteOficial: '',
     sintesisActosOmisiones: '',
     nombreEncargadoFirma: '',
@@ -21,6 +22,7 @@ export const CrearQuejaAriPage = () => {
     multasRequerimientos: '',
     multasCredito: '',
     instituto: '',
+    abreviaturaEncargado: '',
     
     // NUEVOS: Campos enriquecidos agregados al estado para la vista previa
     folioGobierno: '',
@@ -33,6 +35,27 @@ export const CrearQuejaAriPage = () => {
   });
   
   const [cargando, setCargando] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState(null);
+
+  const extraerRutaArchivo = (resultado) => {
+    if (!resultado) return null;
+    if (typeof resultado === 'string') return resultado;
+    if (typeof resultado === 'object') {
+      return resultado.rutaPdfAri
+        || resultado.url
+        || resultado.urlDescarga
+        || resultado.archivo
+        || resultado.rutaArchivo
+        || resultado.fileUrl
+        || resultado.path
+        || (resultado.nombreArchivo ? `/api/files/quejas-ari/${resultado.nombreArchivo}` : null)
+        || (resultado.nombreArchivoGenerado ? `/api/files/quejas-ari/${resultado.nombreArchivoGenerado}` : null)
+        || null;
+    }
+    return null;
+  };
+
+  const construirUrlDescarga = (ruta) => ruta ? fileUrl(ruta) : null;
 
  useEffect(() => {
   const cargarDatosEnriquecidos = async () => {
@@ -56,8 +79,13 @@ export const CrearQuejaAriPage = () => {
             nombreContribuyente: datosQueja.contribuyente?.nombreCompleto || datosQueja.nombreContribuyente || '',
             identificacionContribuyente: datosQueja.contribuyente?.rfc || datosQueja.identificacionContribuyente || '',
             
-            fechaSolicitud: datosQueja.fechaSolicitud || datosQueja.fecha_solicitud || ''
+            fechaSolicitud: datosQueja.fechaSolicitud || datosQueja.fecha_solicitud || '',
+            rutaPdfAri: datosQueja.rutaPdfAri || datosQueja.rutaAri || datosQueja.archivo || ''
           }));
+
+          const rutaDescarga = extraerRutaArchivo(datosQueja);
+          const urlDescarga = construirUrlDescarga(rutaDescarga);
+          setDownloadUrl(urlDescarga);
         }
       } catch (err) {
         console.warn("No se pudieron pre-cargar los datos relacionales de la queja:", err.message);
@@ -90,7 +118,12 @@ export const CrearQuejaAriPage = () => {
       const payload = { ...formData };
       const res = await crearQuejaAri(payload);
       console.log('Queja ARI creada exitosamente en el backend:', res);
-      alert('Queja ARI creada correctamente');
+
+      const rutaDescarga = extraerRutaArchivo(res);
+      const urlDescarga = construirUrlDescarga(rutaDescarga);
+      setDownloadUrl(urlDescarga);
+
+      alert(`Queja ARI creada correctamente${urlDescarga ? '. Ya está disponible para descargar.' : ''}`);
     } catch (err) {
       console.error('Error al crear queja ARI', err);
       alert('Error al crear la queja ARI');
@@ -111,6 +144,7 @@ export const CrearQuejaAriPage = () => {
             handleSubmit={handleSubmit}
             catalogos={catalogos}
             cargando={cargando}
+            downloadUrl={downloadUrl}
           />
         </section>
 
@@ -123,6 +157,7 @@ export const CrearQuejaAriPage = () => {
               nombre: '',
               nombreArea: '',
             }}
+            downloadUrl={downloadUrl}
           />
         </section>
       </div>

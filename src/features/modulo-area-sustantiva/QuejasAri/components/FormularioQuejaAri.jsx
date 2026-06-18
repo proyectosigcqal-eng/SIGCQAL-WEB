@@ -1,7 +1,7 @@
 import React from 'react';
 import '../styles/quejasAri.css';
 
-export const FormularioQuejaAri = ({ formData, setFormData, handleChange, handleSubmit, catalogos, cargando }) => {
+export const FormularioQuejaAri = ({ formData, setFormData, handleChange, handleSubmit, catalogos, cargando, downloadUrl }) => {
   const plantillas = catalogos?.plantillasQuejaAri || [];
 
   const handlePlantillaChange = (e) => {
@@ -25,7 +25,7 @@ export const FormularioQuejaAri = ({ formData, setFormData, handleChange, handle
 
       <div className="form-row">
         <div className="form-group">
-          <label>Instituto que expidió la identificación</label>
+          <label>Instituto emisor de la identificación</label>
           <input type="text" name="instituto" value={formData.instituto || ''} onChange={handleChange} />
         </div>
         <div className="form-group">
@@ -45,8 +45,27 @@ export const FormularioQuejaAri = ({ formData, setFormData, handleChange, handle
         </div>
       </div>
 
+      <div className="form-row">
+        <div className="form-group">
+          <label>Abreviatura del encargado</label>
+          <input type="text" name="abreviaturaEncargado" value={formData.abreviaturaEncargado || ''} onChange={handleChange} />
+        </div>
+        
+      </div>
+
       <div className="form-actions">
         <button className="btn-primario" type="submit" disabled={cargando}>{cargando ? 'Guardando...' : 'Guardar Queja ARI'}</button>
+        {downloadUrl && (
+          <a
+            className="btn-descargar-quejaari"
+            href={downloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            Descargar Queja ARI
+          </a>
+        )}
       </div>
 
     </form>
