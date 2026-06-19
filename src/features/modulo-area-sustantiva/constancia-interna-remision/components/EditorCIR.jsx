@@ -9,29 +9,40 @@ const FECHA_HOY = new Date().toLocaleDateString("es-MX", {
 });
 
 export const EditorCIR = ({ expediente, folioExpediente }) => {
-  // ── Campos ROJOS — el usuario los llena ──────────────────────────────
+  // ── Campos del formulario ──────────────────────────────
+  const [areaQueRemite, setAreaQueRemite] = useState("Asesoría");
+  const [areaQueRecibe, setAreaQueRecibe] = useState(
+    "Departamento de Quejas, Recomendaciones, Medidas Correctivas y Sanciones",
+  );
+  const [servicioPrestado, setServicioPrestado] = useState("Asesoría");
+
   const [documentacionRemite, setDocumentacionRemite] = useState("");
   const [motivosRemite, setMotivosRemite] = useState("");
+  const [fundamentos, setFundamentos] = useState(
+    "Lo anterior con fundamento en lo dispuesto por los artículos 1, 22, 25 fracción I, III, 26, 37, 38 , 39 y 40 de la Ley de los Derechos y Defensa del Contribuyente del Estado de Zacatecas y sus Municipios; en relación con el 2, 6 fracciones I, IV, 7 fracción II, inciso a), 26 fracción VII, 27 fracciones I, II, 28 fracciones I, V, VI, VIII, X y XIII, y 39 fracciones II y VI, del Estatuto Orgánico de la Comisión Estatal de la Defensa del Contribuyente, así como el 1, 5, 30 fracción IV, 56, 57, 58 de los Lineamientos Generales de Actuación de la Comisión Estatal de la Defensa del Contribuyente.",
+  );
   const [observaciones, setObservaciones] = useState("");
+
   const [asesorQueRemite, setAsesorQueRemite] = useState("");
+  const [asesorQueRecibe, setAsesorQueRecibe] = useState("");
+  const [nombreTitular, setNombreTitular] = useState(
+    "LIC. JOSE DAVID RIVERA SESMA",
+  );
 
   const [generando, setGenerando] = useState(false);
-  const [urlDocx, setUrlDocx] = useState(null);
   const [error, setError] = useState(null);
   const [exito, setExito] = useState(false);
 
-  // ── Campos VERDES — vienen del expediente o sistema ──────────────────
+  // ── Campos del sistema (verdes) ──────────────────────
   const folioExp =
     expediente?.folioGobierno ??
     expediente?.folio ??
     folioExpediente ??
     "[FOLIO]";
-
   const contribuyente =
     expediente?.nombreContribuyente ??
     expediente?.contribuyente ??
     "[CONTRIBUYENTE]";
-    
   const autoridad = expediente?.autoridad ?? "[AUTORIDAD RESPONSABLE]";
 
   const handleGenerarCIR = async () => {
@@ -47,16 +58,23 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
     setExito(false);
 
     try {
-      const expedienteId = expediente?.id || 1;
+      const expedienteId = expediente?.id_expediente || expediente?.idExpediente || expediente?.id;
 
+      if (!expedienteId) {
+        setError("Error critico: No se pudo encontrar el ID del expediente en el sistema.");
+        return;
+      }
+
+      // Payload exacto que espera el Backend
       const payload = {
         documentacionRemite,
         motivosRemite,
+        fundamentos,
         observaciones,
         asesorQueRemite: asesorQueRemite || "ASESOR EN TURNO",
-        fechaCIR: FECHA_HOY,
-        autoridadResponsable: autoridad,
-        nombreEncargado: "LIC. JOSE DAVID RIVERA SESMA"
+        nombreEncargado: nombreTitular,
+        // Nota: areaQueRemite, areaQueRecibe y servicioPrestado
+        // se usan para la vista previa. Si tu backend los guarda, agrégaselos al payload.
       };
 
       const res = await fetch(
@@ -68,9 +86,28 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
         },
       );
 
-      if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
-      const errData = await res.json();
-      setUrlDocx(errData.url ?? null);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || `Error del servidor: ${res.status}`);
+      }
+
+      // Descarga directa del Blob
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const contentDisposition = res.headers.get("Content-Disposition");
+      let filename = "Constancia_Interna_Remision.docx";
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
       setExito(true);
     } catch (e) {
       setError("Error al generar la CIR: " + e.message);
@@ -79,124 +116,371 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
     }
   };
 
-  // ── Estilos reutilizables para inputs ──
   const inputStyle = {
     width: "100%",
-    padding: "0.6rem",
+    padding: "0.5rem",
     border: "1px solid #cbd5e1",
     borderRadius: "4px",
     fontFamily: "inherit",
-    fontSize: "0.95rem",
-    boxSizing: "border-box"
+    fontSize: "0.9rem",
+    boxSizing: "border-box",
   };
 
   return (
-    <section className="ca-card" style={{ background: "#fff", borderRadius: "8px", padding: "2rem", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-      <h2 className="ca-card-title" style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#1e293b", margin: "0 0 1.5rem 0", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    <section
+      className="ca-card"
+      style={{
+        background: "#fff",
+        borderRadius: "8px",
+        padding: "1.5rem",
+        boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "1.4rem",
+          fontWeight: "bold",
+          color: "#1e293b",
+          margin: "0 0 1rem 0",
+        }}
+      >
         📋 Generador de Constancia Interna de Remisión
       </h2>
 
       {error && (
-        <div className="ca-alert-error" style={{ backgroundColor: "#fee2e2", color: "#991b1b", padding: "1rem", borderRadius: "4px", marginBottom: "1.5rem", fontWeight: "500" }}>
+        <div
+          style={{
+            backgroundColor: "#fee2e2",
+            color: "#991b1b",
+            padding: "1rem",
+            borderRadius: "4px",
+            marginBottom: "1rem",
+          }}
+        >
           {error}
         </div>
       )}
-
       {exito && (
-        <div className="ca-alert-exito" style={{ backgroundColor: "#dcfce7", color: "#166534", padding: "1rem", borderRadius: "4px", marginBottom: "1.5rem", fontWeight: "500", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span>✓ Constancia generada correctamente. El archivo se ha descargado.</span>
-          {urlDocx && (
-            <a href={`${API}${urlDocx}`} target="_blank" rel="noreferrer" className="ca-btn-descargar" style={{ color: "#166534", textDecoration: "underline", fontWeight: "bold" }}>
-              Descargar DOCX
-            </a>
-          )}
+        <div
+          style={{
+            backgroundColor: "#dcfce7",
+            color: "#166534",
+            padding: "1rem",
+            borderRadius: "4px",
+            marginBottom: "1rem",
+          }}
+        >
+          ✓ Constancia generada y descargada correctamente.
         </div>
       )}
 
-      {/* Contenedor principal flex para forzar las dos columnas */}
-      <div className="acci-layout" style={{ display: "flex", flexWrap: "wrap", gap: "2rem", alignItems: "flex-start" }}>
-        
-        {/* ── Panel izquierdo: formulario (40% del ancho) ── */}
-        <div className="acci-form-panel" style={{ flex: "1 1 350px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <h3 className="acci-form-title" style={{ fontSize: "1.1rem", fontWeight: "600", color: "#334155", margin: 0, borderBottom: "1px solid #e2e8f0", paddingBottom: "0.5rem" }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "1.5rem",
+          alignItems: "flex-start",
+        }}
+      >
+        {/* ── PANEL IZQUIERDO: FORMULARIO COMPLETO ── */}
+        <div
+          style={{
+            flex: "1 1 380px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
+          }}
+        >
+          {/* Bloque Verde (Solo Lectura) */}
+          <div
+            style={{
+              backgroundColor: "#f0fdf4",
+              padding: "1rem",
+              borderRadius: "6px",
+              border: "1px solid #bbf7d0",
+              fontSize: "0.9rem",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "auto 1fr",
+                gap: "0.4rem 1rem",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ color: "#166534", fontWeight: "600" }}>
+                📅 Fecha:
+              </span>
+              <span style={{ fontWeight: "500" }}>{FECHA_HOY}</span>
+              <span style={{ color: "#166534", fontWeight: "600" }}>
+                📋 Folio:
+              </span>
+              <span style={{ fontWeight: "500" }}>{folioExp}</span>
+              <span style={{ color: "#166534", fontWeight: "600" }}>
+                👤 Contribuyente:
+              </span>
+              <span style={{ fontWeight: "500" }}>{contribuyente}</span>
+              <span style={{ color: "#166534", fontWeight: "600" }}>
+                🏢 Autoridad:
+              </span>
+              <span style={{ fontWeight: "500" }}>{autoridad}</span>
+            </div>
+          </div>
+
+          <div
+            style={{ height: "1px", background: "#e2e8f0", margin: "0.5rem 0" }}
+          ></div>
+          <h3 style={{ margin: 0, fontSize: "1rem", color: "#475569" }}>
             Datos de la Remisión
           </h3>
 
-          {/* Datos verdes — solo lectura */}
-          <div className="acci-info-readonly" style={{ backgroundColor: "#f8fafc", padding: "1rem", borderRadius: "6px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem" }}>
-            <div className="acci-readonly-item" style={{ display: "grid", gridTemplateColumns: "120px 1fr" }}>
-              <span className="acci-readonly-label" style={{ color: "#64748b", fontWeight: "500" }}>📅 Fecha:</span>
-              <span className="acci-readonly-value" style={{ color: "#0f172a", fontWeight: "600" }}>{FECHA_HOY}</span>
+          {/* Inputs Dobles */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.3rem",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  color: "#334155",
+                }}
+              >
+                Área que remite
+              </label>
+              <input
+                type="text"
+                style={inputStyle}
+                value={areaQueRemite}
+                onChange={(e) => setAreaQueRemite(e.target.value)}
+              />
             </div>
-            <div className="acci-readonly-item" style={{ display: "grid", gridTemplateColumns: "120px 1fr" }}>
-              <span className="acci-readonly-label" style={{ color: "#64748b", fontWeight: "500" }}>📋 Folio / Exp:</span>
-              <span className="acci-readonly-value" style={{ color: "#0f172a", fontWeight: "600" }}>{folioExp}</span>
-            </div>
-            <div className="acci-readonly-item" style={{ display: "grid", gridTemplateColumns: "120px 1fr" }}>
-              <span className="acci-readonly-label" style={{ color: "#64748b", fontWeight: "500" }}>👤 Contribuyente:</span>
-              <span className="acci-readonly-value" style={{ color: "#0f172a", fontWeight: "600" }}>{contribuyente}</span>
-            </div>
-            <div className="acci-readonly-item" style={{ display: "grid", gridTemplateColumns: "120px 1fr" }}>
-              <span className="acci-readonly-label" style={{ color: "#64748b", fontWeight: "500" }}>🏢 Autoridad:</span>
-              <span className="acci-readonly-value" style={{ color: "#0f172a", fontWeight: "600" }}>{autoridad}</span>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.3rem",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  color: "#334155",
+                }}
+              >
+                Área que recibe
+              </label>
+              <input
+                type="text"
+                style={inputStyle}
+                value={areaQueRecibe}
+                onChange={(e) => setAreaQueRecibe(e.target.value)}
+              />
             </div>
           </div>
 
-          {/* Campos rojos — el usuario los llena */}
-          <div className="ca-field" style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>
-              Documentación que se remite <span style={{ color: "#ef4444" }}>*</span>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
+            <label
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                color: "#334155",
+              }}
+            >
+              Servicio prestado previamente
+            </label>
+            <input
+              type="text"
+              style={inputStyle}
+              value={servicioPrestado}
+              onChange={(e) => setServicioPrestado(e.target.value)}
+            />
+          </div>
+
+          {/* Textareas Principales */}
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
+            <label
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                color: "#334155",
+              }}
+            >
+              Documentación que se remite{" "}
+              <span style={{ color: "#ef4444" }}>*</span>
             </label>
             <textarea
-              rows={4}
+              rows={3}
               style={{ ...inputStyle, resize: "vertical" }}
               value={documentacionRemite}
               onChange={(e) => setDocumentacionRemite(e.target.value)}
-              placeholder="Ej: Carpeta de investigación, Oficio de la autoridad..."
+              placeholder="Ej: Copia de Solicitud, IFE, Requerimiento..."
             />
           </div>
 
-          <div className="ca-field" style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>
-              Motivos por los que se remite <span style={{ color: "#ef4444" }}>*</span>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
+            <label
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                color: "#334155",
+              }}
+            >
+              Motivos por los que se remite{" "}
+              <span style={{ color: "#ef4444" }}>*</span>
             </label>
             <textarea
-              rows={4}
+              rows={3}
               style={{ ...inputStyle, resize: "vertical" }}
               value={motivosRemite}
               onChange={(e) => setMotivosRemite(e.target.value)}
-              placeholder="Ej: Para análisis jurídico, substanciación..."
+              placeholder="Ej: Para el pertinente análisis y solución del asunto..."
             />
           </div>
 
-          <div className="ca-field" style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>
-              Observaciones <span style={{ color: "#94a3b8", fontWeight: "normal" }}>(opcional)</span>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
+            <label
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                color: "#334155",
+              }}
+            >
+              Fundamentos (Artículos)
+            </label>
+            <textarea
+              rows={4}
+              style={{ ...inputStyle, resize: "vertical", fontSize: "0.8rem" }}
+              value={fundamentos}
+              onChange={(e) => setFundamentos(e.target.value)}
+            />
+          </div>
+
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
+            <label
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                color: "#334155",
+              }}
+            >
+              Observaciones
             </label>
             <textarea
               rows={2}
               style={{ ...inputStyle, resize: "vertical" }}
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
-              placeholder="Notas para el área de representación legal..."
             />
           </div>
 
-          <div className="ca-field" style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <label style={{ fontSize: "0.9rem", fontWeight: "600", color: "#334155" }}>
-              Asesor que remite <span style={{ color: "#94a3b8", fontWeight: "normal" }}>(opcional)</span>
+          <div
+            style={{ height: "1px", background: "#e2e8f0", margin: "0.5rem 0" }}
+          ></div>
+          <h3 style={{ margin: 0, fontSize: "1rem", color: "#475569" }}>
+            Firmas
+          </h3>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.3rem",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  color: "#334155",
+                }}
+              >
+                Asesor que remite
+              </label>
+              <input
+                type="text"
+                style={inputStyle}
+                value={asesorQueRemite}
+                onChange={(e) => setAsesorQueRemite(e.target.value)}
+                placeholder="Nombre del Asesor"
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.3rem",
+              }}
+            >
+              <label
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  color: "#334155",
+                }}
+              >
+                Asesor que recibe
+              </label>
+              <input
+                type="text"
+                style={inputStyle}
+                value={asesorQueRecibe}
+                onChange={(e) => setAsesorQueRecibe(e.target.value)}
+                placeholder="Nombre del Asesor"
+              />
+            </div>
+          </div>
+
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
+            <label
+              style={{
+                fontSize: "0.85rem",
+                fontWeight: "600",
+                color: "#334155",
+              }}
+            >
+              Titular que Autoriza
             </label>
             <input
               type="text"
               style={inputStyle}
-              value={asesorQueRemite}
-              onChange={(e) => setAsesorQueRemite(e.target.value)}
-              placeholder="Ej: Lic. Nombre del Asesor"
+              value={nombreTitular}
+              onChange={(e) => setNombreTitular(e.target.value)}
             />
           </div>
 
           <button
-            className="ca-btn-guardar"
             onClick={handleGenerarCIR}
             disabled={generando}
             style={{
@@ -207,50 +491,66 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
               borderRadius: "4px",
               fontWeight: "bold",
               cursor: generando ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s"
+              marginTop: "0.5rem",
             }}
           >
-            {generando ? "Generando CIR..." : "📄 Generar Constancia"}
+            {generando
+              ? "Generando CIR..."
+              : "📄 Generar y Descargar Constancia"}
           </button>
         </div>
 
-        {/* ── Panel derecho: vista previa del documento (60% del ancho) ── */}
-        <div className="acci-preview-panel" style={{ flex: "2 1 500px", backgroundColor: "#f1f5f9", padding: "1.5rem", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-          <h3 className="acci-form-title" style={{ fontSize: "1.1rem", fontWeight: "600", color: "#334155", margin: "0 0 1rem 0" }}>
-            Vista previa del documento
+        {/* ── PANEL DERECHO: VISTA PREVIA OFICIAL ── */}
+        <div
+          style={{
+            flex: "2 1 500px",
+            backgroundColor: "#f1f5f9",
+            padding: "1rem",
+            borderRadius: "8px",
+            border: "1px solid #e2e8f0",
+            position: "sticky",
+            top: "1rem",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "1.1rem",
+              fontWeight: "600",
+              color: "#334155",
+              margin: "0 0 1rem 0",
+              textAlign: "center",
+            }}
+          >
+            Vista Previa
           </h3>
 
-          <div className="acci-doc-wrap" style={{ display: "flex", justifyContent: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
             <div
-              className="acci-doc"
               style={{
                 position: "relative",
                 width: "100%",
-                maxWidth: "750px", // Limita el ancho para que parezca una hoja A4
-                minHeight: "950px",
-                padding: "170px 60px 90px 60px",
-                fontFamily: "'Montserrat', 'Arial', sans-serif",
-                fontSize: "11pt",
-                lineHeight: "1.6",
+                maxWidth: "700px",
+                minHeight: "900px",
+                padding: "140px 50px 50px 50px",
+                fontFamily: "'Arial', sans-serif",
+                fontSize: "10pt",
+                lineHeight: "1.4",
                 color: "#000",
                 backgroundColor: "#fff",
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", // Sombra tipo papel
-                boxSizing: "border-box"
+                boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+                boxSizing: "border-box",
               }}
             >
-              {/* Membrete */}
               <img
                 src="/src/assets/membrete.jpg"
                 alt="Membrete"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                }}
+                onError={(e) => (e.target.style.display = "none")}
                 style={{
                   position: "absolute",
                   top: 0,
                   left: 0,
                   width: "100%",
-                  height: "160px",
+                  height: "130px",
                   objectFit: "cover",
                   objectPosition: "top",
                   zIndex: 0,
@@ -258,99 +558,193 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
                 }}
               />
 
-              <div style={{ position: "relative", zIndex: 1, textAlign: "justify" }}>
-                
-                {/* ── Encabezado tipo tabla del CIR ── */}
-                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1.5rem" }}>
+              <div style={{ position: "relative", zIndex: 1 }}>
+                {/* Encabezado Oficial */}
+                <div
+                  style={{
+                    border: "1px solid #000",
+                    padding: "8px",
+                    marginBottom: "1rem",
+                    fontSize: "9.5pt",
+                  }}
+                >
                   <div
                     style={{
-                      border: "1px solid #000",
-                      padding: "10px",
-                      width: "65%",
-                      fontSize: "9.5pt",
-                      lineHeight: "1.4",
-                      fontFamily: "inherit",
+                      textAlign: "center",
+                      fontWeight: "bold",
+                      marginBottom: "6px",
+                      fontSize: "11pt",
                     }}
                   >
-                    <div style={{ textAlign: "center", fontWeight: "bold", marginBottom: "5px" }}>
-                      CONSTANCIA INTERNA DE REMISIÓN
+                    CONSTANCIA INTERNA DE REMISIÓN
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "4px",
+                    }}
+                  >
+                    <div>
+                      <strong>Nº de Folio:</strong> {folioExp}
                     </div>
                     <div>
-                      <strong>Folio:</strong>{" "}
-                      <span style={{ color: "#16a34a", fontWeight: 600 }}>{folioExp}</span>
+                      <strong>Contribuyente:</strong> {contribuyente}
                     </div>
-                    <div>
-                      <strong>Contribuyente:</strong>{" "}
-                      <span style={{ color: "#16a34a", fontWeight: 600 }}>{contribuyente}</span>
-                    </div>
-                    <div>
-                      <strong>Fecha:</strong>{" "}
-                      <span style={{ color: "#16a34a", fontWeight: 600 }}>{FECHA_HOY}</span>
-                    </div>
+                  </div>
+                  <div style={{ marginTop: "4px" }}>
+                    Zacatecas, Zac., a {FECHA_HOY}
                   </div>
                 </div>
 
-                <p style={{ marginBottom: "1rem" }}>
-                  En la ciudad de Zacatecas, siendo las _____ horas del día{" "}
-                  <span style={{ color: "#16a34a", fontWeight: 600 }}>{FECHA_HOY}</span>, 
-                  el suscrito{" "}
-                  <span style={{ color: "#dc2626", fontWeight: 600 }}>
-                    {asesorQueRemite || "[ASESOR QUE REMITE]"}
-                  </span>
-                  , hace constar la remisión del expediente citado al rubro al área de{" "}
-                  <strong>Representación Legal y Defensa</strong>.
-                </p>
+                <div style={{ marginBottom: "0.5rem" }}>
+                  <strong>Área que remite:</strong>{" "}
+                  <span style={{ color: "#dc2626" }}>{areaQueRemite}</span>
+                </div>
+                <div style={{ marginBottom: "0.5rem" }}>
+                  <strong>Área que recibe:</strong>{" "}
+                  <span style={{ color: "#dc2626" }}>{areaQueRecibe}</span>
+                </div>
+                <div style={{ marginBottom: "1rem" }}>
+                  <strong>Servicio prestado previamente:</strong>{" "}
+                  <span style={{ color: "#dc2626" }}>{servicioPrestado}</span>
+                </div>
 
-                <p style={{ marginBottom: "1rem" }}>
-                  Se acompaña a la presente la siguiente documentación:
-                </p>
-
-                <p
+                <div style={{ marginBottom: "0.4rem", fontWeight: "bold" }}>
+                  Documentación que se remite:
+                </div>
+                <div
                   style={{
                     paddingLeft: "20px",
-                    fontStyle: "italic",
-                    color: documentacionRemite ? "#dc2626" : "#64748b",
                     marginBottom: "1rem",
-                    backgroundColor: "#f8fafc",
-                    padding: "10px",
-                    borderLeft: "3px solid #1e3a8a",
+                    whiteSpace: "pre-wrap",
+                    color: documentacionRemite ? "#000" : "#94a3b8",
+                    fontStyle: documentacionRemite ? "normal" : "italic",
                   }}
                 >
-                  {documentacionRemite ||
-                    "[Describa aquí la documentación que se remite...]"}
-                </p>
-
-                <p style={{ marginBottom: "1rem" }}>
-                  Lo anterior con el motivo de:{" "}
-                  <span style={{ textDecoration: "underline", color: "#dc2626", fontWeight: 600 }}>
-                    {motivosRemite || "[Motivos por los que se remite...]"}
-                  </span>
-                  .
-                </p>
-
-                <p style={{ marginBottom: "0.8rem" }}>
-                  <strong>I. Recepción.</strong> Se da por recibido el
-                  expediente y anexos descritos para su trámite.
-                </p>
-
-                <p style={{ marginBottom: "0.8rem" }}>
-                  <strong>II. Observaciones.</strong>{" "}
-                  <span style={{ color: observaciones ? "#dc2626" : "#000" }}>
-                    {observaciones || "Sin observaciones."}
-                  </span>
-                </p>
-
-                <div style={{ textAlign: "center", marginBottom: "3rem", marginTop: "3rem" }}>
-                  <strong>ATENTAMENTE</strong>
-                  <br />
-                  <br />
-                  <br />
-                  <strong>LIC. ENCARGADO DEL ÁREA</strong>
-                  <br />
-                  <span style={{ fontSize: "0.9em" }}>
-                    Comisión Estatal de la Defensa del Contribuyente
-                  </span>
+                  {documentacionRemite || "[Ingrese la documentación]"}
                 </div>
+
+                <div style={{ marginBottom: "0.4rem", fontWeight: "bold" }}>
+                  Motivos por los que se remite y solicita el servicio:
+                </div>
+                <div
+                  style={{
+                    paddingLeft: "20px",
+                    marginBottom: "1rem",
+                    color: motivosRemite ? "#000" : "#94a3b8",
+                    fontStyle: motivosRemite ? "normal" : "italic",
+                  }}
+                >
+                  {motivosRemite || "[Ingrese los motivos]"}
+                </div>
+
+                <div
+                  style={{
+                    marginBottom: "1.5rem",
+                    fontSize: "9pt",
+                    textAlign: "justify",
+                  }}
+                >
+                  {fundamentos}
+                </div>
+
+                <div style={{ marginBottom: "0.4rem", fontWeight: "bold" }}>
+                  Observaciones:
+                </div>
+                <div
+                  style={{
+                    paddingLeft: "20px",
+                    marginBottom: "3rem",
+                    color: observaciones ? "#000" : "#94a3b8",
+                  }}
+                >
+                  {observaciones || "Ninguna."}
+                </div>
+
+                {/* Tabla de Firmas Exacta al Oficio */}
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    marginTop: "30px",
+                    fontSize: "9pt",
+                  }}
+                >
+                  <thead>
+                    <tr
+                      style={{ borderBottom: "1px solid #000", height: "20px" }}
+                    >
+                      <th
+                        style={{
+                          width: "33%",
+                          textAlign: "center",
+                          padding: "5px",
+                        }}
+                      >
+                        Nombre y firma de Asesor
+                      </th>
+                      <th
+                        style={{
+                          width: "33%",
+                          textAlign: "center",
+                          padding: "5px",
+                        }}
+                      >
+                        Nombre y firma de Asesor
+                      </th>
+                      <th
+                        style={{
+                          width: "33%",
+                          textAlign: "center",
+                          padding: "5px",
+                        }}
+                      >
+                        Nombre y firma del Titular
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ height: "80px" }}>
+                      <td
+                        style={{
+                          textAlign: "center",
+                          verticalAlign: "bottom",
+                          fontWeight: "bold",
+                          color: "#dc2626",
+                        }}
+                      >
+                        {asesorQueRemite
+                          ? asesorQueRemite.split(" ").pop()
+                          : "[Remite]"}
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                          verticalAlign: "bottom",
+                          fontWeight: "bold",
+                          color: "#dc2626",
+                        }}
+                      >
+                        {asesorQueRecibe
+                          ? asesorQueRecibe.split(" ").pop()
+                          : "[Recibe]"}
+                      </td>
+                      <td
+                        style={{
+                          textAlign: "center",
+                          verticalAlign: "bottom",
+                          fontWeight: "bold",
+                          color: "#dc2626",
+                        }}
+                      >
+                        {nombreTitular
+                          ? nombreTitular.split(" ").pop()
+                          : "[Autorizó]"}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
