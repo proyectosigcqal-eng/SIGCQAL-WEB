@@ -27,8 +27,16 @@ const adaptarTramite = (item) => ({
   estatus:       item.estatus_principal ?? '',
   seguimiento:   item.ultima_modificacion?.descripcion ?? '',
   fecha:         item.ultima_modificacion?.timestamp ?? '',
+  bloqueado:    item.bloqueado ?? false,
   // semaforoPlazos se enriquece después de forma no bloqueante
   semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
+  tieneCir:          item.tiene_cir ?? false,
+  tieneAri:          item.tiene_ari ?? false,
+  tieneOficio:       item.tiene_oficio ?? false,
+  tieneContestacion: item.tiene_contestacion ?? false,
+  tieneAcci:         item.tiene_acci ?? false,
+  tieneResolucion:   item.tiene_resolucion ?? false,
+  checklistCompleto: item.checklist_completo ?? false,
 });
 
 // Enriquecimiento opcional — no bloquea el render principal
@@ -53,6 +61,8 @@ export const useBandejaGestion = () => {
   const [error, setError]             = useState(null);
   const controllerRef                 = useRef(null);
 
+
+
   const fetchBandeja = useCallback(() => {
     if (controllerRef.current) controllerRef.current.abort();
     const controller = new AbortController();
@@ -65,7 +75,10 @@ export const useBandejaGestion = () => {
     if (busqueda.trim()) params.append('search', busqueda.trim());
 
     const etapa = ETAPAS.find((e) => e.key === etapaActiva);
-    if (etapa?.estatus) params.append('estatus', etapa.estatus);
+    // ← cambio: solo manda estatus si NO es la pestaña CERRADA
+    if (etapa?.estatus && etapaActiva !== 'CERRADA') {
+      params.append('estatus', etapa.estatus);
+    }
     params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
 
     fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`, {
@@ -79,11 +92,8 @@ export const useBandejaGestion = () => {
         if (!Array.isArray(data)) throw new Error('Respuesta inesperada');
 
         const tramitesBase = data.map(adaptarTramite);
-        // Renderiza inmediatamente sin esperar semáforos
         setTramites(tramitesBase);
 
-        // Enriquece con semáforo de autoridad en segundo plano
-        // sin bloquear la UI ni lanzar un nuevo fetch si fue abortado
         if (controller.signal.aborted) return;
         const enriquecidos = await Promise.all(
           tramitesBase.map(async (t) => ({
@@ -110,12 +120,19 @@ export const useBandejaGestion = () => {
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  return {
-    busqueda, setBusqueda,
-    etapaActiva, setEtapaActiva,
-    tramites, cargando, error,
-    ETAPAS,
-    recargar:  fetchBandeja,  // nombre de develop
-    refrescar: fetchBandeja,  // alias de feature — para no romper si alguien lo usa
-  };
+const tramitesFiltradosPorEtapa = tramites.filter(t => {
+  if (etapaActiva === 'CERRADA') return t.bloqueado === true;
+  return !t.bloqueado; // bloqueados solo aparecen en CERRADA
+});
+
+return {
+  busqueda, setBusqueda,
+  etapaActiva, setEtapaActiva,
+  tramites: tramitesFiltradosPorEtapa, // ← usa este, no tramites directo
+  cargando, error,
+  ETAPAS,
+  recargar:  fetchBandeja,
+  refrescar: fetchBandeja,
+};
+
 };

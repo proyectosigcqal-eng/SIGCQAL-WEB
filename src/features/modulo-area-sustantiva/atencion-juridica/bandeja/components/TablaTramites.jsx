@@ -15,16 +15,55 @@ const BadgeEstatus = ({ label, bloqueado }) => (
   </span>
 );
 
-const BadgeSinSemaforo = ({ estatus }) => {
-  const t = (estatus ?? '').toLowerCase();
-  if (t.includes('informe rendido') || t.includes('respuesta recibida')) {
-    return <span className="bdg-badge badge-concluido">ATENDIDO</span>;
+const calcularAccion = (t, estUp) => {
+  if (estUp.includes('ASIGNADA A ASESOR')) {
+    if (t.tieneCir) {
+      return { label: 'VER CIR', ruta: `/atencion-juridica/cir/${t.folio}` };
+    }
+    if (t.checklistCompleto) {
+      return { label: 'GENERAR CIR', ruta: `/atencion-juridica/cir/${t.folio}` };
+    }
+    return { label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` };
+}
+  if (estUp.includes('VALIDACIÓN') || estUp.includes('VALIDACION')) {
+    return { label: 'VALIDAR DOCS', ruta: `/atencion-juridica/checklist/${t.folio}` };
   }
-  return <span className="bdg-badge badge-default">--</span>;
+  if (estUp.includes('CIR GENERADA')) {
+    return t.tieneAri
+      ? { label: 'VER ARI', ruta: `/atencion-juridica/ari/${t.folio}` }
+      : { label: 'GENERAR ARI', ruta: `/atencion-juridica/ari/${t.folio}` };
+  }
+  if (estUp.includes('ARI GENERADO')) {
+    return t.tieneOficio
+      ? { label: 'VER OFICIO', ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` }
+      : { label: 'GENERAR OFICIO', ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` };
+  }
+  if (estUp.includes('OFICIO DE NOTIFICACIÓN') || estUp.includes('OFICIO DE NOTIFICACION')) {
+    return t.tieneContestacion
+      ? { label: 'VER CONTESTACIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
+      : { label: 'REGISTRAR CONTESTACIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` };
+  }
+  if (estUp.includes('CONTESTACIÓN DE AUTORIDAD') || estUp.includes('CONTESTACION DE AUTORIDAD')) {
+    return t.tieneAcci
+      ? { label: 'VER ACCI', ruta: `/atencion-juridica/acci/${t.folio}` }
+      : { label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` };
+  }
+  if (estUp.includes('ACCI GENERADO')) {
+    return t.tieneResolucion
+      ? { label: 'VER RESOLUCIÓN', ruta: `/atencion-juridica/resolucion/${t.folio}` }
+      : { label: 'GENERAR RESOLUCIÓN', ruta: `/atencion-juridica/resolucion/${t.folio}` };
+  }
+  if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION')) {
+    return { label: 'NOTIFICAR', ruta: `/atencion-juridica/notificacion-final/${t.folio}` };
+  }
+  if (estUp.includes('NOTIFICACIÓN FINAL') || estUp.includes('NOTIFICACION FINAL')) {
+    return { label: 'CERRAR EXPEDIENTE', ruta: `/atencion-juridica/cierre/${t.folio}` };
+  }
+  return { label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` };
 };
 
-export const TablaTramites = ({ tramites, onInforme, onCir }) => {
-  const navigate   = useNavigate();
+export const TablaTramites = ({ tramites }) => {
+  const navigate = useNavigate();
   const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
 
   const tramitesFiltrados = tipoActivo === 'QUEJAS_RECLAMACIONES'
@@ -82,20 +121,9 @@ export const TablaTramites = ({ tramites, onInforme, onCir }) => {
           </thead>
           <tbody>
             {tramitesFiltrados.map((t) => {
-              const bloqueado =
-                t.estatus?.toUpperCase().includes('NO PRESENTADA') ||
-                t.estatus?.toUpperCase().includes('BLOQUEADO')     ||
-                t.estatus?.toUpperCase().includes('FINALIZADO');
-
-              const estUp    = (t.estatus ?? '').toUpperCase();
-              const etiqueta = bloqueado                 ? 'CERRADO'
-                : estUp.includes('CIR')                 ? 'GENERAR CIR'
-                : estUp.includes('OFICIO')              ? 'VER OFICIO'
-                : estUp.includes('VALIDACIÓN') || estUp.includes('VALIDACION')
-                                                        ? 'VALIDAR DOCS'
-                :                                         'ATENDER';
-
-              const puedeInforme = estUp.includes('OFICIO ENVIADO') && t.expedienteId;
+              const bloqueado = t.bloqueado === true;
+              const estUp     = (t.estatus ?? '').toUpperCase();
+              const accion    = calcularAccion(t, estUp);
 
               return (
                 <tr key={t.id} className={bloqueado ? 'bdg-row--bloqueado' : ''}>
@@ -116,50 +144,19 @@ export const TablaTramites = ({ tramites, onInforme, onCir }) => {
                     <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
                   </td>
                   <td>
-                    {/* Semáforo de prevención (3 días hábiles) */}
                     {t.semaforoPlazos
                       ? <SemaforoPlazosAutoridad semaforo={t.semaforoPlazos} />
                       : <SemaforoContador folio={t.folio} />
                     }
                   </td>
                   <td className="bdg-action-cell">
-                    <div style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-                      <button
-                        className={`bdg-btn-action ${bloqueado ? 'bdg-btn-action--disabled' : ''}`}
-                        disabled={bloqueado}
-                        onClick={() => {
-                          if (bloqueado) return;
-                          navigate(`/atencion-juridica/checklist/${t.folio}`);
-                        }}
-                      >
-                        {etiqueta}
-                      </button>
-
-                      {/* Botón INFORME — solo si el asesor de feature lo requiere */}
-                      {onInforme && puedeInforme && (
-                        <button
-                          className="bdg-btn-action"
-                          style={{ background: '#166534' }}
-                          onClick={() => onInforme(t.expedienteId)}
-                          type="button"
-                        >
-                          INFORME
-                        </button>
-                      )}
-
-                      {/* Botón CIR — cuando clasificación es "Procede" */}
-                      {onCir && estUp.includes('PROCEDE') && t.expedienteId && (
-                        <button
-                          className="bdg-btn-action"
-                          style={{ background: '#2563eb' }}
-                          onClick={() => onCir(t.expedienteId)}
-                          type="button"
-                          title="Generar Constancia Interna de Remisión"
-                        >
-                          GENERAR CIR
-                        </button>
-                      )}
-                    </div>
+                    <button
+                      className={`bdg-btn-action ${bloqueado ? 'bdg-btn-action--disabled' : ''}`}
+                      disabled={bloqueado}
+                      onClick={() => !bloqueado && navigate(accion.ruta)}
+                    >
+                      {bloqueado ? 'CERRADO' : accion.label}
+                    </button>
                   </td>
                 </tr>
               );

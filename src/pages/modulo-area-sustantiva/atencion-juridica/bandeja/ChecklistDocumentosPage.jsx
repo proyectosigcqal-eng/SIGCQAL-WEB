@@ -1,7 +1,9 @@
-import { useState, useCallback, useEffect } from 'react'; // <-- Agregamos useEffect
+import { useState, useCallback, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CheckSquare, AlertTriangle, FileText, User, Shield, Gavel } from 'lucide-react';
+import { CheckSquare, AlertTriangle, FileText, User, Shield } from 'lucide-react';
 import '../../../../features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/checklist.css';
+
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const DOCUMENTOS = [
   {
@@ -30,113 +32,175 @@ const DOCUMENTOS = [
   },
 ];
 
+// Mapeo: id del checkbox → campo en la BD
+const CAMPO_BD = {
+  escrito_inicial:        'requisitoIdentificacion',
+  identificacion_oficial: 'requisitoActosFiscales',
+  documento_acto:         'requisitoNarrativaClara',
+  poder_notarial:         'requisitoCompetenciaCedecon',
+};
+
+const checkedToPayload = (checked) => ({
+  requisitoIdentificacion:     checked.escrito_inicial        ?? false,
+  requisitoActosFiscales:      checked.identificacion_oficial ?? false,
+  requisitoNarrativaClara:     checked.documento_acto         ?? false,
+  requisitoCompetenciaCedecon: checked.poder_notarial         ?? false,
+});
+
 export const ChecklistDocumentosPage = () => {
   const { folio } = useParams();
   const navigate  = useNavigate();
 
-  const [checked, setChecked] = useState({});
-  const [procesando, setProcesando] = useState(false);
-  
-  // NUEVO: Estado para guardar la información del expediente
-  const [expediente, setExpediente] = useState(null);
+  const [checked,    setChecked]    = useState({
+    escrito_inicial:        false,
+    identificacion_oficial: false,
+    documento_acto:         false,
+    poder_notarial:         false,
+  });
+  const [procesando,  setProcesando]  = useState(false);
+  const [expediente,  setExpediente]  = useState(null);
+  const [cargando,    setCargando]    = useState(true);
+  const [errorDetalle, setErrorDetalle] = useState(null);
 
-  // NUEVO: Hook para traer los datos del backend al cargar la página
+  // ── 1. Carga detalle del expediente ────────────────────────────────
   useEffect(() => {
-    const fetchExpedienteInfo = async () => {
-      try {
-        const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
-        // Ajusta esta ruta a tu endpoint real que devuelve el detalle del expediente
-        const res = await fetch(`${API_BASE}/api/clasificacion-juridica/expedientes/${folio}`); 
-        
-        if (res.ok) {
-          const data = await res.json();
-          console.log("Datos recibidos del backend:", data);
-          setExpediente(data);
-        }
-      } catch (error) {
-        console.error('Error al cargar la información del expediente:', error);
-      }
-    };
+    if (!folio) { setCargando(false); return; }
 
-    if (folio) {
-      fetchExpedienteInfo();
-    }
+    fetch(`${API_BASE}/api/v1/expedientes/${folio}/detalle-asesoria`)
+      .then(r => {
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        return r.json();
+      })
+      .then(data => {
+        setExpediente(data);
+        setErrorDetalle(null);
+      })
+      .catch(err => setErrorDetalle(err.message))
+      .finally(() => setCargando(false));
   }, [folio]);
 
-  const toggleDoc = (id) =>
-    setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
+  // ── 2. Carga requisitos persistidos en BD ───────────────────────────
+  useEffect(() => {
+    if (!folio) return;
 
-  const todosValidados = DOCUMENTOS.every((d) => checked[d.id]);
+    fetch(`${API_BASE}/api/v1/quejas/${folio}/requisitos`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        setChecked({
+          escrito_inicial:        data.requisitoIdentificacion     ?? false,
+          identificacion_oficial: data.requisitoActosFiscales      ?? false,
+          documento_acto:         data.requisitoNarrativaClara     ?? false,
+          poder_notarial:         data.requisitoCompetenciaCedecon ?? false,
+        });
+      })
+      .catch(() => {}); // Si no hay queja aún, empieza en blanco
+  }, [folio]);
 
-  // ── PROCEDE → quita semáforo, habilita CIR ──────────────────────────
+  // ── 3. Toggle: actualiza UI inmediatamente + persiste en BD ─────────
+  const toggleDoc = useCallback((id) => {
+    setChecked(prev => {
+      const siguiente = { ...prev, [id]: !prev[id] };
+
+      // Fire-and-forget — no bloquea la UI si falla
+      fetch(`${API_BASE}/api/v1/quejas/${folio}/requisitos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkedToPayload(siguiente)),
+      }).catch(() => {});
+
+      return siguiente;
+    });
+  }, [folio]);
+
+  const todosValidados = DOCUMENTOS.every(d => checked[d.id]);
+
+  // ── 4. PROCEDE ───────────────────────────────────────────────────────
   const handleProcede = useCallback(async () => {
     if (!todosValidados) return;
     setProcesando(true);
     try {
-      await fetch(
-        `${import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev'}/api/v1/quejas/${folio}/admitir`,
+      const res = await fetch(
+        `${API_BASE}/api/v1/quejas/${folio}/admitir`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' } }
       );
-      navigate(`/atencion-juridica/tramites-irl/${folio}?accion=generar-cir`);
-    } catch {
-      navigate(`/atencion-juridica/tramites-irl/${folio}?accion=generar-cir`);
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+    } catch (e) {
+      console.error('[Checklist] Error al admitir:', e.message);
     } finally {
       setProcesando(false);
+      navigate(`/atencion-juridica/tramites-irl/${folio}?accion=generar-cir`);
     }
   }, [folio, navigate, todosValidados]);
 
-  // ── REQUIERE ACLARACIÓN → regresa a la bandeja con semáforo activo ──
+  // ── 5. REQUIERE ACLARACIÓN ───────────────────────────────────────────
   const handleRequiereAclaracion = useCallback(async () => {
     setProcesando(true);
     try {
       await fetch(
-        `${import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev'}/api/v1/quejas/${folio}/requerir-aclaracion`,
+        `${API_BASE}/api/v1/quejas/${folio}/requerir-aclaracion`,
         { method: 'POST', headers: { 'Content-Type': 'application/json' } }
       );
-    } catch {
+    } catch (e) {
+      console.error('[Checklist] Error al requerir aclaración:', e.message);
     } finally {
       setProcesando(false);
       navigate('/atencion-juridica/bandeja');
     }
   }, [folio, navigate]);
 
+  // ── Helpers cabecera ─────────────────────────────────────────────────
+  const quejoso   = expediente?.contribuyente ?? '—';
+  const asunto    = expediente?.analisis_legal?.tipo_acto_impuesto
+                 ?? expediente?.descripcion_sintetica
+                 ?? '—';
+  const autoridad = expediente?.autoridad_responsable
+                 ?? expediente?.analisis_legal?.autoridad_fiscal_emisora
+                 ?? '—';
+
   return (
     <div className="chk-page">
 
-      {/* ── Cabecera del expediente ── */}
+      {/* ── Cabecera ── */}
       <div className="chk-header-card">
         <div className="chk-header-item">
           <div className="chk-header-label">FOLIO</div>
           <div className="chk-header-folio">{folio}</div>
         </div>
         <div className="chk-header-item">
-  <div className="chk-header-label">QUEJOSO</div>
-  <div className="chk-header-value">
-    {expediente?.contribuyente || '—'}
-  </div>
-</div>
-
-<div className="chk-header-item">
-  <div className="chk-header-label">ASUNTO DE LA QUEJA</div>
-  <div className="chk-header-value">
-    {expediente?.analisis_legal?.tipo_acto_impuesto 
-     || expediente?.descripcion_sintetica 
-     || '—'}
-  </div>
-</div>
-
-<div className="chk-header-item">
-  <div className="chk-header-label">AUTORIDAD</div>
-  <div className="chk-header-value">
-    {expediente?.analisis_legal?.autoridad_fiscal_emisora
-     || expediente?.autoridad_responsable
-     || '—'}
-  </div>
-</div>
+          <div className="chk-header-label">QUEJOSO</div>
+          <div className="chk-header-value">
+            {cargando ? '...' : quejoso}
+          </div>
+        </div>
+        <div className="chk-header-item">
+          <div className="chk-header-label">ASUNTO DE LA QUEJA</div>
+          <div className="chk-header-value">
+            {cargando ? '...' : asunto}
+          </div>
+        </div>
+        <div className="chk-header-item">
+          <div className="chk-header-label">AUTORIDAD</div>
+          <div className="chk-header-value">
+            {cargando ? '...' : autoridad}
+          </div>
+        </div>
       </div>
 
+      {/* Error no crítico — no bloquea el checklist */}
+      {errorDetalle && (
+        <div style={{
+          background: '#fef9c3', border: '1px solid #fde047',
+          borderRadius: 8, padding: '0.6rem 1rem',
+          color: '#854d0e', fontSize: '0.8rem', marginBottom: '1rem',
+        }}>
+          ⚠ No se pudo cargar el detalle del expediente. El checklist sigue disponible.
+        </div>
+      )}
+
       <div className="chk-layout">
-        {/* ── Lista de documentos (Se mantiene igual) ── */}
+
+        {/* ── Lista de documentos ── */}
         <div className="chk-card">
           <div className="chk-card-header">
             <CheckSquare size={20} />
@@ -153,8 +217,13 @@ export const ChecklistDocumentosPage = () => {
                 <div className={`chk-checkbox ${checked[doc.id] ? 'chk-checkbox--checked' : ''}`}>
                   {checked[doc.id] && (
                     <svg viewBox="0 0 12 10" fill="none">
-                      <path d="M1 5l3 4L11 1" stroke="white" strokeWidth="2"
-                            strokeLinecap="round" strokeLinejoin="round" />
+                      <path
+                        d="M1 5l3 4L11 1"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   )}
                 </div>
@@ -168,7 +237,7 @@ export const ChecklistDocumentosPage = () => {
           </ul>
         </div>
 
-        {/* ── Panel de acciones (Se mantiene igual) ── */}
+        {/* ── Panel de acciones ── */}
         <div className="chk-aside">
           <div className="chk-aside-label">ACCIONES DE CALIFICACIÓN</div>
 

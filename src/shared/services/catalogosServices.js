@@ -45,6 +45,12 @@ export const getPlantillas = async () => {
 
 };
 
+// Plantillas específicas para Quejas ARI
+export const getPlantillasQuejaAri = async () => {
+    const response = await axios.get(`${CATALOGOS_BASE}/plantillas-queja/listar`);
+        return response.data;
+};
+
 export const getEstatus = async () => {
  
         const response = await axios.get(`${CATALOGOS_BASE}/estatus`);

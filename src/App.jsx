@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "./shared/MainLayout";
 import { GenerarMemorandumPage } from "./pages/modulo-correspondencia/memorandum/GenerarMemorandumPage";
@@ -33,6 +34,9 @@ import AccesoRestringidoPage from "./pages/AccesoRestringidoPage";
 import { Login } from "./pages/auth/login/LoginPage";
 import { ChecklistDocumentosPage } from "./pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage";
 import { ConstanciaInternaRemisionPage } from "./pages/modulo-area-sustantiva/constancia-interna-remision/ConstanciaInternaRemisionPage";
+import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
+import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
+import { OficioNotificacionPage } from './pages/modulo-area-sustantiva/oficio-notificacion/OficioNotificacionPage';
 
 function App() {
   return (
@@ -384,6 +388,7 @@ function App() {
             }
           />
 
+
           {/* 👇 AQUÍ AGREGAMOS LA NUEVA RUTA PARA LA CONSTANCIA INTERNA DE REMISIÓN */}
           <Route
             path="atencion-juridica/constancia-interna-remision/:folio"
@@ -394,6 +399,34 @@ function App() {
                 }
               >
                 <ConstanciaInternaRemisionPage />
+              </ProtectedRoute>
+            }
+          />
+
+
+          <Route
+          path="atencion-juridica/oficio-notificacion/:folio"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/oficio-notificacion']}>
+              <OficioNotificacionPage />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+        path="atencion-juridica/checklist/:folio"
+        element={
+          <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/checklist']}>
+            <ChecklistDocumentosPage />
+          </ProtectedRoute>
+        }
+      />
+  
+          <Route
+            path="atencion-juridica/contestacion-autoridad/:folio"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/contestacion-autoridad']}>
+                <ContestacionAutoridadPage />
               </ProtectedRoute>
             }
           />
@@ -412,6 +445,19 @@ function App() {
             }
           />
 
+          {/* Módulo Área Sustantiva - Crear Queja ARI */}
+          <Route
+            path="area-sustantiva/quejas-ari"
+            element={
+              <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/quejas-ari']}>
+                <CrearQuejaAriPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Ruta de prueba para Cierre */}
+          <Route path="area-sustantiva/cierre-test/:idExpediente?" element={<CierrePage />} />
+
           {/* Acceso restringido (página pública para usuarios autenticados) */}
           <Route
             path="acceso-restringido"
@@ -420,6 +466,7 @@ function App() {
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>
+
 
         <Route
           path="atencion-juridica/checklist/:folio"
@@ -431,6 +478,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+       
+
       </Routes>
     </BrowserRouter>
   );
