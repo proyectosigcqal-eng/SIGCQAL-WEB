@@ -36,6 +36,8 @@ import { ChecklistDocumentosPage } from './pages/modulo-area-sustantiva/atencion
 import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
 import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
 import { OficioNotificacionPage } from './pages/modulo-area-sustantiva/oficio-notificacion/OficioNotificacionPage';
+import { GestionAsesoresPage } from './pages/modulo-area-sustantiva/admin/GestionAsesoresPage';
+import { GestionUsuariosPage } from './pages/modulo-area-sustantiva/admin/GestionUsuariosPage';
 
 function App() {
   return (
@@ -284,6 +286,23 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="admin/asesores"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES['/admin/asesores']}>
+      <GestionAsesoresPage />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="admin/usuarios"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES['/admin/usuarios']}>
+      <GestionUsuariosPage />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="correspondencia/oficios-por-area"

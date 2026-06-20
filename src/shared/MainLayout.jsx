@@ -31,6 +31,11 @@ export const MainLayout = () => {
     
     ];
 
+    const adminItems = [
+  { label: 'Gestión de Asesores', to: '/admin/asesores', icon: <User size={16} /> },
+  { label: 'Gestión de Usuarios', to: '/admin/usuarios', icon: <Users size={16} /> },
+];
+
     const breadcrumb = pathname.startsWith('/atencion-juridica') ? 'Quejas' : 'Correspondencia';
 
     return (

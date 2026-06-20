@@ -71,15 +71,14 @@ export const useBandejaGestion = () => {
     setCargando(true);
     setError(null);
 
-    const params = new URLSearchParams();
-    if (busqueda.trim()) params.append('search', busqueda.trim());
+   const params = new URLSearchParams();
+if (busqueda.trim()) params.append('search', busqueda.trim());
 
-    const etapa = ETAPAS.find((e) => e.key === etapaActiva);
-    // ← cambio: solo manda estatus si NO es la pestaña CERRADA
-    if (etapa?.estatus && etapaActiva !== 'CERRADA') {
-      params.append('estatus', etapa.estatus);
-    }
-    params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
+const etapa = ETAPAS.find((e) => e.key === etapaActiva);
+if (etapa?.estatus && etapaActiva !== 'CERRADA') {
+  params.append('estatus', etapa.estatus);
+}
+params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
 
     fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`, {
       signal: controller.signal,
@@ -95,12 +94,17 @@ export const useBandejaGestion = () => {
         setTramites(tramitesBase);
 
         if (controller.signal.aborted) return;
-        const enriquecidos = await Promise.all(
-          tramitesBase.map(async (t) => ({
-            ...t,
-            semaforoPlazos: t.semaforoPlazos ?? await obtenerSemaforo(t.expedienteId),
-          }))
-        );
+        const etapasConSemaforo = ['ASIGNADA_ASESOR', 'VALIDACION'];
+  const necesitaSemaforo = etapasConSemaforo.includes(etapaActiva);
+
+  const enriquecidos = await Promise.all(
+    tramitesBase.map(async (t) => ({
+      ...t,
+      semaforoPlazos: necesitaSemaforo
+        ? (t.semaforoPlazos ?? await obtenerSemaforo(t.expedienteId))
+        : null,
+    }))
+  );
         if (!controller.signal.aborted) setTramites(enriquecidos);
       })
       .catch((err) => {
