@@ -37,6 +37,7 @@ import { ConstanciaInternaRemisionPage } from "./pages/modulo-area-sustantiva/co
 import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
 import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
 import { OficioNotificacionPage } from './pages/modulo-area-sustantiva/oficio-notificacion/OficioNotificacionPage';
+import { ResolucionFinalPage } from './pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage';
 
 function App() {
   return (
@@ -409,6 +410,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/oficio-notificacion']}>
               <OficioNotificacionPage />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="atencion-juridica/resolucion-final/:folio"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/resolucion-final']}>
+              <ResolucionFinalPage />
             </ProtectedRoute>
           }
         />
