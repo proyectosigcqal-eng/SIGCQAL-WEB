@@ -117,21 +117,21 @@ export const ChecklistDocumentosPage = () => {
 
   // ── 4. PROCEDE ───────────────────────────────────────────────────────
   const handleProcede = useCallback(async () => {
-    if (!todosValidados) return;
-    setProcesando(true);
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/quejas/${folio}/admitir`,
-        { method: 'POST', headers: { 'Content-Type': 'application/json' } }
-      );
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-    } catch (e) {
-      console.error('[Checklist] Error al admitir:', e.message);
-    } finally {
-      setProcesando(false);
-      navigate(`/atencion-juridica/tramites-irl/${folio}?accion=generar-cir`);
-    }
-  }, [folio, navigate, todosValidados]);
+  if (!todosValidados) return;
+  setProcesando(true);
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/v1/quejas/${folio}/admitir`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' } }
+    );
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+  } catch (e) {
+    console.error('[Checklist] Error al admitir:', e.message);
+  } finally {
+    setProcesando(false);
+    navigate('/atencion-juridica/bandeja'); // ← corregido, igual que requerir aclaración
+  }
+}, [folio, navigate, todosValidados]);
 
   // ── 5. REQUIERE ACLARACIÓN ───────────────────────────────────────────
   const handleRequiereAclaracion = useCallback(async () => {

@@ -30,6 +30,9 @@ export const EditorResolucionFinal = ({
   idQuejaRespuestaAutoridad,
   idEstatusQueja,
   idEstatusExpediente,
+  fechaSolicitudPrevia,
+  numeroOficioPrevio,
+  fechaOficioPrevia,
 }) => {
   // ── Campo nuevo: fecha del acto jurídico (va a la tabla, no solo al docx) ──
   const [fechaEmisionResolucion, setFechaEmisionResolucion] = useState('');
@@ -66,11 +69,21 @@ export const EditorResolucionFinal = ({
                      ?? expediente?.nombreContribuyente
                      ?? '';
 
+  const formatearFecha = (fechaISO) => {
+    if (!fechaISO) return '';
+    const [year, month, day] = fechaISO.split('-');
+    const meses = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return `${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
+  };
+
   useEffect(() => {
     if (expedienteFromProps) setExpedienteNum(expedienteFromProps);
     if (contribuyenteFromProps) setNombreContribuyente(contribuyenteFromProps);
-  }, [expedienteFromProps, contribuyenteFromProps]);
-
+    if (fechaSolicitudPrevia) setFechaSolicitud(formatearFecha(fechaSolicitudPrevia));
+    if (numeroOficioPrevio) setOficioNumero(numeroOficioPrevio);
+    if (fechaOficioPrevia) setFechaOficio(formatearFecha(fechaOficioPrevia));
+  }, [expedienteFromProps, contribuyenteFromProps, fechaSolicitudPrevia, numeroOficioPrevio, fechaOficioPrevia]);
   // ── Buscar si ya existe una resolución para este expediente ────────────
   useEffect(() => {
     if (!idExpediente) { setBuscandoExistente(false); return; }
@@ -111,30 +124,27 @@ export const EditorResolucionFinal = ({
 
       // Paso 1: si aún no existe, se crea el registro en resolucion_final.
       if (!idActual) {
-        if (!idExpediente || !idAri || !idQuejaRespuestaAutoridad
-            || !idEstatusQueja || !idEstatusExpediente) {
-          throw new Error(
-            'Faltan identificadores relacionados (expediente, ARI, respuesta de ' +
-            'autoridad, estatus). Verifica que vengan de las pantallas anteriores.'
-          );
-        }
+  if (!idExpediente) {
+    throw new Error('No se encontró el id del expediente.');
+  }
 
-        const creado = await crearResolucionFinal({
-          fechaEmisionResolucion,
-          conceptoCobro: motivoQueja,
-          contactoVia,
-          numeroCredito: null,
-          folioCredito: numeroCreditoMulta,
-          idExpediente,
-          idAri,
-          idQuejaRespuestaAutoridad,
-          idEstatusQueja,
-          idEstatusExpediente,
-        });
+  const creado = await crearResolucionFinal({
+    fechaEmisionResolucion,
+    conceptoCobro:            motivoQueja       || null,
+    contactoVia:              contactoVia       || null,
+    numeroCredito:            null,
+    folioCredito:             numeroCreditoMulta || null,
+    idExpediente,
+    // ← Manda null explícito si no vienen — el backend ya los acepta
+    idAri:                    idAri                       ?? null,
+    idQuejaRespuestaAutoridad: idQuejaRespuestaAutoridad  ?? null,
+    idEstatusQueja:           idEstatusQueja              ?? null,
+    idEstatusExpediente:      idEstatusExpediente         ?? null,
+  });
 
-        idActual = creado.idResolucionFinal;
-        setIdResolucionFinal(idActual);
-      }
+  idActual = creado.idResolucionFinal;
+  setIdResolucionFinal(idActual);
+}
 
       // Paso 2: generar el oficio .docx con los datos del formulario.
       const actualizado = await generarOficioResolucionFinal(idActual, {
@@ -174,17 +184,39 @@ export const EditorResolucionFinal = ({
       <h2 className="ca-card-title">📄 Acuerdo de Cierre</h2>
 
       {error && <div className="ca-alert-error">{error}</div>}
-      {exito && (
-        <div className="ca-alert-exito">
-          ✓ Acuerdo de cierre generado correctamente.
-          {' '}
-          {urlDocx && (
-            <a href={urlDocx} target="_blank" rel="noreferrer" className="ca-btn-descargar">
-              Descargar DOCX
-            </a>
-          )}
-        </div>
-      )}
+     {exito && (
+  <div className="ca-alert-exito">
+    ✓ Acuerdo de cierre generado correctamente.{' '}
+    {urlDocx && (
+      <button
+        className="ca-btn-descargar"
+        onClick={async () => {
+          // urlDocx = "/api/files/expedientes/ACUERDO_CIERRE_4_xxx.docx"
+          const urlCompleta = `${API}${urlDocx}`;
+          try {
+            const res = await fetch(urlCompleta);
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+
+            const blob     = await res.blob();
+            const href     = URL.createObjectURL(blob);
+            const a        = document.createElement('a');
+            a.href         = href;
+            a.download     = urlDocx.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(href), 60_000);
+          } catch (e) {
+            console.error('Error al descargar:', e);
+            window.open(urlCompleta, '_blank');
+          }
+        }}
+      >
+        Descargar DOCX
+      </button>
+    )}
+  </div>
+)}
 
       <div className="acci-layout">
 

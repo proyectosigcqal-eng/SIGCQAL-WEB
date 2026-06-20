@@ -16,52 +16,71 @@ const BadgeEstatus = ({ label, bloqueado }) => (
 );
 
 const calcularAccion = (t, estUp) => {
+
+  // ── ASIGNADA A ASESOR ─────────────────────────────────────────────
   if (estUp.includes('ASIGNADA A ASESOR')) {
     if (t.tieneCir) {
-      return { label: 'VER CIR', ruta: `/atencion-juridica/cir/${t.folio}` };
+      return { label: 'VER CIR', ruta: `/atencion-juridica/checklist/${t.folio}` }; // temporal hasta que CIR tenga ruta
     }
     if (t.checklistCompleto) {
-      return { label: 'GENERAR CIR', ruta: `/atencion-juridica/cir/${t.folio}` };
+      return { label: 'GENERAR CIR', ruta: `/atencion-juridica/checklist/${t.folio}` }; // temporal
     }
     return { label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` };
-}
+  }
+
+  // ── VALIDACIÓN DE REQUISITOS ──────────────────────────────────────
   if (estUp.includes('VALIDACIÓN') || estUp.includes('VALIDACION')) {
     return { label: 'VALIDAR DOCS', ruta: `/atencion-juridica/checklist/${t.folio}` };
   }
-  if (estUp.includes('CIR GENERADA')) {
+
+  // ── CIR GENERADA ─────────────────────────────────────────────────
+  if (estUp.includes('CIR')) {
     return t.tieneAri
-      ? { label: 'VER ARI', ruta: `/atencion-juridica/ari/${t.folio}` }
-      : { label: 'GENERAR ARI', ruta: `/atencion-juridica/ari/${t.folio}` };
+      ? { label: 'VER ARI',     ruta: `/area-sustantiva/quejas-ari` }
+      : { label: 'GENERAR ARI', ruta: `/area-sustantiva/quejas-ari` };
   }
-  if (estUp.includes('ARI GENERADO')) {
+
+  // ── ARI GENERADO ─────────────────────────────────────────────────
+  if (estUp.includes('ARI')) {
     return t.tieneOficio
-      ? { label: 'VER OFICIO', ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` }
+      ? { label: 'VER OFICIO',     ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` }
       : { label: 'GENERAR OFICIO', ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` };
   }
-  if (estUp.includes('OFICIO DE NOTIFICACIÓN') || estUp.includes('OFICIO DE NOTIFICACION')) {
+
+  // ── OFICIO DE NOTIFICACIÓN ────────────────────────────────────────
+  if (estUp.includes('OFICIO')) {
     return t.tieneContestacion
-      ? { label: 'VER CONTESTACIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
+      ? { label: 'VER CONTESTACIÓN',       ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
       : { label: 'REGISTRAR CONTESTACIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` };
   }
-  if (estUp.includes('CONTESTACIÓN DE AUTORIDAD') || estUp.includes('CONTESTACION DE AUTORIDAD')) {
-    return t.tieneAcci
-      ? { label: 'VER ACCI', ruta: `/atencion-juridica/acci/${t.folio}` }
-      : { label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` };
+
+  // ── CONTESTACIÓN DE AUTORIDAD ─────────────────────────────────────
+  // Desde aquí el asesor decide: ACCI o Resolución
+  if (estUp.includes('CONTESTACIÓN') || estUp.includes('CONTESTACION')) {
+    // Siempre va a contestación-autoridad porque ahí está la decisión ACCI vs Resolución
+    return { label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` };
   }
-  if (estUp.includes('ACCI GENERADO')) {
+
+  // ── ACCI GENERADO ─────────────────────────────────────────────────
+  if (estUp.includes('ACCI')) {
     return t.tieneResolucion
-      ? { label: 'VER RESOLUCIÓN', ruta: `/atencion-juridica/resolucion/${t.folio}` }
-      : { label: 'GENERAR RESOLUCIÓN', ruta: `/atencion-juridica/resolucion/${t.folio}` };
+      ? { label: 'VER RESOLUCIÓN',     ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
+      : { label: 'GENERAR RESOLUCIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` };
   }
+
+  // ── INFORME DE RESOLUCIÓN ─────────────────────────────────────────
   if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION')) {
-    return { label: 'NOTIFICAR', ruta: `/atencion-juridica/notificacion-final/${t.folio}` };
+    return { label: 'NOTIFICAR', ruta: `/area-sustantiva/cierre-test/${t.folio}` };
   }
+
+  // ── EN PROCESO DE NOTIFICACIÓN FINAL ─────────────────────────────
   if (estUp.includes('NOTIFICACIÓN FINAL') || estUp.includes('NOTIFICACION FINAL')) {
-    return { label: 'CERRAR EXPEDIENTE', ruta: `/atencion-juridica/cierre/${t.folio}` };
+    return { label: 'CERRAR EXPEDIENTE', ruta: `/area-sustantiva/cierre-test/${t.folio}` };
   }
+
+  // ── Default ───────────────────────────────────────────────────────
   return { label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` };
 };
-
 export const TablaTramites = ({ tramites }) => {
   const navigate = useNavigate();
   const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
@@ -144,11 +163,17 @@ export const TablaTramites = ({ tramites }) => {
                     <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
                   </td>
                   <td>
-                    {t.semaforoPlazos
-                      ? <SemaforoPlazosAutoridad semaforo={t.semaforoPlazos} />
-                      : <SemaforoContador folio={t.folio} />
-                    }
-                  </td>
+                      {/* Solo mostrar semáforo en las etapas iniciales */}
+                      {(estUp.includes('ASIGNADA A ASESOR') || 
+                        estUp.includes('VALIDACIÓN') || 
+                        estUp.includes('VALIDACION'))
+                        ? (t.semaforoPlazos
+                            ? <SemaforoPlazosAutoridad semaforo={t.semaforoPlazos} />
+                            : <SemaforoContador folio={t.folio} />
+                          )
+                        : <span style={{ color: '#999', fontSize: '0.8rem' }}>—</span>
+                      }
+                    </td>
                   <td className="bdg-action-cell">
                     <button
                       className={`bdg-btn-action ${bloqueado ? 'bdg-btn-action--disabled' : ''}`}

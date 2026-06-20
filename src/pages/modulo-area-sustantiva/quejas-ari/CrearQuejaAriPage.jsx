@@ -12,8 +12,8 @@ export const CrearQuejaAriPage = () => {
   // Estado alineado exactamente al QuejasAriRequestDTO con IDs provisionales
   // y propiedades extendidas añadidas para la renderización de la vista previa
   const [formData, setFormData] = useState({
-    idQueja: 2, // Forzado provisionalmente
-    idCir: 2,   // Forzado provisionalmente
+    idQueja: 1, // Forzado provisionalmente
+    idCir: 1,   // Forzado provisionalmente
     numExpedienteOficial: '',
     sintesisActosOmisiones: '',
     nombreEncargadoFirma: '',
@@ -67,7 +67,7 @@ export const CrearQuejaAriPage = () => {
             ...prev,
             // Conservamos los IDs y datos nativos del formulario
             idQueja: datosQueja.id || prev.idQueja,
-            
+            idCir: datosQueja.idCir || prev.idCir,
             // 🔍 Extracción segura: Soporta si el Back devuelve el objeto entidad o un DTO plano
             folioGobierno: datosQueja.folioGobierno || datosQueja.folio || '',
             
