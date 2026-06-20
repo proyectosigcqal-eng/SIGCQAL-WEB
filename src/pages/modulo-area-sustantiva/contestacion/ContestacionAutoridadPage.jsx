@@ -32,7 +32,7 @@ export const ContestacionAutoridadPage = () => {
 
   const handleGuardadoExitoso = (decisionGuardada) => {
     if (decisionGuardada === 'acci') setFase('acci');
-    else navigate(`/atencion-juridica/resolucion/${folio}`);
+    else navigate(`/atencion-juridica/resolucion-final/${folio}`);
   };
 
   if (loading) return <div className="ca-page"><p>Cargando expediente...</p></div>;

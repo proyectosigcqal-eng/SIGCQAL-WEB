@@ -40,6 +40,7 @@ import { OficioNotificacionPage } from './pages/modulo-area-sustantiva/oficio-no
 import { GestionAsesoresPage } from './pages/modulo-area-sustantiva/admin/GestionAsesoresPage';
 import { GestionUsuariosPage } from './pages/modulo-area-sustantiva/admin/GestionUsuariosPage';
 import { ResolucionFinalPage } from './pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage';
+import {CrearQuejaAriPage} from './pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage';
 
 
 function App() {
