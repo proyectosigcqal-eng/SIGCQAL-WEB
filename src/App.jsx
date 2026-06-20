@@ -1,56 +1,61 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { MainLayout } from './shared/MainLayout'; 
-import { GenerarMemorandumPage } from './pages/modulo-correspondencia/memorandum/GenerarMemorandumPage';
-import { GenerarOficioPage } from './pages/modulo-correspondencia/oficio/GenerarOficioPage';
-import { GenerarOficioPage as GenerarOficioCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioPage';
-import { GenerarOficioInternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioInternoPage';
-import { GenerarOficioExternoPage } from './pages/modulo-correspondencia/correspondencia/GenerarOficioExternoPage';
-import { RegistrarCorrespondenciaPage } from './pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage';
-import { CorrespondenciasRegistradasPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage';
-import { AsignarAreaPage } from './pages/modulo-correspondencia/memorandum/AsignarAreaPage'; 
-import { AsignarAreaOficioPage } from './pages/modulo-correspondencia/oficio/AsignarAreaOficioPage'; 
-import { BitacoraHistorica } from './features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica';
-import { ContestacionPage } from './pages/modulo-correspondencia/contestacion-memorandum/ContestacionPage';
-import { ContestacionOficioPage } from './pages/modulo-correspondencia/contestacion-oficio/ContestacionOficioPage';
-import { BandejaCentralPage } from './pages/modulo-correspondencia/bandeja-central/BandejaCentralPage';
-import BandejaTramitesIrlPage from './pages/modulo-correspondencia/bandeja-tramites-irl/BandejaTramitesIrlPage';
-import {DetalleTramiteIrlPage} from './pages/modulo-correspondencia/bandeja-tramites-irl/DetalleTramiteIrlPage';
-import { ListaMemorandumsPage } from './pages/modulo-correspondencia/memorandum/ListaMemorandumsPage';
-import { ListaOficiosPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPage';
-import { ListaMemorandumsPorAreaPage } from './pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage';
-import { ContestacionCorrespondenciaPage } from './pages/modulo-correspondencia/contestacion-correspondencia/ContestacionCorrespondenciaPage';
-import { CorrespondenciaPendienteRevisionPage } from './pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage';
-import { ListaAcusesCorrespondenciaPage } from './pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage';
-import { ListaOficiosPorAreaPage } from './pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage';
-import { ListaAcusesOficioPage } from './pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage';
-import { GenerarOficioContestacionPage } from './pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage';
-import { BandejaGestionPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage';
-import { ClasificacionJuridicaPage } from './pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage';
-import { RegistroExpedientePage } from './pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage';
-import { CrearQuejaAriPage } from './pages/modulo-area-sustantiva/QuejasAri/CrearQuejaAriPage';
-import ProtectedRoute from './shared/components/ProtectedRoute';
-import { ROUTE_ROLES } from './shared/config/routeRoles';
-import AccesoRestringidoPage from './pages/AccesoRestringidoPage';
-import { Login } from './pages/auth/login/LoginPage';
-import { ChecklistDocumentosPage } from './pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage';
+
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { MainLayout } from "./shared/MainLayout";
+import { GenerarMemorandumPage } from "./pages/modulo-correspondencia/memorandum/GenerarMemorandumPage";
+import { GenerarOficioPage } from "./pages/modulo-correspondencia/oficio/GenerarOficioPage";
+import { GenerarOficioPage as GenerarOficioCorrespondenciaPage } from "./pages/modulo-correspondencia/correspondencia/GenerarOficioPage";
+import { GenerarOficioInternoPage } from "./pages/modulo-correspondencia/correspondencia/GenerarOficioInternoPage";
+import { GenerarOficioExternoPage } from "./pages/modulo-correspondencia/correspondencia/GenerarOficioExternoPage";
+import { RegistrarCorrespondenciaPage } from "./pages/modulo-correspondencia/correspondencia/RegistrarCorrespondenciaPage";
+import { CorrespondenciasRegistradasPage } from "./pages/modulo-correspondencia/correspondencia/CorrespondenciasRegistradasPage";
+import { AsignarAreaPage } from "./pages/modulo-correspondencia/memorandum/AsignarAreaPage";
+import { AsignarAreaOficioPage } from "./pages/modulo-correspondencia/oficio/AsignarAreaOficioPage";
+import { BitacoraHistorica } from "./features/modulo-correspondencia/bitacora-historica/components/BitacoraHistorica";
+import { ContestacionPage } from "./pages/modulo-correspondencia/contestacion-memorandum/ContestacionPage";
+import { ContestacionOficioPage } from "./pages/modulo-correspondencia/contestacion-oficio/ContestacionOficioPage";
+import { BandejaCentralPage } from "./pages/modulo-correspondencia/bandeja-central/BandejaCentralPage";
+import BandejaTramitesIrlPage from "./pages/modulo-correspondencia/bandeja-tramites-irl/BandejaTramitesIrlPage";
+import { DetalleTramiteIrlPage } from "./pages/modulo-correspondencia/bandeja-tramites-irl/DetalleTramiteIrlPage";
+import { ListaMemorandumsPage } from "./pages/modulo-correspondencia/memorandum/ListaMemorandumsPage";
+import { ListaOficiosPage } from "./pages/modulo-correspondencia/oficio/ListaOficiosPage";
+import { ListaMemorandumsPorAreaPage } from "./pages/modulo-correspondencia/acuserecibointerno/ListaMemorandumsPorAreaPage";
+import { ContestacionCorrespondenciaPage } from "./pages/modulo-correspondencia/contestacion-correspondencia/ContestacionCorrespondenciaPage";
+import { CorrespondenciaPendienteRevisionPage } from "./pages/modulo-correspondencia/correspondencia/CorrespondenciaPendienteRevisionPage";
+import { ListaAcusesCorrespondenciaPage } from "./pages/modulo-correspondencia/acusecorrespondencia/ListaAcusesCorrespondenciaPage";
+import { ListaOficiosPorAreaPage } from "./pages/modulo-correspondencia/oficio/ListaOficiosPorAreaPage";
+import { ListaAcusesOficioPage } from "./pages/modulo-correspondencia/acuseoficio/ListaAcusesOficioPage";
+import { GenerarOficioContestacionPage } from "./pages/modulo-correspondencia/oficio/GenerarOficioContestacionPage";
+import { BandejaGestionPage } from "./pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage";
+import { ClasificacionJuridicaPage } from "./pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage";
+import { RegistroExpedientePage } from "./pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage";
+import ProtectedRoute from "./shared/components/ProtectedRoute";
+import { ROUTE_ROLES } from "./shared/config/routeRoles";
+import AccesoRestringidoPage from "./pages/AccesoRestringidoPage";
+import { Login } from "./pages/auth/login/LoginPage";
+import { ChecklistDocumentosPage } from "./pages/modulo-area-sustantiva/atencion-juridica/bandeja/ChecklistDocumentosPage";
+import { ConstanciaInternaRemisionPage } from "./pages/modulo-area-sustantiva/constancia-interna-remision/ConstanciaInternaRemisionPage";
 import { ContestacionAutoridadPage } from './pages/modulo-area-sustantiva/contestacion/ContestacionAutoridadPage';
 import CierrePage from './pages/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/CierrePage';
 import { OficioNotificacionPage } from './pages/modulo-area-sustantiva/oficio-notificacion/OficioNotificacionPage';
 import { GestionAsesoresPage } from './pages/modulo-area-sustantiva/admin/GestionAsesoresPage';
 import { GestionUsuariosPage } from './pages/modulo-area-sustantiva/admin/GestionUsuariosPage';
+import { ResolucionFinalPage } from './pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage';
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-         <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Navigate to="/login" replace />} />
           {/* Flujo de creación de Memorándum */}
           <Route
             path="correspondencia/nuevo-memorandum/:idCorrespondencia"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/nuevo-memorandum']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/nuevo-memorandum"]}
+              >
                 <GenerarMemorandumPage />
               </ProtectedRoute>
             }
@@ -60,7 +65,9 @@ function App() {
           <Route
             path="correspondencia/nuevo-oficio/:idCorrespondencia"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/nuevo-oficio']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/nuevo-oficio"]}
+              >
                 <GenerarOficioPage />
               </ProtectedRoute>
             }
@@ -69,7 +76,9 @@ function App() {
           <Route
             path="correspondencia/registrar"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/registrar']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/registrar"]}
+              >
                 <RegistrarCorrespondenciaPage />
               </ProtectedRoute>
             }
@@ -78,7 +87,9 @@ function App() {
           <Route
             path="correspondencia/registradas"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/registradas']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/registradas"]}
+              >
                 <CorrespondenciasRegistradasPage />
               </ProtectedRoute>
             }
@@ -87,7 +98,9 @@ function App() {
           <Route
             path="correspondencia/generar-oficio/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/generar-oficio"]}
+              >
                 <GenerarOficioCorrespondenciaPage />
               </ProtectedRoute>
             }
@@ -96,7 +109,11 @@ function App() {
           <Route
             path="correspondencia/generar-oficio-interno/:idCorrespondencia"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio-interno']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/generar-oficio-interno"]
+                }
+              >
                 <GenerarOficioInternoPage />
               </ProtectedRoute>
             }
@@ -105,7 +122,11 @@ function App() {
           <Route
             path="correspondencia/generar-oficio-externo/:idCorrespondencia"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/generar-oficio-externo']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/generar-oficio-externo"]
+                }
+              >
                 <GenerarOficioExternoPage />
               </ProtectedRoute>
             }
@@ -114,7 +135,9 @@ function App() {
           <Route
             path="correspondencia/contestacion/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/contestacion']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/contestacion"]}
+              >
                 <ContestacionPage />
               </ProtectedRoute>
             }
@@ -123,7 +146,11 @@ function App() {
           <Route
             path="correspondencia/contestacion-oficio/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/contestacion-oficio']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/contestacion-oficio"]
+                }
+              >
                 <ContestacionOficioPage />
               </ProtectedRoute>
             }
@@ -132,7 +159,11 @@ function App() {
           <Route
             path="correspondencia/contestacion-correspondencia/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/contestacion-correspondencia']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/contestacion-correspondencia"]
+                }
+              >
                 <ContestacionCorrespondenciaPage />
               </ProtectedRoute>
             }
@@ -141,7 +172,11 @@ function App() {
           <Route
             path="correspondencia/nuevo-oficio-contestacion"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/nuevo-oficio-contestacion']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/nuevo-oficio-contestacion"]
+                }
+              >
                 <GenerarOficioContestacionPage />
               </ProtectedRoute>
             }
@@ -150,7 +185,9 @@ function App() {
           <Route
             path="correspondencia/seguimiento/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/seguimiento']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/seguimiento"]}
+              >
                 <ContestacionPage />
               </ProtectedRoute>
             }
@@ -159,7 +196,9 @@ function App() {
           <Route
             path="correspondencia/bandeja"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/bandeja']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/bandeja"]}
+              >
                 <BandejaCentralPage />
               </ProtectedRoute>
             }
@@ -168,7 +207,11 @@ function App() {
           <Route
             path="atencion-juridica/bandeja-tramites-irl"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/bandeja-tramites-irl']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/atencion-juridica/bandeja-tramites-irl"]
+                }
+              >
                 <BandejaTramitesIrlPage />
               </ProtectedRoute>
             }
@@ -177,8 +220,10 @@ function App() {
           <Route
             path="atencion-juridica/asignacion"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/asignacion']}>
-                <div style={{ padding: '2rem' }}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/atencion-juridica/asignacion"]}
+              >
+                <div style={{ padding: "2rem" }}>
                   <h2>Asignación (CU-MARSU-03)</h2>
                   <p>Página en construcción</p>
                 </div>
@@ -186,17 +231,23 @@ function App() {
             }
           />
 
-         <Route path="atencion-juridica/bandeja" element={
-          <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/bandeja']}>
-            <BandejaGestionPage />
-          </ProtectedRoute>
-        } />
-          
+          <Route
+            path="atencion-juridica/bandeja"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/atencion-juridica/bandeja"]}
+              >
+                <BandejaGestionPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="atencion-juridica/tramites-irl/:folio"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/tramites-irl']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/atencion-juridica/tramites-irl"]}
+              >
                 <DetalleTramiteIrlPage />
               </ProtectedRoute>
             }
@@ -205,7 +256,11 @@ function App() {
           <Route
             path="correspondencia/pendiente-revision-area"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/pendiente-revision-area']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/pendiente-revision-area"]
+                }
+              >
                 <CorrespondenciaPendienteRevisionPage />
               </ProtectedRoute>
             }
@@ -214,7 +269,11 @@ function App() {
           <Route
             path="correspondencia/acuses-correspondencia"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/acuses-correspondencia']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/acuses-correspondencia"]
+                }
+              >
                 <ListaAcusesCorrespondenciaPage />
               </ProtectedRoute>
             }
@@ -223,7 +282,11 @@ function App() {
           <Route
             path="correspondencia/acuses-oficio-por-area"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/acuses-oficio-por-area']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/acuses-oficio-por-area"]
+                }
+              >
                 <ListaAcusesOficioPage />
               </ProtectedRoute>
             }
@@ -233,7 +296,9 @@ function App() {
           <Route
             path="correspondencia/asignar-area/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/asignar-area']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/asignar-area"]}
+              >
                 <AsignarAreaPage />
               </ProtectedRoute>
             }
@@ -242,7 +307,11 @@ function App() {
           <Route
             path="correspondencia/asignar-area-oficio/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/asignar-area-oficio']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/asignar-area-oficio"]
+                }
+              >
                 <AsignarAreaOficioPage />
               </ProtectedRoute>
             }
@@ -252,7 +321,9 @@ function App() {
           <Route
             path="correspondencia/bitacora/:id"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/bitacora']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/bitacora"]}
+              >
                 <BitacoraHistorica />
               </ProtectedRoute>
             }
@@ -262,7 +333,11 @@ function App() {
           <Route
             path="correspondencia/lista-memorandums-revision"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/lista-memorandums-revision']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/lista-memorandums-revision"]
+                }
+              >
                 <ListaMemorandumsPage />
               </ProtectedRoute>
             }
@@ -271,7 +346,11 @@ function App() {
           <Route
             path="correspondencia/lista-oficios-revision"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/lista-oficios-revision']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/lista-oficios-revision"]
+                }
+              >
                 <ListaOficiosPage />
               </ProtectedRoute>
             }
@@ -281,7 +360,11 @@ function App() {
           <Route
             path="correspondencia/memorandums-por-area"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/memorandums-por-area']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/correspondencia/memorandums-por-area"]
+                }
+              >
                 <ListaMemorandumsPorAreaPage />
               </ProtectedRoute>
             }
@@ -307,27 +390,55 @@ function App() {
           <Route
             path="correspondencia/oficios-por-area"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/correspondencia/oficios-por-area']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/correspondencia/oficios-por-area"]}
+              >
                 <ListaOficiosPorAreaPage />
               </ProtectedRoute>
             }
           />
 
-
           <Route
             path="atencion-juridica/clasificacion/:idExpediente?"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/clasificacion']}>
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/atencion-juridica/clasificacion"]}
+              >
                 <ClasificacionJuridicaPage />
               </ProtectedRoute>
             }
           />
+
+
+          {/* 👇 AQUÍ AGREGAMOS LA NUEVA RUTA PARA LA CONSTANCIA INTERNA DE REMISIÓN */}
+          <Route
+            path="atencion-juridica/constancia-interna-remision/:folio"
+            element={
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/atencion-juridica/constancia-interna-remision"]
+                }
+              >
+                <ConstanciaInternaRemisionPage />
+              </ProtectedRoute>
+            }
+          />
+
 
           <Route
           path="atencion-juridica/oficio-notificacion/:folio"
           element={
             <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/oficio-notificacion']}>
               <OficioNotificacionPage />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="atencion-juridica/resolucion-final/:folio"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/resolucion-final']}>
+              <ResolucionFinalPage />
             </ProtectedRoute>
           }
         />
@@ -349,11 +460,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           {/* Módulo Área Sustantiva - Registro de Expediente */}
           <Route
             path="area-sustantiva/registro-expediente"
             element={
-              <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/registro-expediente']}>
+              <ProtectedRoute
+                allowedRoles={
+                  ROUTE_ROLES["/area-sustantiva/registro-expediente"]
+                }
+              >
                 <RegistroExpedientePage />
               </ProtectedRoute>
             }
@@ -373,12 +489,28 @@ function App() {
           <Route path="area-sustantiva/cierre-test/:idExpediente?" element={<CierrePage />} />
 
           {/* Acceso restringido (página pública para usuarios autenticados) */}
-          <Route path="acceso-restringido" element={<AccesoRestringidoPage />} />
+          <Route
+            path="acceso-restringido"
+            element={<AccesoRestringidoPage />}
+          />
 
           {/* <Route path="correspondencia" element={<CorrespondenciaPage />} /> */}
         </Route>
 
+
+        <Route
+          path="atencion-juridica/checklist/:folio"
+          element={
+            <ProtectedRoute
+              allowedRoles={ROUTE_ROLES["/atencion-juridica/checklist"]}
+            >
+              <ChecklistDocumentosPage />
+            </ProtectedRoute>
+          }
+        />
+
        
+
       </Routes>
     </BrowserRouter>
   );

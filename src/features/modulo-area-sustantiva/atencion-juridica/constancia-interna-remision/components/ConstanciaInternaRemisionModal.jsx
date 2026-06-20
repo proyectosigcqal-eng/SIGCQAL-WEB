@@ -1,195 +1,217 @@
-import React from 'react';
-import { X, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { X, Eye, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import { useConstanciaInternaRemision } from '../hooks/useConstanciaInternaRemision';
 import './ConstanciaInternaRemisionModal.css';
 
 export const ConstanciaInternaRemisionModal = ({ expedienteId, onClose, onSuccess }) => {
   const {
     formData,
-    handleFieldChange,
-    handleSubmit,
+    handleInputChange,
+    errors,
+    precargados,
+    isLoading,
+    isGeneratingPreview,
     previewUrl,
-    loading,
-    error,
-    success,
+    message,
+    handleGeneratePreview,
+    handleGenerarCIR,
+    handleClose,
   } = useConstanciaInternaRemision(expedienteId);
 
+  const isFormValid = useMemo(
+    () => Boolean(formData.fundamentos?.trim() && formData.fechaCIR),
+    [formData.fundamentos, formData.fechaCIR]
+  );
+
+  const handleCancel = () => {
+    handleClose();
+    onClose?.();
+  };
+
+  const handleSave = async () => {
+    const success = await handleGenerarCIR();
+    if (success) {
+      onSuccess?.();
+      onClose?.();
+    }
+  };
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-cir" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>Constancia Interna de Remisión (Art. 41)</h2>
+    <div className="cir-modal-overlay" onClick={handleCancel}>
+      <div className="cir-modal-container" onClick={(e) => e.stopPropagation()}>
+        <div className="cir-modal-header">
+          <div>
+            <p className="cir-modal-badge">CIR</p>
+            <h2>Constancia Interna de Remisión</h2>
+            <p className="cir-modal-subtitle">Editor de CIR con preview integrado</p>
+          </div>
+
           <button
-            className="close-btn"
-            onClick={onClose}
-            aria-label="Cerrar"
+            className="cir-btn-close"
+            type="button"
+            onClick={handleCancel}
+            disabled={isLoading}
+            aria-label="Cerrar modal"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
-        {success && (
-          <div className="alert alert-success">
-            <CheckCircle size={20} />
-            {success}
-          </div>
-        )}
-        {error && (
-          <div className="alert alert-error">
-            <AlertCircle size={20} />
-            {error}
-          </div>
-        )}
-
-        <div className="modal-body">
-          {/* Columna izquierda: Form */}
-          <div className="form-section">
-            <form onSubmit={handleSubmit}>
-              {/* Respuesta de Autoridad */}
-              <fieldset className="form-fieldset">
-                <legend>Respuesta de la Autoridad</legend>
-
-                <div className="form-group">
-                  <label className="checkbox-group">
-                    <input
-                      type="checkbox"
-                      checked={formData.autoridadContesto}
-                      onChange={(e) =>
-                        handleFieldChange('autoridadContesto', e.target.checked)
-                      }
-                    />
-                    ¿Recibió respuesta de la autoridad?
-                  </label>
-                </div>
-
-                {formData.autoridadContesto && (
-                  <>
-                    <div className="form-group">
-                      <label htmlFor="informeAutoridadFecha">
-                        Fecha de respuesta
-                      </label>
-                      <input
-                        id="informeAutoridadFecha"
-                        type="date"
-                        value={formData.informeAutoridadFecha}
-                        onChange={(e) =>
-                          handleFieldChange('informeAutoridadFecha', e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="informeAutoridadAsunto">
-                        Asunto de respuesta
-                      </label>
-                      <input
-                        id="informeAutoridadAsunto"
-                        type="text"
-                        value={formData.informeAutoridadAsunto}
-                        onChange={(e) =>
-                          handleFieldChange('informeAutoridadAsunto', e.target.value)
-                        }
-                        placeholder="Ej: Informe sobre solicitud..."
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="informeAutoridadTexto">
-                        Texto de respuesta
-                      </label>
-                      <textarea
-                        id="informeAutoridadTexto"
-                        value={formData.informeAutoridadTexto}
-                        onChange={(e) =>
-                          handleFieldChange('informeAutoridadTexto', e.target.value)
-                        }
-                        placeholder="Copia el contenido de la respuesta..."
-                        rows={5}
-                      />
-                    </div>
-                  </>
+        <div className="cir-modal-body">
+          <div className="cir-panel">
+            {(message?.text || errors.submit || errors.precargados) && (
+              <div
+                className={`cir-alert ${
+                  errors.submit || errors.precargados || message?.type === 'error'
+                    ? 'cir-alert-error'
+                    : 'cir-alert-success'
+                }`}
+              >
+                {errors.submit || errors.precargados || message?.type === 'error' ? (
+                  <AlertCircle size={16} />
+                ) : (
+                  <CheckCircle size={16} />
                 )}
-              </fieldset>
-
-              {/* Análisis y Determinación */}
-              <fieldset className="form-fieldset">
-                <legend>Análisis Jurídico</legend>
-
-                <div className="form-group">
-                  <label htmlFor="analisisJuridico">
-                    Análisis jurídico
-                    <span className="optional">(opcional)</span>
-                  </label>
-                  <textarea
-                    id="analisisJuridico"
-                    value={formData.analisisJuridico}
-                    onChange={(e) =>
-                      handleFieldChange('analisisJuridico', e.target.value)
-                    }
-                    placeholder="Análisis jurídico de la queja..."
-                    rows={4}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="determinacion">
-                    Determinación
-                    <span className="optional">(opcional)</span>
-                  </label>
-                  <textarea
-                    id="determinacion"
-                    value={formData.determinacion}
-                    onChange={(e) =>
-                      handleFieldChange('determinacion', e.target.value)
-                    }
-                    placeholder="Determinación..."
-                    rows={3}
-                  />
-                </div>
-              </fieldset>
-
-              {/* Botones */}
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={onClose}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={loading}
-                  onClick={(e) => {
-                    handleSubmit(e);
-                    if (onSuccess) {
-                      onSuccess();
-                    }
-                  }}
-                >
-                  {loading ? 'Guardando...' : 'Guardar CIR'}
-                </button>
+                <span>{errors.submit || errors.precargados || message?.text}</span>
               </div>
-            </form>
+            )}
+
+            <div className="cir-section">
+              <h3 className="cir-section-title">Información de Remisión</h3>
+
+              <div className="cir-form-group">
+                <label className="cir-label">
+                  Fundamentos
+                  <span className="cir-badge-required">Requerido</span>
+                </label>
+                <textarea
+                  className={`cir-textarea ${errors.fundamentos ? 'cir-error' : ''}`}
+                  value={formData.fundamentos}
+                  onChange={(e) => handleInputChange('fundamentos', e.target.value)}
+                  placeholder="Describe los fundamentos del dictamen..."
+                  disabled={isLoading}
+                  rows={4}
+                />
+                {errors.fundamentos && <div className="cir-error-text">{errors.fundamentos}</div>}
+              </div>
+
+              <div className="cir-form-group">
+                <label className="cir-label">
+                  Observaciones
+                  <span className="cir-badge-optional">Opcional</span>
+                </label>
+                <textarea
+                  className="cir-textarea"
+                  value={formData.observaciones}
+                  onChange={(e) => handleInputChange('observaciones', e.target.value)}
+                  placeholder="Observaciones adicionales (opcional)..."
+                  disabled={isLoading}
+                  rows={3}
+                />
+              </div>
+
+              <div className="cir-form-group">
+                <label className="cir-label">
+                  Fecha de emisión
+                  <span className="cir-badge-required">Requerido</span>
+                </label>
+                <input
+                  type="date"
+                  className={`cir-input ${errors.fechaCIR ? 'cir-error' : ''}`}
+                  value={formData.fechaCIR}
+                  onChange={(e) => handleInputChange('fechaCIR', e.target.value)}
+                  disabled={isLoading}
+                />
+                {errors.fechaCIR && <div className="cir-error-text">{errors.fechaCIR}</div>}
+              </div>
+            </div>
+
+            <div className="cir-section cir-section-precargados">
+              <div className="cir-section-header">
+                <h3 className="cir-section-title">Datos precargados</h3>
+                <span className="cir-subtext">Solo lectura</span>
+              </div>
+
+              {isLoading ? (
+                <div className="cir-loading">Cargando datos...</div>
+              ) : (
+                <div className="cir-precargados-grid">
+                  <div className="cir-field-readonly">
+                    <label className="cir-label">Asesor que remite</label>
+                    <input
+                      type="text"
+                      className="cir-input cir-readonly"
+                      value={precargados.asesorQueRemite}
+                      disabled
+                    />
+                  </div>
+                  <div className="cir-field-readonly">
+                    <label className="cir-label">Nombre del encargado</label>
+                    <input
+                      type="text"
+                      className="cir-input cir-readonly"
+                      value={precargados.nombreEncargado}
+                      disabled
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="cir-footer-actions">
+              <button
+                type="button"
+                className="cir-btn cir-btn-secondary"
+                onClick={handleCancel}
+                disabled={isLoading || isGeneratingPreview}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="cir-btn cir-btn-primary"
+                onClick={handleGeneratePreview}
+                disabled={!isFormValid || isLoading || isGeneratingPreview}
+              >
+                <Eye size={16} /> Preview
+              </button>
+              <button
+                type="button"
+                className="cir-btn cir-btn-success"
+                onClick={handleSave}
+                disabled={!isFormValid || isLoading}
+              >
+                <Download size={16} /> Generar CIR
+              </button>
+            </div>
           </div>
 
-          {/* Columna derecha: Preview PDF */}
-          <div className="preview-section">
-            <h4>Vista Previa PDF</h4>
-            {loading ? (
-              <div className="preview-loading">
-                Cargando preview...
-              </div>
-            ) : previewUrl ? (
+          <div className="cir-panel cir-panel-preview">
+            <div className="cir-preview-header">
+              <h3 className="cir-section-title">Vista previa</h3>
+              <span className="cir-preview-note">Haz clic en Preview para cargar el documento HTML</span>
+            </div>
+
+            {isGeneratingPreview && (
+              <div className="cir-loading">Generando preview...</div>
+            )}
+
+            {previewUrl ? (
               <iframe
-                className="preview-iframe"
+                className="cir-preview-iframe"
+                title="Vista previa CIR"
                 src={previewUrl}
-                title="PDF Preview"
               />
             ) : (
-              <div className="preview-empty">
-                Complete el formulario para ver la vista previa
+              <div className="cir-preview-empty">
+                Completa los campos requeridos y presiona Preview para visualizar el PDF.
+              </div>
+            )}
+
+            {errors.preview && (
+              <div className="cir-alert cir-alert-error">
+                <AlertCircle size={16} />
+                <span>{errors.preview}</span>
               </div>
             )}
           </div>
