@@ -461,3 +461,26 @@
   background: #1e3a8a;
   color: #fff;
 }
+
+.bdg-btn-bitacora {
+    background-color: #64748b; /* Un gris azulado profesional */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.bdg-btn-bitacora:hover {
+    background-color: #475569;
+}
+/* Asegura espacio entre botones en la columna de acciones */
+.bdg-action-cell {
+    text-align: center;
+    white-space: nowrap; /* Evita que el botón se salte de renglón */
+}
+
+/* Agregamos un margen derecho al primer botón para separar del siguiente */
+.bdg-btn-action:not(:last-child) {
+    margin-right: 8px;
+}

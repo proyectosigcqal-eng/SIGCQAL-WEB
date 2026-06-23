@@ -81,7 +81,12 @@ const calcularAccion = (t, estUp) => {
   // ── Default ───────────────────────────────────────────────────────
   return { label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` };
 };
+<<<<<<< Updated upstream
 export const TablaTramites = ({ tramites }) => {
+=======
+
+export const TablaTramites = ({ tramites, onVerBitacora}) => {
+>>>>>>> Stashed changes
   const navigate = useNavigate();
   const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
 
@@ -144,6 +149,8 @@ export const TablaTramites = ({ tramites }) => {
               const estUp     = (t.estatus ?? '').toUpperCase();
               const accion    = calcularAccion(t, estUp);
 
+              console.log("Estructura de t:", t);
+
               return (
                 <tr key={t.id} className={bloqueado ? 'bdg-row--bloqueado' : ''}>
                   <td>
@@ -181,6 +188,18 @@ export const TablaTramites = ({ tramites }) => {
                       onClick={() => !bloqueado && navigate(accion.ruta)}
                     >
                       {bloqueado ? 'CERRADO' : accion.label}
+                    </button>
+                    {/* Botón de Bitácora independiente */}
+                    <button
+                      className="bdg-btn-bitacora" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // AQUÍ ES DONDE CAMBIAREMOS t.id_queja POR EL CAMPO CORRECTO
+                        console.log("ID detectado:", t.id); // prueba con t.id o t.idQueja
+                        onVerBitacora(t.id); // <--- CAMBIA 't.id_queja' por lo que diga el log
+                      }}
+                    >
+                      Bitácora
                     </button>
                   </td>
                 </tr>
