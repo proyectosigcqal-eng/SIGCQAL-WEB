@@ -19,6 +19,21 @@ export const crearQuejaAri = async (payload) => {
 };
 
 /**
+ * Obtiene idQueja / idCir asociados a un folio (para precargar el formulario de ARI)
+ * @param {string} folio
+ * @returns {Promise<{idQueja: number, idCir: number|null}>}
+ */
+export const obtenerContextoAriPorFolio = async (folio) => {
+  const res = await axios.get(`${API_URL}/contexto/${folio}`);
+  return res.data;
+};
+
+export const listarAriPorIdQueja = async (idQueja) => {
+  const res = await axios.get(`${API_URL}/por-queja/${idQueja}`);
+  return res.data;
+};
+
+/**
  * Obtener Queja ARI por ID
  * @param {number} id
  * @returns {Promise<Object>} Objeto QuejaResponseDTO enriquecido
@@ -26,7 +41,7 @@ export const crearQuejaAri = async (payload) => {
 export const obtenerQuejaAriPorId = async (idQueja) => {
     try {
         // CAMBIO: Apuntamos a '/quejas' en lugar de '/quejas-ari'
-        const response = await axios.get(`${API_BASE_URL}/quejas/${idQueja}`);
+        const response = await axios.get(`${API_URL}/quejas/${idQueja}`);
         
         console.log("=== DATOS ENRIQUECIDOS RECIBIDOS ===", response.data);
         return response.data;

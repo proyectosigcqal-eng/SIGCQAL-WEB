@@ -1,41 +1,49 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
 import { fileUrl } from '@/shared/config/api';
 import { FormularioQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/components/FormularioQuejaAri';
 import { VistaPreviaQuejaAri } from '@/features/modulo-area-sustantiva/QuejasAri/components/VistaPreviaQuejaAri';
-import { crearQuejaAri, obtenerQuejaAriPorId } from '@/features/modulo-area-sustantiva/QuejasAri/services/quejasAriService';
+import {
+  crearQuejaAri,
+  obtenerContextoAriPorFolio, // ← nuevo, ver abajo
+  listarAriPorIdQueja,        // ← nuevo, ver abajo
+} from '@/features/modulo-area-sustantiva/QuejasAri/services/quejasAriService';
 import '@/features/modulo-area-sustantiva/QuejasAri/styles/quejasAri.css';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+
+const ESTADO_INICIAL = {
+  idQueja: null,
+  idCir: null,
+  numExpedienteOficial: '',
+  sintesisActosOmisiones: '',
+  nombreEncargadoFirma: '',
+  fechaAcuerdo: '',
+  idPlantillaQuejaAri: '',
+  multasRequerimientos: '',
+  multasCredito: '',
+  instituto: '',
+  abreviaturaEncargado: '',
+  folioGobierno: '',
+  nombreAsesor: '',
+  rfcAsesor: '',
+  nombreRepresentante: '',
+  nombreContribuyente: '',
+  identificacionContribuyente: '',
+  fechaSolicitud: '',
+};
+
 export const CrearQuejaAriPage = () => {
+  const { folio } = useParams();
+  const navigate = useNavigate();
   const catalogos = useCatalogos();
-  
-  // Estado alineado exactamente al QuejasAriRequestDTO con IDs provisionales
-  // y propiedades extendidas añadidas para la renderización de la vista previa
-  const [formData, setFormData] = useState({
-    idQueja: 1, // Forzado provisionalmente
-    idCir: 1,   // Forzado provisionalmente
-    numExpedienteOficial: '',
-    sintesisActosOmisiones: '',
-    nombreEncargadoFirma: '',
-    fechaAcuerdo: '',
-    idPlantillaQuejaAri: '',
-    multasRequerimientos: '',
-    multasCredito: '',
-    instituto: '',
-    abreviaturaEncargado: '',
-    
-    // NUEVOS: Campos enriquecidos agregados al estado para la vista previa
-    folioGobierno: '',
-    nombreAsesor: '',
-    rfcAsesor: '',
-    nombreRepresentante: '',
-    nombreContribuyente: '',
-    identificacionContribuyente: '',
-    fechaSolicitud: ''
-  });
-  
-  const [cargando, setCargando] = useState(false);
+
+  const [formData, setFormData]   = useState(ESTADO_INICIAL);
+  const [cargando, setCargando]   = useState(false);
+  const [cargandoCtx, setCargandoCtx] = useState(true);
   const [downloadUrl, setDownloadUrl] = useState(null);
+  const [errorCtx, setErrorCtx]   = useState(null);
 
   const extraerRutaArchivo = (resultado) => {
     if (!resultado) return null;
@@ -49,58 +57,74 @@ export const CrearQuejaAriPage = () => {
         || resultado.fileUrl
         || resultado.path
         || (resultado.nombreArchivo ? `/api/files/quejas-ari/${resultado.nombreArchivo}` : null)
-        || (resultado.nombreArchivoGenerado ? `/api/files/quejas-ari/${resultado.nombreArchivoGenerado}` : null)
         || null;
     }
     return null;
   };
 
-  const construirUrlDescarga = (ruta) => ruta ? fileUrl(ruta) : null;
+  const construirUrlDescarga = (ruta) => (ruta ? fileUrl(ruta) : null);
 
- useEffect(() => {
-  const cargarDatosEnriquecidos = async () => {
-    if (formData.idQueja) {
+  // ── 1. Resolver idQueja/idCir desde el folio + revisar si ya existe un ARI ──
+  useEffect(() => {
+    if (!folio) { setCargandoCtx(false); return; }
+
+    (async () => {
       try {
-        const datosQueja = await obtenerQuejaAriPorId(formData.idQueja);
-        if (datosQueja) {
-          setFormData(prev => ({
-            ...prev,
-            // Conservamos los IDs y datos nativos del formulario
-            idQueja: datosQueja.id || prev.idQueja,
-            idCir: datosQueja.idCir || prev.idCir,
-            // 🔍 Extracción segura: Soporta si el Back devuelve el objeto entidad o un DTO plano
-            folioGobierno: datosQueja.folioGobierno || datosQueja.folio || '',
-            
-            nombreAsesor: datosQueja.asesor?.nombreCompleto || datosQueja.nombreAsesor || '',
-            rfcAsesor: datosQueja.asesor?.rfc || datosQueja.rfcAsesor || '',
-            
-            nombreRepresentante: datosQueja.representanteLegal || datosQueja.nombreRepresentante || '',
-            
-            nombreContribuyente: datosQueja.contribuyente?.nombreCompleto || datosQueja.nombreContribuyente || '',
-            identificacionContribuyente: datosQueja.contribuyente?.rfc || datosQueja.identificacionContribuyente || '',
-            
-            fechaSolicitud: datosQueja.fechaSolicitud || datosQueja.fecha_solicitud || '',
-            rutaPdfAri: datosQueja.rutaPdfAri || datosQueja.rutaAri || datosQueja.archivo || ''
-          }));
+        // a) idQueja / idCir reales para este folio (endpoint nuevo)
+        const ctx = await obtenerContextoAriPorFolio(folio);
+        if (!ctx?.idQueja) {
+          setErrorCtx('No se encontró una queja asociada a este folio.');
+          return;
+        }
 
-          const rutaDescarga = extraerRutaArchivo(datosQueja);
-          const urlDescarga = construirUrlDescarga(rutaDescarga);
-          setDownloadUrl(urlDescarga);
+        // b) prefill de datos de contexto — reutiliza el endpoint que ya usa el checklist
+        let prefill = {};
+        try {
+          const res = await fetch(`${API_BASE}/api/v1/expedientes/${folio}/detalle-asesoria`);
+          if (res.ok) {
+            const detalle = await res.json();
+            prefill = {
+              folioGobierno: folio,
+              nombreContribuyente: detalle?.contribuyente ?? '',
+              // ⚠️ Ajusta estos 4 si tu endpoint de detalle-asesoria usa otros nombres de campo
+              nombreAsesor: detalle?.nombreAsesor ?? '',
+              rfcAsesor: detalle?.rfcAsesor ?? '',
+              nombreRepresentante: detalle?.nombreRepresentante ?? '',
+              identificacionContribuyente: detalle?.identificacionContribuyente ?? '',
+              fechaSolicitud: detalle?.fechaSolicitud ?? '',
+            };
+          }
+        } catch {
+          // no crítico — el formulario sigue disponible aunque no haya prefill
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          idQueja: ctx.idQueja,
+          idCir: ctx.idCir ?? null,
+          ...prefill,
+        }));
+
+        // c) ¿ya existe un ARI para esta queja? (VER ARI y GENERAR ARI comparten ruta)
+        const ariExistentes = await listarAriPorIdQueja(ctx.idQueja);
+        if (Array.isArray(ariExistentes) && ariExistentes.length > 0) {
+          const existente = ariExistentes[0];
+          setFormData(prev => ({ ...prev, ...existente }));
+          setDownloadUrl(construirUrlDescarga(extraerRutaArchivo(existente)));
         }
       } catch (err) {
-        console.warn("No se pudieron pre-cargar los datos relacionales de la queja:", err.message);
+        console.error('Error al cargar contexto de ARI:', err);
+        setErrorCtx('No se pudo cargar la información del expediente.');
+      } finally {
+        setCargandoCtx(false);
       }
-    }
-  };
-  cargarDatosEnriquecidos();
-}, [formData.idQueja]);
+    })();
+  }, [folio]);
 
+  // ── 2. Plantilla por defecto ──
   useEffect(() => {
     if (catalogos?.plantillasQuejaAri?.length > 0 && !formData.idPlantillaQuejaAri) {
-      setFormData(prev => ({
-        ...prev,
-        idPlantillaQuejaAri: catalogos.plantillasQuejaAri[0].id
-      }));
+      setFormData(prev => ({ ...prev, idPlantillaQuejaAri: catalogos.plantillasQuejaAri[0].id }));
     }
   }, [catalogos?.plantillasQuejaAri]);
 
@@ -112,18 +136,24 @@ export const CrearQuejaAriPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.idQueja) {
+      alert('No se pudo determinar la queja asociada a este folio.');
+      return;
+    }
+
     setCargando(true);
     try {
-      // El payload va perfectamente estructurado para el backend
-      const payload = { ...formData };
+      const payload = {
+        ...formData,
+        fechaAcuerdo: formData.fechaAcuerdo || null, // nunca '' a un LocalDate
+      };
+
       const res = await crearQuejaAri(payload);
-      console.log('Queja ARI creada exitosamente en el backend:', res);
 
       const rutaDescarga = extraerRutaArchivo(res);
-      const urlDescarga = construirUrlDescarga(rutaDescarga);
-      setDownloadUrl(urlDescarga);
+      setDownloadUrl(construirUrlDescarga(rutaDescarga));
 
-      alert(`Queja ARI creada correctamente${urlDescarga ? '. Ya está disponible para descargar.' : ''}`);
+      alert(`Queja ARI creada correctamente${rutaDescarga ? '. Ya está disponible para descargar.' : ''}`);
     } catch (err) {
       console.error('Error al crear queja ARI', err);
       alert('Error al crear la queja ARI');
@@ -132,10 +162,22 @@ export const CrearQuejaAriPage = () => {
     }
   };
 
+  if (cargandoCtx) {
+    return <div className="sigcqal-page-container">Cargando información del expediente...</div>;
+  }
+
+  if (errorCtx) {
+    return (
+      <div className="sigcqal-page-container">
+        <p>{errorCtx}</p>
+        <button onClick={() => navigate('/atencion-juridica/bandeja')}>Volver a la bandeja</button>
+      </div>
+    );
+  }
+
   return (
     <div className="sigcqal-page-container">
       <div className="split-view-container">
-        {/* Panel Izquierdo: Formulario */}
         <section className="panel-formulario">
           <FormularioQuejaAri
             formData={formData}
@@ -146,17 +188,20 @@ export const CrearQuejaAriPage = () => {
             cargando={cargando}
             downloadUrl={downloadUrl}
           />
+          <button
+            type="button"
+            onClick={() => navigate('/atencion-juridica/bandeja')}
+            style={{ marginTop: '1rem' }}
+          >
+            ← Volver a la bandeja
+          </button>
         </section>
 
-        {/* Panel Derecho: Vista previa adaptada */}
         <section className="panel-vista-previa-contenedor" style={{ height: '100%', overflow: 'hidden' }}>
           <VistaPreviaQuejaAri
             formData={formData}
             usuarios={catalogos.usuarios}
-            areaDestino={{
-              nombre: '',
-              nombreArea: '',
-            }}
+            areaDestino={{ nombre: '', nombreArea: '' }}
             downloadUrl={downloadUrl}
           />
         </section>

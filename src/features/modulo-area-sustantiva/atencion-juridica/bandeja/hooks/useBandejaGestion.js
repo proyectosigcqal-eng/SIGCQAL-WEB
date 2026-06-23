@@ -15,36 +15,36 @@ const ETAPAS = [
   { key: 'CERRADA',        label: 'Cerrada / Concluida',                   estatus: 'Cerrada / Concluida' },
 ];
 
-const adaptarTramite = (item) => ({
-  id:            item.folio,
-  folio:         item.folio,
-  // ← expedienteId viene de feature — necesario para botón INFORME y semáforo autoridad
-  expedienteId:  item.expedienteId ?? item.expediente_id
-               ?? item.idExpediente ?? item.id_expediente ?? null,
-  municipio:     item.municipio_procedencia ?? '',
-  contribuyente: item.contribuyente ?? '',
-  asunto:        item.tipo_acto ?? '',
-  estatus:       item.estatus_principal ?? '',
-  seguimiento:   item.ultima_modificacion?.descripcion ?? '',
-  fecha:         item.ultima_modificacion?.timestamp ?? '',
-  bloqueado:    item.bloqueado ?? false,
-  // semaforoPlazos se enriquece después de forma no bloqueante
-  semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
-  tieneCir:          item.tiene_cir ?? false,
-  tieneAri:          item.tiene_ari ?? false,
-  tieneOficio:       item.tiene_oficio ?? false,
-  tieneContestacion: item.tiene_contestacion ?? false,
-  tieneAcci:         item.tiene_acci ?? false,
-  tieneResolucion:   item.tiene_resolucion ?? false,
-  checklistCompleto: item.checklist_completo ?? false,
-});
-
+// ✅ Así debe quedar
+const adaptarTramite = (item) => {
+  console.log('>>> item bandeja:', item);
+  return {
+    id:            item.folio,
+    folio:         item.folio,
+    idExpediente:  item.idExpediente ?? item.id_expediente ?? null,
+    municipio:     item.municipio_procedencia ?? '',
+    contribuyente: item.contribuyente ?? '',
+    asunto:        item.tipo_acto ?? '',
+    estatus:       item.estatus_principal ?? '',
+    seguimiento:   item.ultima_modificacion?.descripcion ?? '',
+    fecha:         item.ultima_modificacion?.timestamp ?? '',
+    bloqueado:     item.bloqueado ?? false,
+    semaforoPlazos: item.semaforoPlazos ?? item.semaforo_plazos ?? null,
+    tieneCir:          item.tiene_cir ?? false,
+    tieneAri:          item.tiene_ari ?? false,
+    tieneOficio:       item.tiene_oficio ?? false,
+    tieneContestacion: item.tiene_contestacion ?? false,
+    tieneAcci:         item.tiene_acci ?? false,
+    tieneResolucion:   item.tiene_resolucion ?? false,
+    checklistCompleto: item.checklist_completo ?? false,
+  };
+};
 // Enriquecimiento opcional — no bloquea el render principal
-const obtenerSemaforo = async (expedienteId) => {
-  if (!expedienteId) return null;
+const obtenerSemaforo = async (folio) => {
+  if (!folio) return null;
   try {
     const res = await fetch(
-      `${API_BASE}/api/v1/expedientes/${expedienteId}/plazo-autoridad/semaforo`
+      `${API_BASE}/api/v1/expedientes/${folio}/plazo-prevencion` // ← endpoint correcto
     );
     if (!res.ok) return null;
     return await res.json();
@@ -97,14 +97,14 @@ params.append('tipo_tramite', 'QUEJAS_Y_RECLAMACIONES');
         const etapasConSemaforo = ['ASIGNADA_ASESOR', 'VALIDACION'];
   const necesitaSemaforo = etapasConSemaforo.includes(etapaActiva);
 
-  const enriquecidos = await Promise.all(
-    tramitesBase.map(async (t) => ({
-      ...t,
-      semaforoPlazos: necesitaSemaforo
-        ? (t.semaforoPlazos ?? await obtenerSemaforo(t.expedienteId))
-        : null,
-    }))
-  );
+ const enriquecidos = await Promise.all(
+  tramitesBase.map(async (t) => ({
+    ...t,
+    semaforoPlazos: necesitaSemaforo
+      ? (t.semaforoPlazos ?? await obtenerSemaforo(t.folio)) // ← folio, no expedienteId
+      : null,
+  }))
+);
         if (!controller.signal.aborted) setTramites(enriquecidos);
       })
       .catch((err) => {

@@ -478,7 +478,7 @@ function App() {
 
           {/* Módulo Área Sustantiva - Crear Queja ARI */}
           <Route
-            path="area-sustantiva/quejas-ari"
+            path="area-sustantiva/quejas-ari/:folio"
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES['/area-sustantiva/quejas-ari']}>
                 <CrearQuejaAriPage />
