@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
 import { Search } from 'lucide-react';
 import { useBandejaGestion } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion';
 import { TablaTramites } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites';
-
-import BitacoraHistoricaSustantivaModal from '@/pages/modulo-area-sustantiva/bitacora-historica-sustantiva/BitacoraHistoricaSustantivaModal';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css';
 
 export const BandejaGestionPage = () => {
@@ -14,14 +11,6 @@ export const BandejaGestionPage = () => {
     ETAPAS,
   } = useBandejaGestion();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [quejaIdSeleccionada, setQuejaIdSeleccionada] = useState(null);
-
-  const abrirBitacora = (id) => {
-    setQuejaIdSeleccionada(id);
-    setIsModalOpen(true);
-  };
- 
   return (
     <div className="bdg-page">
 
@@ -72,19 +61,10 @@ export const BandejaGestionPage = () => {
         ) : error ? (
           <div className="bdg-empty"><p>{error}</p></div>
         ) : (
-          <TablaTramites tramites={tramites} 
-          onVerBitacora={abrirBitacora}/>
+          <TablaTramites tramites={tramites} />
         )}
 
       </div>
-        {/* 5. Renderizado condicional del Modal */}
-      {isModalOpen && (
-        <BitacoraHistoricaSustantivaModal 
-          idQueja={quejaIdSeleccionada} 
-          onClose={() => setIsModalOpen(false)} 
-        />
-      )}
-
     </div>
   );
 };
