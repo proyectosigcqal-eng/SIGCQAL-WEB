@@ -234,19 +234,47 @@
 /* Badges */
 .bdg-badge {
   display: inline-block;
-  padding: 0.22rem 0.65rem;
+  max-width: 220px;       /* ← antes no tenía límite */
+  white-space: normal;    /* ← permite wrap dentro del badge */
+  word-break: break-word;
+  padding: 4px 10px;
   border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .bdg-badge--estatus {
-  background: #dbeafe;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.bdg-badge--bloqueado {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.bdg-btn-action--secundario {
+  background: transparent;
+  border: 2px solid #1e3a8a;
+  color: #1e3a8a;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+
+.bdg-btn-action--secundario:hover {
+  background: #eff6ff;
 }
 
 .bdg-badge--rojo {
@@ -310,9 +338,12 @@
 
 /* Botones de acción */
 .bdg-action-cell {
-  text-align: center;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;        /* ← evita que se salgan */
+  white-space: nowrap;
 }
-
 .bdg-btn-action {
   background: #1e3a8a;
   color: #fff;
