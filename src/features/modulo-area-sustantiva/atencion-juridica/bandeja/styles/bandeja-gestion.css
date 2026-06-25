@@ -1,11 +1,15 @@
-/* ── Página ────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   BANDEJA DE GESTIÓN — Estilos unificados
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Página ─────────────────────────────────────────────────── */
 .bdg-page {
   padding: 2rem 2.5rem;
   background: #f4f6fb;
   min-height: 100vh;
 }
 
-/* ── Encabezado ────────────────────────────────────────────────────────────── */
+/* ── Encabezado ─────────────────────────────────────────────── */
 .bdg-header {
   display: flex;
   align-items: flex-start;
@@ -48,7 +52,7 @@
   background: #22c55e;
 }
 
-/* ── Tarjeta de filtros + contenido ────────────────────────────────────────── */
+/* ── Tarjeta contenedora ────────────────────────────────────── */
 .bdg-filtros-card {
   background: #fff;
   border-radius: 14px;
@@ -56,7 +60,7 @@
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
 }
 
-/* ── Fila de filtros ───────────────────────────────────────────────────────── */
+/* ── Fila de filtros ────────────────────────────────────────── */
 .bdg-filtros-row {
   display: flex;
   gap: 0.75rem;
@@ -88,6 +92,7 @@
   color: #374151;
   outline: none;
   box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .bdg-search:focus {
@@ -106,6 +111,7 @@
   outline: none;
   cursor: pointer;
   min-width: 180px;
+  transition: border-color 0.15s;
 }
 
 .bdg-select:focus {
@@ -134,7 +140,7 @@
   background: #1e3a8a;
 }
 
-/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+/* ── Tabs ───────────────────────────────────────────────────── */
 .bdg-tabs {
   display: flex;
   gap: 0.5rem;
@@ -150,7 +156,7 @@
   font-weight: 600;
   color: #6b7280;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.15s, color 0.15s;
   letter-spacing: 0.02em;
 }
 
@@ -165,58 +171,132 @@
   border-color: #1e3a8a;
 }
 
-/* ── Tabla ─────────────────────────────────────────────────────────────────── */
+/* ── Switch de etapas (segmented control) ───────────────────── */
+.bdg-switch-bar {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 1.5rem;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 4px;
+  border-radius: 10px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.bdg-switch-btn {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bdg-switch-btn:hover:not(.is-active) {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.bdg-switch-btn.is-active {
+  background: #1e3a8a;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(30, 58, 138, 0.25);
+}
+
+/* ── Contenedor de tabla ────────────────────────────────────── */
+.bdg-tabla-wrapper {
+  width: 100%;
+}
+
+.bdg-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+              0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* ── Tabla ──────────────────────────────────────────────────── */
 .bdg-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  text-align: left;
 }
 
-.bdg-table thead tr {
-  border-bottom: 1px solid #e5e7eb;
+.bdg-table thead {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .bdg-table th {
-  text-align: left;
-  padding: 0.6rem 1rem;
+  padding: 1rem 1.25rem;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #9ca3af;
+  color: #64748b;
   letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .bdg-table td {
-  padding: 1rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  color: #334155;
 }
 
 .bdg-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.bdg-table tbody tr:hover {
-  background: #f9fafb;
+.bdg-table tbody tr {
+  transition: background-color 0.15s ease;
 }
 
-/* Folio */
+.bdg-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.bdg-row--bloqueado {
+  opacity: 0.8;
+  background: #fef2f2;
+}
+
+/* ── Celdas de datos ────────────────────────────────────────── */
 .bdg-folio {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #0f1b3d;
 }
 
+.bdg-folio-secundario {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
 .bdg-sub {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #64748b;
   margin-top: 2px;
 }
 
-/* Contribuyente */
 .bdg-contribuyente {
   font-weight: 600;
-  color: #111827;
+  color: #1e293b;
 }
 
 .bdg-impuesto {
@@ -224,173 +304,62 @@
   font-weight: 500;
 }
 
-/* Estatus – columna con dos badges */
+.bdg-asunto {
+  color: #475569;
+  font-size: 0.85rem;
+  max-width: 280px;
+  white-space: normal;
+  line-height: 1.4;
+}
+
+.bdg-modificacion {
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.bdg-divider-null {
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.bdg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  white-space: normal;
+  word-break: break-word;
+  max-width: 220px;
+}
+
+/* Variantes de badge */
+.bdg-badge--estatus    { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.bdg-badge--bloqueado  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.bdg-badge--rojo       { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.bdg-badge--verde      { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+
+/* Badges de etapa */
+.badge-calificacion { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.badge-registro     { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+.badge-proceso      { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.badge-asignado     { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.badge-concluido    { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+.badge-default      { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+
+/* Contenedor de múltiples badges en una columna */
 .bdg-estatus-col {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-/* Badges */
-.bdg-badge {
-  display: inline-block;
-  max-width: 220px;       /* ← antes no tenía límite */
-  white-space: normal;    /* ← permite wrap dentro del badge */
-  word-break: break-word;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.3;
-}
-
-.bdg-badge--estatus {
-  background: #e0f2fe;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
-}
-
-.bdg-badge--bloqueado {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-}
-
-.bdg-btn-action--secundario {
-  background: transparent;
-  border: 2px solid #1e3a8a;
-  color: #1e3a8a;
-  text-decoration: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-}
-
-
-.bdg-btn-action--secundario:hover {
-  background: #eff6ff;
-}
-
-.bdg-badge--rojo {
-  background: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-}
-
-.bdg-badge--verde {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.badge-calificacion {
-  background: #dbeafe;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-}
-
-.badge-registro {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-}
-
-.badge-proceso {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #fde68a;
-}
-
-.badge-asignado {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.badge-concluido {
-  background: #ede9fe;
-  color: #5b21b6;
-  border: 1px solid #ddd6fe;
-}
-
-.badge-default {
-  background: #f3f4f6;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
-}
-
-/* Última modificación */
-.bdg-modificacion {
-  color: #374151;
-  font-size: 0.875rem;
-}
-
-.bdg-asunto {
-  color: #374151;
-  font-size: 0.875rem;
-}
-
-/* Botones de acción */
-.bdg-action-cell {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;        /* ← evita que se salgan */
-  white-space: nowrap;
-}
-.bdg-btn-action {
-  background: #1e3a8a;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.55rem 0.9rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-}
-
-.bdg-btn-action:hover {
-  background: #2446a6;
-}
-
-.bdg-icon-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #9ca3af;
-  padding: 0.35rem;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.15s, background 0.15s;
-}
-
-.bdg-icon-btn:hover {
-  color: #1e3a8a;
-  background: #eff6ff;
-}
-
-/* Estado vacío */
-.bdg-empty {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #9ca3af;
-  font-size: 0.875rem;
-}
-
-/* ── Semáforo / Contador ───────────────────────────────────────────────────── */
+/* ── Semáforo / Contador de días ────────────────────────────── */
 .semaforo-pill {
   display: inline-flex;
   flex-direction: column;
@@ -417,78 +386,115 @@
   white-space: nowrap;
 }
 
-/* Verde — más de 3 días */
-.semaforo-pill--verde {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
+.semaforo-pill--verde    { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.semaforo-pill--amarillo { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+.semaforo-pill--rojo     { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.semaforo-pill--bloqueado{ background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
 
-/* Amarillo — 1-3 días */
-.semaforo-pill--amarillo {
-  background: #fef9c3;
-  color: #854d0e;
-  border: 1px solid #fde047;
-}
+.semaforo-na       { color: #9ca3af; font-size: 0.875rem; }
+.semaforo-cargando { color: #9ca3af; font-size: 0.75rem; }
 
-/* Rojo — 0 días o menos */
-.semaforo-pill--rojo {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
-}
-
-/* Cerrado/Bloqueado */
-.semaforo-pill--bloqueado {
-  background: #f3f4f6;
-  color: #6b7280;
-  border: 1px solid #e5e7eb;
-}
-
-.semaforo-na {
-  color: #9ca3af;
-  font-size: 0.875rem;
-}
-
-.semaforo-cargando {
-  color: #9ca3af;
-  font-size: 0.75rem;
-}
-
-
-/* ── Switch de etapas ─────────────────────────────────────────────────────── */
-.bdg-switch-bar {
+/* ── Botones de acción ──────────────────────────────────────── */
+.bdg-action-cell {
   display: flex;
-  gap: 0;
-  margin-bottom: 1.25rem;
-  border-radius: var(--border-radius-md);
-  border: 0.5px solid var(--color-border-secondary);
-  overflow: hidden;
-  overflow-x: auto;
-  width: fit-content;
-  max-width: 100%;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
-.bdg-switch-btn {
-  padding: 8px 16px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  border: none;
-  background: var(--color-background-primary);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.12s, color 0.12s;
-  flex-shrink: 0;
-}
-
-.bdg-switch-btn:hover:not(.is-active) {
-  background: var(--color-background-secondary);
-  color: var(--color-text-primary);
-}
-
-.bdg-switch-btn.is-active {
+.bdg-btn-action {
   background: #1e3a8a;
   color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.bdg-btn-action:hover {
+  background: #1d4ed8;
+  transform: translateY(-0.5px);
+}
+
+.bdg-btn-action--secundario {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  text-decoration: none;
+  padding: 6px 13px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.bdg-btn-action--secundario:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f1b3d;
+}
+
+.bdg-btn-action--disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: none;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.bdg-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.bdg-icon-btn:hover {
+  color: #1e3a8a;
+  background: #eff6ff;
+}
+
+.bdg-btn-icon {
+  font-size: 0.85rem;
+}
+
+/* ── Estado vacío ───────────────────────────────────────────── */
+.bdg-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+}
+
+.bdg-empty-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.bdg-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
 }

@@ -17,7 +17,6 @@ const BadgeEstatus = ({ label, bloqueado }) => (
   </span>
 );
 
-// Devuelve SIEMPRE un arreglo: [{ tipo: 'navegacion'|'descarga', label, ruta? , url? }]
 const calcularAcciones = (t, estUp) => {
   if (estUp.includes('ASIGNADA A ASESOR')) {
     if (t.checklistCompleto) {
@@ -35,6 +34,7 @@ const calcularAcciones = (t, estUp) => {
       {
         tipo: 'descarga',
         label: 'DESCARGAR CIR',
+        // ✅ ya estaba correcta — coincide con ConstanciaInternaRemisionController
         url: `${API_BASE}/api/v1/expedientes/folio/${t.folio}/constancia-interna-remision/descargar`,
       },
       t.tieneAri
@@ -45,6 +45,12 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes('ARI')) {
     return [
+      {
+        tipo: 'descarga',
+        label: 'DESCARGAR ARI',
+        // ✅ corregido — coincide con el nuevo endpoint en QuejasAriController
+        url: `${API_BASE}/api/v1/quejas-ari/folio/${t.folio}/descargar`,
+      },
       t.tieneOficio
         ? { tipo: 'navegacion', label: 'VER OFICIO',     ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` }
         : { tipo: 'navegacion', label: 'GENERAR OFICIO', ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` },
@@ -53,6 +59,12 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes('OFICIO')) {
     return [
+      {
+        tipo: 'descarga',
+        label: 'DESCARGAR Oficio',
+        // ✅ corregido — coincide con el nuevo endpoint en OficioNotificacionController
+        url: `${API_BASE}/api/v1/oficio-notificacion/folio/${t.folio}/descargar`,
+      },
       t.tieneContestacion
         ? { tipo: 'navegacion', label: 'VER CONTESTACIÓN',       ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
         : { tipo: 'navegacion', label: 'REGISTRAR CONTESTACIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` },
@@ -60,20 +72,34 @@ const calcularAcciones = (t, estUp) => {
   }
 
   if (estUp.includes('CONTESTACIÓN') || estUp.includes('CONTESTACION')) {
-    return [{ tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }];
+    return [
+      { tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
+    ];
   }
 
   if (estUp.includes('ACCI')) {
     return [
+      {
+        tipo: 'descarga',
+        label: 'DESCARGAR ACCI',
+        // ✅ corregido — coincide con el nuevo endpoint en QuejasAcciController
+        url: `${API_BASE}/api/v1/quejas-acci/folio/${t.folio}/descargar`,
+      },
       t.tieneResolucion
         ? { tipo: 'navegacion', label: 'VER RESOLUCIÓN',     ruta: `/atencion-juridica/resolucion-final/${t.folio}` }
         : { tipo: 'navegacion', label: 'GENERAR RESOLUCIÓN', ruta: `/atencion-juridica/resolucion-final/${t.folio}` },
     ];
   }
 
-  if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION')) {
-    return [{ tipo: 'navegacion', label: 'NOTIFICAR', ruta: `/area-sustantiva/cierre-test/${t.folio}` }];
-  }
+ if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION')) {
+  return [
+    {
+      tipo: 'descarga',
+      label: 'DESCARGAR Resolución',
+      url: `${API_BASE}/api/modulo-area-sustantiva/resolucion-final/folio/${t.folio}/descargar`,
+    },
+    { tipo: 'navegacion', label: 'NOTIFICAR', ruta: `/area-sustantiva/cierre-test/${t.folio}` }];
+}
 
   if (estUp.includes('NOTIFICACIÓN FINAL') || estUp.includes('NOTIFICACION FINAL')) {
     return [{ tipo: 'navegacion', label: 'CERRAR EXPEDIENTE', ruta: `/area-sustantiva/cierre-test/${t.folio}` }];
@@ -81,7 +107,6 @@ const calcularAcciones = (t, estUp) => {
 
   return [{ tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` }];
 };
-
 export const TablaTramites = ({ tramites }) => {
   const navigate = useNavigate();
   const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
@@ -91,27 +116,15 @@ export const TablaTramites = ({ tramites }) => {
     : [];
 
   return (
-    <div>
-      {/* ── Switch triple ── */}
-      <div style={{
-        display: 'flex', gap: 0, marginBottom: '1.25rem',
-        borderRadius: 8, border: '0.5px solid var(--color-border-secondary)',
-        overflow: 'hidden', width: 'fit-content',
-      }}>
-        {TIPO_TRAMITE_TABS.map((tab, i) => (
+    <div className="bdg-tabla-wrapper">
+      {/* ── Tabs / Switch de Etapas moderno utilizando clases CSS ── */}
+      <div className="bdg-switch-bar">
+        {TIPO_TRAMITE_TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setTipoActivo(tab.id)}
-            style={{
-              padding: '8px 20px', fontSize: 13, fontWeight: 600,
-              border: 'none', whiteSpace: 'nowrap', cursor: 'pointer',
-              borderRight: i < TIPO_TRAMITE_TABS.length - 1
-                ? '0.5px solid var(--color-border-secondary)' : 'none',
-              background: tipoActivo === tab.id ? '#1e3a8a' : 'var(--color-background-primary)',
-              color:      tipoActivo === tab.id ? '#fff'    : 'var(--color-text-secondary)',
-              transition: 'background 0.12s, color 0.12s',
-            }}
+            className={`bdg-switch-btn ${tipoActivo === tab.id ? 'is-active' : ''}`}
           >
             {tab.label}
           </button>
@@ -120,6 +133,7 @@ export const TablaTramites = ({ tramites }) => {
 
       {tramitesFiltrados.length === 0 ? (
         <div className="bdg-empty">
+          <div className="bdg-empty-icon">📂</div>
           <p>
             {tipoActivo === 'QUEJAS_RECLAMACIONES'
               ? 'No se encontraron trámites con los filtros seleccionados.'
@@ -127,84 +141,88 @@ export const TablaTramites = ({ tramites }) => {
           </p>
         </div>
       ) : (
-        <table className="bdg-table">
-          <thead>
-            <tr>
-              <th>FOLIO ASESORÍA</th>
-              <th>EXPEDIENTE QUEJA</th>
-              <th>QUEJOSO</th>
-              <th>ASUNTO</th>
-              <th>ESTATUS</th>
-              <th>SEMÁFORO/CONTADOR</th>
-              <th>ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tramitesFiltrados.map((t) => {
-              const bloqueado = t.bloqueado === true;
-              const estUp     = (t.estatus ?? '').toUpperCase();
-              const acciones  = calcularAcciones(t, estUp);
+        /* Contenedor responsivo para evitar desbordamientos */
+        <div className="bdg-table-responsive">
+          <table className="bdg-table">
+            <thead>
+              <tr>
+                <th>FOLIO ASESORÍA</th>
+                <th>EXPEDIENTE QUEJA</th>
+                <th>QUEJOSO</th>
+                <th>ASUNTO</th>
+                <th>ESTATUS</th>
+                <th>SEMÁFORO / CONTADOR</th>
+                <th style={{ textAlignment: 'right' }}>ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tramitesFiltrados.map((t) => {
+                const bloqueado = t.bloqueado === true;
+                const estUp     = (t.estatus ?? '').toUpperCase();
+                const acciones  = calcularAcciones(t, estUp);
 
-              return (
-                <tr key={t.id} className={bloqueado ? 'bdg-row--bloqueado' : ''}>
-                  <td>
-                    <div className="bdg-folio">{t.folio}</div>
-                    <div className="bdg-sub">{t.municipio}</div>
-                  </td>
-                  <td>
-                    <div className="bdg-folio">{t.folio}</div>
-                  </td>
-                  <td>
-                    <div className="bdg-contribuyente">{t.contribuyente}</div>
-                  </td>
-                  <td>
-                    <div className="bdg-asunto">{t.asunto}</div>
-                  </td>
-                  <td>
-                    <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
-                  </td>
-                  <td>
-                    {(estUp.includes('ASIGNADA A ASESOR') ||
-                      estUp.includes('VALIDACIÓN') ||
-                      estUp.includes('VALIDACION'))
-                      ? <SemaforoContador folio={t.folio} />
-                      : <span style={{ color: '#999', fontSize: '0.8rem' }}>—</span>
-                    }
-                  </td>
-                  <td className="bdg-action-cell" >
-                    {bloqueado ? (
-                      <button className="bdg-btn-action bdg-btn-action--disabled" disabled>
-                        CERRADO
-                      </button>
-                    ) : (
-                      acciones.map((accion, i) =>
-                        accion.tipo === 'descarga' ? (
-                          <a
-                            key={i}
-                            className="bdg-btn-action bdg-btn-action--secundario"
-                            href={accion.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {accion.label}
-                          </a>
-                        ) : (
-                          <button
-                            key={i}
-                            className="bdg-btn-action"
-                            onClick={() => navigate(accion.ruta)}
-                          >
-                            {accion.label}
-                          </button>
+                return (
+                  <tr key={t.id} className={bloqueado ? 'bdg-row--bloqueado' : ''}>
+                    <td>
+                      <div className="bdg-folio">{t.folio}</div>
+                      <div className="bdg-sub">{t.municipio}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-folio-secundario">{t.idExpediente}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-contribuyente">{t.contribuyente}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-asunto">{t.asunto}</div>
+                    </td>
+                    <td>
+                      <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
+                    </td>
+                    <td>
+                      {(estUp.includes('ASIGNADA A ASESOR') ||
+                        estUp.includes('VALIDACIÓN') ||
+                        estUp.includes('VALIDACION'))
+                        ? <SemaforoContador folio={t.folio} />
+                        : <span className="bdg-divider-null">—</span>
+                      }
+                    </td>
+                    <td className="bdg-action-cell">
+                      {bloqueado ? (
+                        <button className="bdg-btn-action bdg-btn-action--disabled" disabled>
+                          CERRADO
+                        </button>
+                      ) : (
+                        acciones.map((accion, i) =>
+                          accion.tipo === 'descarga' ? (
+                            <a
+                              key={i}
+                              className="bdg-btn-action bdg-btn-action--secundario"
+                              href={accion.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <span className="bdg-btn-icon">📥</span>
+                              {accion.label}
+                            </a>
+                          ) : (
+                            <button
+                              key={i}
+                              className="bdg-btn-action"
+                              onClick={() => navigate(accion.ruta)}
+                            >
+                              {accion.label}
+                            </button>
+                          )
                         )
-                      )
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

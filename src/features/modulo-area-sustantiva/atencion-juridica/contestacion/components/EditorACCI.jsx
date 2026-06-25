@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
@@ -17,6 +17,7 @@ export const EditorACCI = ({ expediente, contestacion, folioExpediente }) => {
   const [urlDocx, setUrlDocx] = useState(null);
   const [error, setError] = useState(null);
   const [exito, setExito] = useState(false);
+  const [idQueja, setIdQueja] = useState(null);
 
   const numOficio = contestacion?.numOficio || '[NÚMERO DE OFICIO]';
   const dependencia = contestacion?.dependencia || '[DEPENDENCIA]';
@@ -26,49 +27,57 @@ export const EditorACCI = ({ expediente, contestacion, folioExpediente }) => {
   const numExpediente = expediente?.numExpediente ?? expediente?.expediente ?? folioExp;
   const contribuyente = expediente?.nombreContribuyente ?? expediente?.contribuyente ?? '[CONTRIBUYENTE]';
 
-  const handleGenerarACCI = async () => {
-    if (!titularRequerido || !motivosRequerimiento) {
-      setError('El titular requerido y los motivos del requerimiento son obligatorios.');
-      return;
-    }
-    setGenerando(true);
-    setError(null);
-    setExito(false);
+  useEffect(() => {
+  if (!folioExp || folioExp === '[FOLIO]') return;
+  fetch(`${API}/api/v1/quejas-ari/contexto/${folioExp}`)
+    .then(r => r.ok ? r.json() : null)
+    .then(ctx => setIdQueja(ctx?.idQueja ?? null))
+    .catch(() => {});
+}, [folioExp]);
 
-    try {
-      const params = new URLSearchParams({
-        folioAcci: folioExp,
-        expediente: numExpediente,
-        contribuyente: contribuyente,
-        autoridadFiscal: dependencia,
-        numOficioRecibido: numOficio,
-        fechaOficio: FECHA_HOY,
-        fechaRecepcion: FECHA_HOY,
-        encargadoDependencia: encargado,
-        dependencia: dependencia,
-        fechaProveido: FECHA_HOY,
-        documentosAnexos: documentosAnexos || '',
-        titularRequerido: titularRequerido,
-        motivosRequerimiento: motivosRequerimiento,
-        inicialesAsesor: inicialesAsesor || '',
-      });
+ const handleGenerarACCI = async () => {
+  if (!titularRequerido || !motivosRequerimiento) {
+    setError('El titular requerido y los motivos del requerimiento son obligatorios.');
+    return;
+  }
+  setGenerando(true);
+  setError(null);
+  setExito(false);
 
-      const res = await fetch(
-        `${API}/api/v1/contestacion-autoridad/generar-acci?${params.toString()}`,
-        { method: 'POST' }
-      );
+  try {
+    const payload = {
+      folioExpediente: folioExp,
+      contribuyente: contribuyente,
+      dependencia: dependencia,
+      numOficioRecibido: numOficio,
+      fechaOficio: FECHA_HOY,
+      fechaRecepcion: FECHA_HOY,
+      encargadoDependencia: encargado,
+      fechaProveido: FECHA_HOY,
+      documentosAnexos: documentosAnexos || '',
+      titularRequerido: titularRequerido,
+      motivosRequerimiento: motivosRequerimiento,
+      inicialesAsesor: inicialesAsesor || '',
+      // idQueja e idOficioAutoridad: NO se mandan — el backend los resuelve solo
+    };
 
-      if (!res.ok) throw new Error(`Error ${res.status}`);
+    const res = await fetch(`${API}/api/v1/quejas-acci`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-      const data = await res.json();
-      setUrlDocx(data.url ?? null);
-      setExito(true);
-    } catch (e) {
-      setError('Error al generar el ACCI: ' + e.message);
-    } finally {
-      setGenerando(false);
-    }
-  };
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+
+    const data = await res.json();
+    setUrlDocx(data.rutaPdfAcci ?? data.url ?? null);
+    setExito(true);
+  } catch (e) {
+    setError('Error al generar el ACCI: ' + e.message);
+  } finally {
+    setGenerando(false);
+  }
+};
 
   return (
     <section className="ca-card">

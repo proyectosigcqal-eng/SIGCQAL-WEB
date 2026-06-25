@@ -8,7 +8,7 @@ import '@/features/modulo-area-sustantiva/admin/styles/gestion-admin.css';
 
 export const GestionUsuariosPage = () => {
   const {
-    usuarios, roles, cargando, error,
+    usuarios, roles, areas, cargando, error,
     busqueda, setBusqueda,
     crearUsuario, actualizarRoles, darBaja,
   } = useGestionUsuarios();
@@ -85,7 +85,7 @@ export const GestionUsuariosPage = () => {
         abierto={modalUsuario}
         onCerrar={() => setModalUsuario(false)}
         onGuardar={crearUsuario}
-        areas={[]}
+        areas={areas} 
       />
 
       {/* ── Modal roles ── */}
@@ -95,6 +95,7 @@ export const GestionUsuariosPage = () => {
         roles={roles}
         onCerrar={() => { setModalRoles(false); setUsuarioRoles(null); }}
         onGuardar={actualizarRoles}
+        
       />
 
       {/* ── Confirmación de baja ── */}
