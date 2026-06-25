@@ -78,7 +78,11 @@ export const GestionAsesoresPage = () => {
         <TablaAsesores
           asesores={asesores}
           cargando={cargando}
-          onEditar={(a) => { setAsesorEditar(a); setModalAbierto(true); }}
+          onEditar={(a) => { 
+  console.log('>>> abriendo modal con:', a.apellidoPaterno); // ✅ agrega temporalmente
+  setAsesorEditar(a); 
+  setModalAbierto(true); 
+}}
           onBaja={(a) => { setErrorBaja(null); setConfirmBaja(a); }}
         />
       </div>

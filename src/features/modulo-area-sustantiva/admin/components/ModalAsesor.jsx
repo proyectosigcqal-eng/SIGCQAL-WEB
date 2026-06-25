@@ -8,36 +8,41 @@ export const ModalAsesor = ({ abierto, asesor, onCerrar, onGuardar }) => {
   const [guardando, setGuardando] = useState(false);
   const [error,     setError]     = useState(null);
 
-  useEffect(() => {
-    if (asesor) {
-      setForm({
-        nombre:          asesor.nombre          ?? '',
-        apellidoPaterno: asesor.apellidoPaterno ?? '',
-        apellidoMaterno: asesor.apellidoMaterno ?? '',
-        especialidad:    asesor.especialidad    ?? '',
-        rfc:             asesor.rfc             ?? '',
-        correo:          asesor.correo          ?? '',
-        telefono:        asesor.telefono        ?? '',
-      });
-    } else {
-      setForm({ nombre:'', apellidoPaterno:'', apellidoMaterno:'',
-                especialidad:'', rfc:'', correo:'', telefono:'' });
-    }
-    setError(null);
-  }, [asesor, abierto]);
+  // ModalAsesor.jsx
+useEffect(() => {
+  if (abierto && asesor) {         
+    console.log('>>> asesor en modal:', JSON.stringify(asesor));
+    setForm({
+      nombre:          asesor.nombre          ?? '',
+      apellidoPaterno: asesor.apellidoPaterno ?? '',
+      apellidoMaterno: asesor.apellidoMaterno ?? '',
+      especialidad:    asesor.especialidad    ?? '',
+      rfc:             asesor.rfc             ?? '',
+      correo:          asesor.correo          ?? '',
+      telefono:        asesor.telefono        ?? '',
+    });
+  } else if (!abierto) {          
+    setForm({
+      nombre: '', apellidoPaterno: '', apellidoMaterno: '',
+      especialidad: '', rfc: '', correo: '', telefono: '',
+    });
+  }
+  setError(null);
+}, [abierto, asesor]);              
 
   if (!abierto) return null;
 
-  const campo = (label, key, placeholder, req) => (
-    <div className="gadmin-field">
-      <label>{label}{req && <span style={{color:'#dc2626'}}> *</span>}</label>
-      <input
-        value={form[key]}
-        onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
-        placeholder={placeholder}
-      />
-    </div>
-  );
+const campo = (label, key, placeholder, req) => (
+  <div className="gadmin-field">
+    <label>{label}{req && <span style={{color:'#dc2626'}}> *</span>}</label>
+    <input
+      value={form[key]}
+      onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+      placeholder={placeholder}
+      style={{ color: '#000000' }}   // ✅ agrega esto temporalmente
+    />
+  </div>
+);
 
   const handleGuardar = async () => {
     if (!form.nombre || !form.apellidoPaterno) {
@@ -55,6 +60,8 @@ export const ModalAsesor = ({ abierto, asesor, onCerrar, onGuardar }) => {
       setGuardando(false);
     }
   };
+
+  console.log('>>> form state:', form);
 
   return (
     <div className="gadmin-overlay">

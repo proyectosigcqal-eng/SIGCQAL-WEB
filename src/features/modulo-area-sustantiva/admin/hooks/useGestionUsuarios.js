@@ -5,6 +5,7 @@ const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 export const useGestionUsuarios = () => {
   const [usuarios, setUsuarios]   = useState([]);
   const [roles,    setRoles]      = useState([]);
+  const [areas,    setAreas]    = useState([]);
   const [cargando, setCargando]   = useState(true);
   const [error,    setError]      = useState(null);
   const [busqueda, setBusqueda]   = useState('');
@@ -12,12 +13,14 @@ export const useGestionUsuarios = () => {
   const cargar = useCallback(async () => {
     setCargando(true);
     try {
-      const [uRes, rRes] = await Promise.all([
+      const [uRes, rRes, aRes] = await Promise.all([
         fetch(`${API}/catalogos/usuarios`),
         fetch(`${API}/catalogos/roles`),
+        fetch(`${API}/catalogos/areas`),
       ]);
       setUsuarios(uRes.ok ? await uRes.json() : []);
       setRoles(rRes.ok    ? await rRes.json() : []);
+      setAreas(aRes.ok    ? await aRes.json() : []);
       setError(null);
     } catch {
       setError('No se pudieron cargar los usuarios.');
@@ -65,7 +68,7 @@ export const useGestionUsuarios = () => {
 
   return {
     usuarios: usuariosFiltrados,
-    roles, cargando, error, busqueda, setBusqueda,
+    roles, areas,cargando, error, busqueda, setBusqueda,
     crearUsuario, actualizarRoles, darBaja,
     recargar: cargar,
   };
