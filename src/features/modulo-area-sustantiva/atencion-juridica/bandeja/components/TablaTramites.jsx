@@ -24,7 +24,6 @@ const BadgeEstatus = ({ label, bloqueado }) => (
   </span>
 );
 
-// Devuelve SIEMPRE un arreglo: [{ tipo: 'navegacion'|'descarga', label, ruta? , url? }]
 const calcularAcciones = (t, estUp) => {
   if (estUp.includes("ASIGNADA A ASESOR")) {
     if (t.checklistCompleto) {
@@ -78,6 +77,11 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes("ARI")) {
     return [
+      {
+        tipo: "descarga",
+        label: "DESCARGAR ARI",
+        url: `${API_BASE}/api/v1/quejas-ari/folio/${t.folio}/descargar`,
+      },
       t.tieneOficio
         ? {
             tipo: "navegacion",
@@ -94,6 +98,11 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes("OFICIO")) {
     return [
+      {
+        tipo: "descarga",
+        label: "DESCARGAR Oficio",
+        url: `${API_BASE}/api/v1/oficio-notificacion/folio/${t.folio}/descargar`,
+      },
       t.tieneContestacion
         ? {
             tipo: "navegacion",
@@ -120,6 +129,11 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes("ACCI")) {
     return [
+      {
+        tipo: "descarga",
+        label: "DESCARGAR ACCI",
+        url: `${API_BASE}/api/v1/quejas-acci/folio/${t.folio}/descargar`,
+      },
       t.tieneResolucion
         ? {
             tipo: "navegacion",
@@ -136,6 +150,11 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes("RESOLUCIÓN") || estUp.includes("RESOLUCION")) {
     return [
+      {
+        tipo: "descarga",
+        label: "DESCARGAR Resolución",
+        url: `${API_BASE}/api/modulo-area-sustantiva/resolucion-final/folio/${t.folio}/descargar`,
+      },
       {
         tipo: "navegacion",
         label: "NOTIFICAR",
@@ -170,7 +189,6 @@ export const TablaTramites = ({ tramites }) => {
   const navigate = useNavigate();
   const [tipoActivo, setTipoActivo] = useState("QUEJAS_RECLAMACIONES");
 
-  // Hook IRL — solo hace fetch cuando el tab IRL esté activo
   const isIrlActivo = tipoActivo === "REPRESENTACION_LEGAL_IRL";
   const {
     busqueda: irlBusqueda,
@@ -230,7 +248,7 @@ export const TablaTramites = ({ tramites }) => {
         ))}
       </div>
 
-      {/* ── Tab IRL: Renderiza TablaIrl con sus sub-switches ── */}
+      {/* ── Tab IRL ── */}
       {isIrlActivo ? (
         <TablaIrl
           subSwitchActivo={subSwitchActivo}
@@ -242,99 +260,104 @@ export const TablaTramites = ({ tramites }) => {
           error={irlError}
           SUB_SWITCHES={SUB_SWITCHES}
         />
-      ) : /* ── Tab Quejas: lógica existente sin cambios ── */
-      tramitesFiltrados.length === 0 ? (
+      ) : tramitesFiltrados.length === 0 ? (
         <div className="bdg-empty">
-          <p>No se encontraron trámites con los filtros seleccionados.</p>
+          <div className="bdg-empty-icon">📂</div>
+          <p>
+            {tipoActivo === "QUEJAS_RECLAMACIONES"
+              ? "No se encontraron trámites con los filtros seleccionados."
+              : "Este módulo estará disponible próximamente."}
+          </p>
         </div>
       ) : (
-        <table className="bdg-table">
-          <thead>
-            <tr>
-              <th>FOLIO ASESORÍA</th>
-              <th>EXPEDIENTE QUEJA</th>
-              <th>QUEJOSO</th>
-              <th>ASUNTO</th>
-              <th>ESTATUS</th>
-              <th>SEMÁFORO/CONTADOR</th>
-              <th>ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tramitesFiltrados.map((t) => {
-              const bloqueado = t.bloqueado === true;
-              const estUp = (t.estatus ?? "").toUpperCase();
-              const acciones = calcularAcciones(t, estUp);
+        <div className="bdg-table-responsive">
+          <table className="bdg-table">
+            <thead>
+              <tr>
+                <th>FOLIO ASESORÍA</th>
+                <th>EXPEDIENTE QUEJA</th>
+                <th>QUEJOSO</th>
+                <th>ASUNTO</th>
+                <th>ESTATUS</th>
+                <th>SEMÁFORO / CONTADOR</th>
+                <th>ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tramitesFiltrados.map((t) => {
+                const bloqueado = t.bloqueado === true;
+                const estUp = (t.estatus ?? "").toUpperCase();
+                const acciones = calcularAcciones(t, estUp);
 
-              return (
-                <tr
-                  key={t.id}
-                  className={bloqueado ? "bdg-row--bloqueado" : ""}
-                >
-                  <td>
-                    <div className="bdg-folio">{t.folio}</div>
-                    <div className="bdg-sub">{t.municipio}</div>
-                  </td>
-                  <td>
-                    <div className="bdg-folio">{t.folio}</div>
-                  </td>
-                  <td>
-                    <div className="bdg-contribuyente">{t.contribuyente}</div>
-                  </td>
-                  <td>
-                    <div className="bdg-asunto">{t.asunto}</div>
-                  </td>
-                  <td>
-                    <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
-                  </td>
-                  <td>
-                    {estUp.includes("ASIGNADA A ASESOR") ||
-                    estUp.includes("VALIDACIÓN") ||
-                    estUp.includes("VALIDACION") ? (
-                      <SemaforoContador folio={t.folio} />
-                    ) : (
-                      <span style={{ color: "#999", fontSize: "0.8rem" }}>
-                        —
-                      </span>
-                    )}
-                  </td>
-                  <td className="bdg-action-cell">
-                    {bloqueado ? (
-                      <button
-                        className="bdg-btn-action bdg-btn-action--disabled"
-                        disabled
-                      >
-                        CERRADO
-                      </button>
-                    ) : (
-                      acciones.map((accion, i) =>
-                        accion.tipo === "descarga" ? (
-                          <a
-                            key={i}
-                            className="bdg-btn-action bdg-btn-action--secundario"
-                            href={accion.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {accion.label}
-                          </a>
-                        ) : (
-                          <button
-                            key={i}
-                            className="bdg-btn-action"
-                            onClick={() => navigate(accion.ruta)}
-                          >
-                            {accion.label}
-                          </button>
-                        ),
-                      )
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                return (
+                  <tr
+                    key={t.id}
+                    className={bloqueado ? "bdg-row--bloqueado" : ""}
+                  >
+                    <td>
+                      <div className="bdg-folio">{t.folio}</div>
+                      <div className="bdg-sub">{t.municipio}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-folio-secundario">{t.idExpediente}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-contribuyente">{t.contribuyente}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-asunto">{t.asunto}</div>
+                    </td>
+                    <td>
+                      <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
+                    </td>
+                    <td>
+                      {estUp.includes("ASIGNADA A ASESOR") ||
+                      estUp.includes("VALIDACIÓN") ||
+                      estUp.includes("VALIDACION") ? (
+                        <SemaforoContador folio={t.folio} />
+                      ) : (
+                        <span className="bdg-divider-null">—</span>
+                      )}
+                    </td>
+                    <td className="bdg-action-cell">
+                      {bloqueado ? (
+                        <button
+                          className="bdg-btn-action bdg-btn-action--disabled"
+                          disabled
+                        >
+                          CERRADO
+                        </button>
+                      ) : (
+                        acciones.map((accion, i) =>
+                          accion.tipo === "descarga" ? (
+                            <a
+                              key={i}
+                              className="bdg-btn-action bdg-btn-action--secundario"
+                              href={accion.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <span className="bdg-btn-icon">📥</span>
+                              {accion.label}
+                            </a>
+                          ) : (
+                            <button
+                              key={i}
+                              className="bdg-btn-action"
+                              onClick={() => navigate(accion.ruta)}
+                            >
+                              {accion.label}
+                            </button>
+                          )
+                        )
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

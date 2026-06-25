@@ -12,7 +12,9 @@ export const useGestionAsesores = () => {
     setCargando(true);
     fetch(`${API}/catalogos/asesores`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(data => { setAsesores(Array.isArray(data) ? data : []); setError(null); })
+      
+      .then(data => { console.log('>>> asesores raw:', JSON.stringify(data[0]));  
+      setAsesores(Array.isArray(data) ? data : []); setError(null); })
       .catch(() => setError('No se pudieron cargar los asesores.'))
       .finally(() => setCargando(false));
   }, []);
