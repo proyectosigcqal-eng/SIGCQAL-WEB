@@ -1,10 +1,13 @@
+// features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites.jsx
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SemaforoContador } from '@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo';
 import { SemaforoPlazosAutoridad } from '@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/components/SemaforoPlazosAutoridad';
 import BitacoraHistoricaSustantivaModal from '../../../../../pages/modulo-area-sustantiva/bitacora-historica-sustantiva/BitacoraHistoricaSustantivaModal';
 import { FileText } from 'lucide-react';
-
+import { useBandejaIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/hooks/useBandejaIrl";
+import { TablaIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/TablaIrl";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
@@ -34,12 +37,7 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes('CIR')) {
     return [
-      {
-        tipo: 'descarga',
-        label: 'DESCARGAR CIR',
-        // ✅ ya estaba correcta — coincide con ConstanciaInternaRemisionController
-        url: `${API_BASE}/api/v1/expedientes/folio/${t.folio}/constancia-interna-remision/descargar`,
-      },
+      { tipo: 'descarga', label: 'DESCARGAR CIR', url: `${API_BASE}/api/v1/expedientes/folio/${t.folio}/constancia-interna-remision/descargar` },
       t.tieneAri
         ? { tipo: 'navegacion', label: 'VER ARI',     ruta: `/area-sustantiva/quejas-ari/${t.folio}` }
         : { tipo: 'navegacion', label: 'GENERAR ARI', ruta: `/area-sustantiva/quejas-ari/${t.folio}` },
@@ -48,12 +46,7 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes('ARI')) {
     return [
-      {
-        tipo: 'descarga',
-        label: 'DESCARGAR ARI',
-        // ✅ corregido — coincide con el nuevo endpoint en QuejasAriController
-        url: `${API_BASE}/api/v1/quejas-ari/folio/${t.folio}/descargar`,
-      },
+      { tipo: 'descarga', label: 'DESCARGAR ARI', url: `${API_BASE}/api/v1/quejas-ari/folio/${t.folio}/descargar` },
       t.tieneOficio
         ? { tipo: 'navegacion', label: 'VER OFICIO',     ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` }
         : { tipo: 'navegacion', label: 'GENERAR OFICIO', ruta: `/atencion-juridica/oficio-notificacion/${t.folio}` },
@@ -62,12 +55,7 @@ const calcularAcciones = (t, estUp) => {
 
   if (estUp.includes('OFICIO')) {
     return [
-      {
-        tipo: 'descarga',
-        label: 'DESCARGAR Oficio',
-        // ✅ corregido — coincide con el nuevo endpoint en OficioNotificacionController
-        url: `${API_BASE}/api/v1/oficio-notificacion/folio/${t.folio}/descargar`,
-      },
+      { tipo: 'descarga', label: 'DESCARGAR Oficio', url: `${API_BASE}/api/v1/oficio-notificacion/folio/${t.folio}/descargar` },
       t.tieneContestacion
         ? { tipo: 'navegacion', label: 'VER CONTESTACIÓN',       ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
         : { tipo: 'navegacion', label: 'REGISTRAR CONTESTACIÓN', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` },
@@ -75,34 +63,24 @@ const calcularAcciones = (t, estUp) => {
   }
 
   if (estUp.includes('CONTESTACIÓN') || estUp.includes('CONTESTACION')) {
-    return [
-      { tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }
-    ];
+    return [{ tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/contestacion-autoridad/${t.folio}` }];
   }
 
   if (estUp.includes('ACCI')) {
     return [
-      {
-        tipo: 'descarga',
-        label: 'DESCARGAR ACCI',
-        // ✅ corregido — coincide con el nuevo endpoint en QuejasAcciController
-        url: `${API_BASE}/api/v1/quejas-acci/folio/${t.folio}/descargar`,
-      },
+      { tipo: 'descarga', label: 'DESCARGAR ACCI', url: `${API_BASE}/api/v1/quejas-acci/folio/${t.folio}/descargar` },
       t.tieneResolucion
         ? { tipo: 'navegacion', label: 'VER RESOLUCIÓN',     ruta: `/atencion-juridica/resolucion-final/${t.folio}` }
         : { tipo: 'navegacion', label: 'GENERAR RESOLUCIÓN', ruta: `/atencion-juridica/resolucion-final/${t.folio}` },
     ];
   }
 
- if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION')) {
-  return [
-    {
-      tipo: 'descarga',
-      label: 'DESCARGAR Resolución',
-      url: `${API_BASE}/api/modulo-area-sustantiva/resolucion-final/folio/${t.folio}/descargar`,
-    },
-    { tipo: 'navegacion', label: 'NOTIFICAR', ruta: `/area-sustantiva/cierre-test/${t.folio}` }];
-}
+  if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION')) {
+    return [
+      { tipo: 'descarga',   label: 'DESCARGAR Resolución', url: `${API_BASE}/api/modulo-area-sustantiva/resolucion-final/folio/${t.folio}/descargar` },
+      { tipo: 'navegacion', label: 'NOTIFICAR',             ruta: `/area-sustantiva/cierre-test/${t.folio}` },
+    ];
+  }
 
   if (estUp.includes('NOTIFICACIÓN FINAL') || estUp.includes('NOTIFICACION FINAL')) {
     return [{ tipo: 'navegacion', label: 'CERRAR EXPEDIENTE', ruta: `/area-sustantiva/cierre-test/${t.folio}` }];
@@ -110,18 +88,31 @@ const calcularAcciones = (t, estUp) => {
 
   return [{ tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` }];
 };
+
 export const TablaTramites = ({ tramites }) => {
   const navigate = useNavigate();
-  const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
+
+  const [tipoActivo, setTipoActivo]               = useState('QUEJAS_RECLAMACIONES');
   const [idQuejaSeleccionada, setIdQuejaSeleccionada] = useState(null);
 
-  const tramitesFiltrados = tipoActivo === 'QUEJAS_RECLAMACIONES'
-    ? (tramites ?? [])
-    : [];
+  const isIrlActivo = tipoActivo === 'REPRESENTACION_LEGAL_IRL';
+  const {
+    busqueda: irlBusqueda,
+    setBusqueda: setIrlBusqueda,
+    subSwitchActivo,
+    setSubSwitchActivo,
+    items: irlItems,
+    cargando: irlCargando,
+    error: irlError,
+    SUB_SWITCHES,
+  } = useBandejaIrl({ enabled: isIrlActivo });
+
+  const tramitesFiltrados = tipoActivo === 'QUEJAS_RECLAMACIONES' ? (tramites ?? []) : [];
 
   return (
     <div className="bdg-tabla-wrapper">
-      {/* ── Tabs / Switch de Etapas moderno utilizando clases CSS ── */}
+
+      {/* ── Switch triple ── */}
       <div className="bdg-switch-bar">
         {TIPO_TRAMITE_TABS.map((tab) => (
           <button
@@ -135,7 +126,19 @@ export const TablaTramites = ({ tramites }) => {
         ))}
       </div>
 
-      {tramitesFiltrados.length === 0 ? (
+      {/* ── Tab IRL ── */}
+      {isIrlActivo ? (
+        <TablaIrl
+          subSwitchActivo={subSwitchActivo}
+          setSubSwitchActivo={setSubSwitchActivo}
+          busqueda={irlBusqueda}
+          setBusqueda={setIrlBusqueda}
+          items={irlItems}
+          cargando={irlCargando}
+          error={irlError}
+          SUB_SWITCHES={SUB_SWITCHES}
+        />
+      ) : tramitesFiltrados.length === 0 ? (
         <div className="bdg-empty">
           <div className="bdg-empty-icon">📂</div>
           <p>
@@ -145,7 +148,6 @@ export const TablaTramites = ({ tramites }) => {
           </p>
         </div>
       ) : (
-        /* Contenedor responsivo para evitar desbordamientos */
         <div className="bdg-table-responsive">
           <table className="bdg-table">
             <thead>
@@ -156,7 +158,7 @@ export const TablaTramites = ({ tramites }) => {
                 <th>ASUNTO</th>
                 <th>ESTATUS</th>
                 <th>SEMÁFORO / CONTADOR</th>
-                <th style={{ textAlignment: 'right' }}>ACCIONES</th>
+                <th>ACCIONES</th>
               </tr>
             </thead>
             <tbody>
@@ -192,15 +194,16 @@ export const TablaTramites = ({ tramites }) => {
                       }
                     </td>
                     <td className="bdg-action-cell">
-                      {/* Botón Bitácora */}
-                        <button 
-                          className="bdg-btn-action bdg-btn-action--icon" // Añade una clase para el estilo
-                          onClick={() => setIdQuejaSeleccionada(t.id)}
-                          title="Ver Bitácora"
-                        >
-                          <FileText size={16} /> {/* El icono */}
-                          <span>BITÁCORA</span>
-                        </button>
+
+                      {/* Botón Bitácora — siempre visible */}
+                      <button
+                        className="bdg-btn-action bdg-btn-action--icon"
+                        onClick={() => setIdQuejaSeleccionada(t.id)}
+                        title="Ver Bitácora"
+                      >
+                        <FileText size={16} />
+                        <span>BITÁCORA</span>
+                      </button>
 
                       {bloqueado ? (
                         <button className="bdg-btn-action bdg-btn-action--disabled" disabled>
@@ -238,13 +241,15 @@ export const TablaTramites = ({ tramites }) => {
           </table>
         </div>
       )}
-        {/* RENDERIZA EL MODAL AQUÍ, fuera de la tabla, antes de cerrar el div padre */}
-        {idQuejaSeleccionada && (
-          <BitacoraHistoricaSustantivaModal 
-            idQueja={idQuejaSeleccionada} 
-            onClose={() => setIdQuejaSeleccionada(null)} 
-          />
-        )}
+
+      {/* Modal de bitácora — fuera de la tabla */}
+      {idQuejaSeleccionada && (
+        <BitacoraHistoricaSustantivaModal
+          idQueja={idQuejaSeleccionada}
+          onClose={() => setIdQuejaSeleccionada(null)}
+        />
+      )}
+
     </div>
   );
 };
