@@ -474,6 +474,16 @@
   background: #eff6ff;
 }
 
+.bdg-switch-btn.is-active {
+  background: #1e3a8a;
+  color: #fff;
+}
+
+.bdg-btn-action--icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
 .bdg-btn-icon {
   font-size: 0.85rem;
 }
@@ -497,4 +507,5 @@
   margin: 0;
   font-size: 0.9rem;
   font-weight: 500;
+
 }
