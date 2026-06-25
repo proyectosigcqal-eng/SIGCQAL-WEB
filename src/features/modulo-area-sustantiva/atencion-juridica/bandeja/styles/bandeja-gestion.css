@@ -461,3 +461,9 @@
   background: #1e3a8a;
   color: #fff;
 }
+
+.bdg-btn-action--icon {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

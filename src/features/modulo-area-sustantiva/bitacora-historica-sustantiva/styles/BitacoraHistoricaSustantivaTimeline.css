@@ -1,0 +1,76 @@
+.timeline-container {
+    position: relative;
+    padding: 20px 0;
+    margin-left: 20px;
+    border-left: 2px solid #e0e0e0; /* La línea vertical */
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 30px;
+    padding-left: 20px;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -9px; /* Centra el punto en la línea */
+    top: 0;
+    width: 16px;
+    height: 16px;
+    background-color: #3f51b5; /* Color corporativo */
+    border-radius: 50%;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between; /* Empuja el título a la izq y fecha a la der */
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.event-title {
+    margin: 0;
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+.event-date {
+    font-size: 0.85rem;
+    color: #64748b;
+    white-space: nowrap;
+    margin-left: 15px; /* Espacio extra de seguridad */
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 2px 8px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+
+.event-author {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+.event-file-link {
+    display: inline-block;
+    margin: 8px 0;
+    font-size: 0.9rem;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.event-file-link:hover {
+    text-decoration: underline;
+}
+
+/* Ajustes adicionales para que se vea ordenado */
+.timeline-content {
+    margin-bottom: 20px;
+}
