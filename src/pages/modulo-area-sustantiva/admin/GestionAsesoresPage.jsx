@@ -46,12 +46,7 @@ export const GestionAsesoresPage = () => {
           </p>
         </div>
         <div className="gadmin-actions">
-          <button
-            className="gadmin-btn gadmin-btn--alta"
-            onClick={() => { setAsesorEditar(null); setModalAbierto(true); }}
-          >
-            <UserPlus size={16} /> Alta de Asesor
-          </button>
+
         </div>
       </div>
 

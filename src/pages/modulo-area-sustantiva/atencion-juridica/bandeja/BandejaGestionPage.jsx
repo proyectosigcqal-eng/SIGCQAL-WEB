@@ -1,6 +1,8 @@
+import { useState } from 'react'; // <-- IMPORTANTE: Agregamos useState
 import { Search } from 'lucide-react';
 import { useBandejaGestion } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion';
-import { TablaTramites } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites';
+// ¡NUEVO! Importamos también la constante TIPO_TRAMITE_TABS de la tabla
+import { TablaTramites, TIPO_TRAMITE_TABS } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css';
 
 export const BandejaGestionPage = () => {
@@ -10,6 +12,9 @@ export const BandejaGestionPage = () => {
     tramites, cargando, error,
     ETAPAS,
   } = useBandejaGestion();
+
+  // ¡NUEVO! Estado heredado de la tabla para controlar el Triple Switch
+  const [tipoActivo, setTipoActivo] = useState('QUEJAS_RECLAMACIONES');
 
   return (
     <div className="bdg-page">
@@ -21,9 +26,23 @@ export const BandejaGestionPage = () => {
         </div>
       </div>
 
+      {/* ── ¡NUEVO! TRIPLE SWITCH PUESTO HASTA ARRIBA DEL TODO ── */}
+      <div className="bdg-switch-bar" style={{ marginBottom: '16px' }}>
+        {TIPO_TRAMITE_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setTipoActivo(tab.id)}
+            className={`bdg-switch-btn ${tipoActivo === tab.id ? 'is-active' : ''}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       <div className="bdg-filtros-card">
 
-        {/* ── Buscador ── */}
+        {/* ── Buscador (Ahora queda por debajo del triple switch) ── */}
         <div className="bdg-filtros-row">
           <div className="bdg-search-wrap">
             <Search className="bdg-search-icon" size={16} />
@@ -37,7 +56,8 @@ export const BandejaGestionPage = () => {
           </div>
         </div>
 
-        {/* ── Switch de etapas ── */}
+        {/* ── Switch de etapas (Barra gris intermedia) ── */}
+       {/* ── Switch de etapas (Barra gris intermedia) ── */}
         <div className="bdg-switch-bar">
           {ETAPAS.map((etapa, i) => (
             <button
@@ -61,7 +81,8 @@ export const BandejaGestionPage = () => {
         ) : error ? (
           <div className="bdg-empty"><p>{error}</p></div>
         ) : (
-          <TablaTramites tramites={tramites} />
+          /* ¡NUEVO! Le pasamos el `tipoActivo` a la tabla como prop */
+          <TablaTramites tramites={tramites} tipoActivo={tipoActivo} />
         )}
 
       </div>
