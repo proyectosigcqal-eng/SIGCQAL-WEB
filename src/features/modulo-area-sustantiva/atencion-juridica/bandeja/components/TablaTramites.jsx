@@ -11,11 +11,38 @@ import { TablaIrl } from "@/features/modulo-area-sustantiva/representacion-legal
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
-const TIPO_TRAMITE_TABS = [
+export const TIPO_TRAMITE_TABS = [
   { id: 'ASESORIA_SIMPLIFICADA',    label: 'Asesoría Simplificada' },
   { id: 'QUEJAS_RECLAMACIONES',     label: 'Quejas y Reclamaciones' },
   { id: 'REPRESENTACION_LEGAL_IRL', label: 'Representación Legal IRL' },
 ];
+
+const formatFecha = (valor) => {
+  if (!valor) return null;
+  const fecha = new Date(valor);
+  if (isNaN(fecha.getTime())) return null;
+  return fecha.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+const obtenerFechaRegistro = (t, estUp) => {
+  if (estUp.includes('CIR'))                                            return t.fechaCir;
+  if (estUp.includes('ARI'))                                            return t.fechaAri;
+  if (estUp.includes('OFICIO'))                                         return t.fechaOficio;
+  if (estUp.includes('CONTESTACIÓN') || estUp.includes('CONTESTACION')) return t.fechaContestacion;
+  if (estUp.includes('ACCI'))                                           return t.fechaAcci;
+  if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION'))     return t.fechaResolucion;
+  return null;
+};
+
+const obtenerEtiquetaFecha = (estUp) => {
+  if (estUp.includes('CIR'))                                            return 'CIR generada';
+  if (estUp.includes('ARI'))                                            return 'ARI generado';
+  if (estUp.includes('OFICIO'))                                         return 'Oficio emitido';
+  if (estUp.includes('CONTESTACIÓN') || estUp.includes('CONTESTACION')) return 'Contestación recibida';
+  if (estUp.includes('ACCI'))                                           return 'ACCI generado';
+  if (estUp.includes('RESOLUCIÓN') || estUp.includes('RESOLUCION'))     return 'Resolución emitida';
+  return null;
+};
 
 const BadgeEstatus = ({ label, bloqueado }) => (
   <span className={`bdg-badge ${bloqueado ? 'bdg-badge--bloqueado' : 'bdg-badge--estatus'}`}>
@@ -89,11 +116,12 @@ const calcularAcciones = (t, estUp) => {
   return [{ tipo: 'navegacion', label: 'ATENDER', ruta: `/atencion-juridica/checklist/${t.folio}` }];
 };
 
-export const TablaTramites = ({ tramites }) => {
+export const TablaTramites = ({ tramites, tipoActivo }) => {
   const navigate = useNavigate();
 
-  const [tipoActivo, setTipoActivo]               = useState('QUEJAS_RECLAMACIONES');
+  // El estado de tipoActivo se movió al Padre para poder renderizar el switch arriba
   const [idQuejaSeleccionada, setIdQuejaSeleccionada] = useState(null);
+
 
   const isIrlActivo = tipoActivo === 'REPRESENTACION_LEGAL_IRL';
   const {
@@ -108,23 +136,15 @@ export const TablaTramites = ({ tramites }) => {
   } = useBandejaIrl({ enabled: isIrlActivo });
 
   const tramitesFiltrados = tipoActivo === 'QUEJAS_RECLAMACIONES' ? (tramites ?? []) : [];
-
+const primerEstatusUp = (tramitesFiltrados[0]?.estatus ?? '').toUpperCase();
+const usaSemaforo = primerEstatusUp.includes('ASIGNADA A ASESOR') ||
+                     primerEstatusUp.includes('VALIDACIÓN') ||
+                     primerEstatusUp.includes('VALIDACION');
+const headerSemaforo = usaSemaforo ? 'SEMÁFORO / CONTADOR' : 'FECHA DE REGISTRO';
   return (
     <div className="bdg-tabla-wrapper">
 
-      {/* ── Switch triple ── */}
-      <div className="bdg-switch-bar">
-        {TIPO_TRAMITE_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setTipoActivo(tab.id)}
-            className={`bdg-switch-btn ${tipoActivo === tab.id ? 'is-active' : ''}`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+     
 
       {/* ── Tab IRL ── */}
       {isIrlActivo ? (
@@ -157,7 +177,7 @@ export const TablaTramites = ({ tramites }) => {
                 <th>QUEJOSO</th>
                 <th>ASUNTO</th>
                 <th>ESTATUS</th>
-                <th>SEMÁFORO / CONTADOR</th>
+                <th>{headerSemaforo}</th>
                 <th>ACCIONES</th>
               </tr>
             </thead>
@@ -185,14 +205,25 @@ export const TablaTramites = ({ tramites }) => {
                     <td>
                       <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
                     </td>
-                    <td>
-                      {(estUp.includes('ASIGNADA A ASESOR') ||
-                        estUp.includes('VALIDACIÓN') ||
-                        estUp.includes('VALIDACION'))
-                        ? <SemaforoContador folio={t.folio} />
-                        : <span className="bdg-divider-null">—</span>
-                      }
-                    </td>
+                 <td>
+  {(estUp.includes('ASIGNADA A ASESOR') ||
+    estUp.includes('VALIDACIÓN') ||
+    estUp.includes('VALIDACION'))
+    ? <SemaforoContador folio={t.folio} />
+    : (() => {
+        const fecha    = formatFecha(obtenerFechaRegistro(t, estUp));
+        const etiqueta = obtenerEtiquetaFecha(estUp);
+        return fecha
+          ? (
+            <div className="bdg-fecha-registro">
+              <div className="bdg-fecha-label">{etiqueta}</div>
+              <div className="bdg-fecha-valor">{fecha}</div>
+            </div>
+          )
+          : <span className="bdg-divider-null">—</span>;
+      })()
+  }
+</td>
                     <td className="bdg-action-cell">
 
                       {/* Botón Bitácora — siempre visible */}

@@ -59,7 +59,7 @@ export const useGestionAsesores = () => {
   return {
     asesores: asesoresFiltrados,
     cargando, error, busqueda, setBusqueda,
-    crearAsesor, actualizarAsesor, darBaja,
+   actualizarAsesor, darBaja,
     recargar: cargar,
   };
 };

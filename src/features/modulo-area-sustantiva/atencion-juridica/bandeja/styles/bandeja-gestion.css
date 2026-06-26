@@ -509,3 +509,14 @@
   font-weight: 500;
 
 }
+
+.bdg-fecha-label {
+  font-size: 0.72rem;
+  color: var(--color-text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.bdg-fecha-valor {
+  font-weight: 600;
+}
+}

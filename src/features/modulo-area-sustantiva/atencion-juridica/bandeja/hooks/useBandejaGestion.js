@@ -37,6 +37,12 @@ const adaptarTramite = (item) => {
     tieneAcci:         item.tiene_acci ?? false,
     tieneResolucion:   item.tiene_resolucion ?? false,
     checklistCompleto: item.checklist_completo ?? false,
+    fechaCir:          item.fechaCir          ?? item.fecha_cir          ?? null,
+    fechaAri:          item.fechaAri          ?? item.fecha_ari          ?? null,
+    fechaOficio:       item.fechaOficio       ?? item.fecha_oficio       ?? null,
+    fechaContestacion: item.fechaContestacion ?? item.fecha_contestacion ?? null,
+    fechaAcci:         item.fechaAcci         ?? item.fecha_acci         ?? null,
+    fechaResolucion:   item.fechaResolucion   ?? item.fecha_resolucion   ?? null,
   };
 };
 // Enriquecimiento opcional — no bloquea el render principal
