@@ -40,6 +40,8 @@ import { GestionAsesoresPage } from "./pages/modulo-area-sustantiva/admin/Gestio
 import { GestionUsuariosPage } from "./pages/modulo-area-sustantiva/admin/GestionUsuariosPage";
 import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage";
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
+
+import { CrearRLCirPage } from "./pages/modulo-area-sustantiva/rl-cir/rl-cir/CrearRLCirPage"; // ← ADD THIS
 import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
 
 function App() {
@@ -511,6 +513,17 @@ function App() {
             }
           />
 
+          <Route
+            path="/area-sustantiva/rl-cir/:folio?"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/rl-cir"]}
+              >
+                <CrearRLCirPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Ruta de prueba para Cierre */}
           <Route
             path="area-sustantiva/cierre-test/:idExpediente?"
@@ -537,6 +550,7 @@ function App() {
           }
         />
       </Routes>
+      
     </BrowserRouter>
   );
 }
