@@ -3,21 +3,43 @@
 import { useNavigate } from "react-router-dom";
 import { formatDateTimeDisplay } from "@/shared/utils/dateUtils";
 
-/**
- * Tabla de Representación Legal IRL.
- *
- * Se usa standalone (BandejaIrlPage) y después se integra
- * dentro del tab "REPRESENTACION_LEGAL_IRL" de TablaTramites.jsx.
- */
+const tabStyle = (active) => ({
+  padding: "8px 20px",
+  fontSize: 13,
+  fontWeight: 600,
+  border: "none",
+  whiteSpace: "nowrap",
+  cursor: "pointer",
+  background: active ? "#1e3a8a" : "var(--color-background-primary)",
+  color: active ? "#fff" : "var(--color-text-secondary)",
+  transition: "background 0.12s, color 0.12s",
+});
+
+const estatusTabStyle = (active) => ({
+  padding: "5px 14px",
+  fontSize: 12,
+  fontWeight: 500,
+  border: "none",
+  whiteSpace: "nowrap",
+  cursor: "pointer",
+  background: active ? "#1e40af" : "var(--color-background-primary)",
+  color: active ? "#fff" : "var(--color-text-secondary)",
+  transition: "background 0.12s, color 0.12s",
+  flexShrink: 0,
+});
+
 export const TablaIrl = ({
   subSwitchActivo,
   setSubSwitchActivo,
+  estatusActivo,
+  setEstatusActivo,
   busqueda,
   setBusqueda,
   items,
   cargando,
   error,
   SUB_SWITCHES,
+  ESTATUS_TABS,
 }) => {
   const navigate = useNavigate();
 
@@ -27,12 +49,24 @@ export const TablaIrl = ({
 
   return (
     <div>
-      {/* ── Sub-switches ── */}
+      {/* ── Búsqueda (arriba de todo) ── */}
+      <div style={{ marginBottom: "0.75rem" }}>
+        <input
+          className="bdg-input"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Buscar por Folio de Gobierno o Contribuyente..."
+          aria-label="Buscar"
+          style={{ width: "100%", maxWidth: 400 }}
+        />
+      </div>
+
+      {/* ── Sub-switches (Directo / Evolución) ── */}
       <div
         style={{
           display: "flex",
           gap: 0,
-          marginBottom: "1.25rem",
+          marginBottom: "0.75rem",
           borderRadius: 8,
           border: "0.5px solid var(--color-border-secondary)",
           overflow: "hidden",
@@ -45,25 +79,11 @@ export const TablaIrl = ({
             type="button"
             onClick={() => setSubSwitchActivo(sw.key)}
             style={{
-              padding: "8px 20px",
-              fontSize: 13,
-              fontWeight: 600,
-              border: "none",
-              whiteSpace: "nowrap",
-              cursor: "pointer",
+              ...tabStyle(subSwitchActivo === sw.key),
               borderRight:
                 i < SUB_SWITCHES.length - 1
                   ? "0.5px solid var(--color-border-secondary)"
                   : "none",
-              background:
-                subSwitchActivo === sw.key
-                  ? "#1e3a8a"
-                  : "var(--color-background-primary)",
-              color:
-                subSwitchActivo === sw.key
-                  ? "#fff"
-                  : "var(--color-text-secondary)",
-              transition: "background 0.12s, color 0.12s",
             }}
           >
             {sw.label}
@@ -71,16 +91,29 @@ export const TablaIrl = ({
         ))}
       </div>
 
-      {/* ── Búsqueda ── */}
-      <div style={{ marginBottom: "1rem" }}>
-        <input
-          className="bdg-input"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-          placeholder="Buscar por Folio de Gobierno o Contribuyente..."
-          aria-label="Buscar"
-          style={{ width: "100%", maxWidth: 400 }}
-        />
+      {/* ── Tabs de estatus (con scroll horizontal) ── */}
+      <div
+        style={{
+          display: "flex",
+          overflowX: "auto",
+          marginBottom: "1rem",
+          borderRadius: 6,
+          border: "0.5px solid var(--color-border-secondary)",
+        }}
+      >
+        {ESTATUS_TABS.map((tab) => (
+          <button
+            key={tab.id ?? "todos"}
+            type="button"
+            onClick={() => setEstatusActivo(tab.id)}
+            style={{
+              ...estatusTabStyle(estatusActivo === tab.id),
+              borderRight: "0.5px solid var(--color-border-secondary)",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* ── Estado: cargando / error / vacío ── */}
@@ -97,7 +130,6 @@ export const TablaIrl = ({
           <p>No se encontraron registros de Representación Legal IRL.</p>
         </div>
       ) : (
-        /* ── Tabla ── */
         <table className="bdg-table">
           <thead>
             <tr>
