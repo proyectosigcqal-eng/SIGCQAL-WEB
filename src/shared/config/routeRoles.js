@@ -1,3 +1,4 @@
+
  export const ROUTE_ROLES = {
 //   // Correspondencia
 //   '/correspondencia/registrar':          ['Administrador', 'Administrador Correspondencia'],
@@ -38,6 +39,7 @@
 //   '/atencion-juridica/demanda-amparo':   ['Administrador', 'Asesor'],
 
 //   // Área Sustantiva — Asesor
+//   '/area-sustantiva/busqueda-contribuyente': ['Administrador', 'Asesor'],
 //   '/area-sustantiva/registro-expediente': ['Administrador', 'Asesor'],
 //   '/area-sustantiva/quejas-ari':          ['Administrador', 'Asesor'],
 

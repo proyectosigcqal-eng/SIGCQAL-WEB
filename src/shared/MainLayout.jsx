@@ -55,7 +55,7 @@ export const MainLayout = () => {
             icon: <CheckSquare size={20} />,
             roles: ['Administrador', 'Asesor'],
             items: [
-                { label: 'Registro de Expedientes', to: '/area-sustantiva/registro-expediente', icon: <FolderCheck size={18} /> },
+                { label: 'Registro de Expedientes', to: '/area-sustantiva/busqueda-contribuyente', icon: <FolderCheck size={18} /> },
                 { label: 'Registro y Calificación',  to: '/atencion-juridica/clasificacion',     icon: <CheckSquare size={18} /> },
                 { label: 'Gestión de Quejas',        to: '/atencion-juridica/bandeja',           icon: <Archive size={18} /> },
                 { label: 'Seguimiento de Queja',     to: '/atencion-juridica/bandeja-tramites-irl', icon: <Archive size={18} /> },
