@@ -1,0 +1,279 @@
+/* =========================================
+   VARIABLES GLOBALES Y RESET BÁSICO
+   ========================================= */
+:root {
+  --bg-sidebar: #0f172a;       /* Azul marino muy oscuro */
+  --bg-sidebar-hover: #1e293b; /* Hover de los items */
+  --bg-sidebar-active: #38bdf815; /* Fondo sutil para elemento activo */
+  
+  --text-sidebar-main: #f8fafc;
+  --text-sidebar-muted: #94a3b8;
+  --accent-color: #38bdf8;     /* Azul brillante para destacados */
+  --accent-danger: #ef4444;    /* Rojo para salir */
+  
+  --bg-main: #f1f5f9;          /* Gris muy claro para el fondo principal */
+  --bg-header: rgba(255, 255, 255, 0.85); /* Header con efecto vidrio */
+  --text-main: #1e293b;
+}
+
+/* =========================================
+   ESTRUCTURA PRINCIPAL (LAYOUT)
+   ========================================= */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* =========================================
+   MENÚ LATERAL (SIDEBAR)
+   ========================================= */
+.app-sidebar {
+  width: 280px;
+  background-color: var(--bg-sidebar);
+  color: var(--text-sidebar-main);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.sidebar-brand {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar-brand h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin: 0;
+  color: #ffffff;
+}
+
+.sidebar-menu {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Scrollbar personalizado para el sidebar */
+.sidebar-menu::-webkit-scrollbar { width: 6px; }
+.sidebar-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+/* Botones Principales (Módulos) */
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-parent-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-sidebar-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.menu-parent-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-parent-btn:hover {
+  background-color: var(--bg-sidebar-hover);
+  color: var(--text-sidebar-main);
+}
+
+.menu-parent-btn.active-parent {
+  color: var(--accent-color);
+}
+
+/* Submenús */
+.menu-children-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 14px;
+  margin-top: 4px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+}
+
+.menu-children-container.open {
+  max-height: 500px; /* Suficiente para expandir */
+  opacity: 1;
+  margin-bottom: 8px;
+}
+
+/* Línea conectora visual para los submenús */
+.menu-children-container {
+  border-left: 1px solid rgba(255,255,255,0.08);
+  margin-left: 22px;
+}
+
+.menu-child-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  text-decoration: none;
+  color: var(--text-sidebar-muted);
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.menu-child-link:hover {
+  background-color: var(--bg-sidebar-hover);
+  color: var(--text-sidebar-main);
+}
+
+.menu-child-link.active-child {
+  background-color: var(--bg-sidebar-active);
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+/* Animación del Chevron */
+.menu-chevron {
+  transition: transform 0.3s ease;
+}
+.menu-chevron.rotate {
+  transform: rotate(180deg);
+}
+
+/* Footer del Sidebar */
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background-color: transparent;
+  color: var(--text-sidebar-muted);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--accent-danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* =========================================
+   ÁREA PRINCIPAL Y HEADER
+   ========================================= */
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Previene desbordamientos en flexbox */
+}
+
+.app-header {
+  height: 72px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+  background: var(--bg-header);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  z-index: 5;
+}
+
+.header-breadcrumb {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.header-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: #ffffff;
+  padding: 6px 8px 6px 16px;
+  border-radius: 50px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.02);
+}
+
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.profile-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.profile-role {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #38bdf8, #0284c7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+
+/* Área donde cargan las vistas hijas (Tablas, formularios, etc.) */
+.app-content-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+.app-content-wrapper {
+  max-width: 1400px; /* Evita que el contenido se estire demasiado en pantallas ultra anchas */
+  margin: 0 auto;
+}
