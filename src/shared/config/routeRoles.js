@@ -35,6 +35,7 @@ export const ROUTE_ROLES = {
   '/area-sustantiva/quejas-ari': ['Administrador', 'Abogado', 'Abogado Calificador'],
 
   '/area-sustantiva/rl-cir': ['Administrador', 'Abogado', 'Abogado Calificador'],
+  '/area-sustantiva/queja-rl-cir': ['Administrador', 'Abogado', 'Abogado Calificador'],
 
 };
 

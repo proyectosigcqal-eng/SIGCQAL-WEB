@@ -42,7 +42,12 @@ import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-f
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
 
 import { CrearRLCirPage } from "./pages/modulo-area-sustantiva/rl-cir/rl-cir/CrearRLCirPage"; // ← ADD THIS
+import { CrearQuejaRlCirPage } from "./pages/modulo-area-sustantiva/rl-cir/quejaRlCir/CrearQuejaRlCirPage";
+
 import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
+
+
+
 
 function App() {
   return (
@@ -520,6 +525,17 @@ function App() {
                 allowedRoles={ROUTE_ROLES["/area-sustantiva/rl-cir"]}
               >
                 <CrearRLCirPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="area-sustantiva/queja-rl-cir"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/queja-rl-cir"]}
+              >
+                <CrearQuejaRlCirPage />
               </ProtectedRoute>
             }
           />
