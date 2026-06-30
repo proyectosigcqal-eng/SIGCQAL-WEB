@@ -8,16 +8,16 @@ import { ClasificacionAtencion } from './ClasificacionAtencion';
 import { ComponenteCritico } from './ComponenteCritico';
 import { ModalGuardarExpediente } from './ModalGuardarExpediente';
 import {SolicitanteRepresentante} from './Solicitante';
-
+ 
 // The presentational section components were moved to separate files under components/
-
+ 
 export const RegistroExpedienteForm = () => {
   const [municipios, setMunicipios] = useState([]);
   const [asesores, setAsesores] = useState([]);
   const [estados, setEstados] = useState([]);
   const [isLoadingCatalogos, setIsLoadingCatalogos] = useState(true);
   const [catalogosError, setCatalogosError] = useState(null);
-
+ 
   const {
     formData,
     erroresCampo,
@@ -26,10 +26,10 @@ export const RegistroExpedienteForm = () => {
     successMessage,
     mostrarModalGuardar,
     asesorAsignado,
+    esContribuyenteExistente, // NUEVO
     handleChange,
     handleChangeNested,
     handleTipoPersonaChange,
-    handleTipoRepresentanteChange,
     handleTieneRepresentanteChange,
     handleClasificacionChange,
     handleFileChange,
@@ -37,24 +37,24 @@ export const RegistroExpedienteForm = () => {
     handleConfirmarGuardar,
     handleCancelarGuardar
   } = useRegistroExpediente();
-
+ 
   // Cargar catálogos al montar el componente
   useEffect(() => {
     const cargarCatalogos = async () => {
       try {
         setIsLoadingCatalogos(true);
         setCatalogosError(null);
-        
+ 
         const [municipiosData, asesoresData, estadosData] = await Promise.all([
           getMunicipios(),
           getAsesores(),
           getEstados()
         ]);
-        
+ 
         console.log('Municipios cargados:', municipiosData);
         console.log('Asesores cargados:', asesoresData);
         console.log('Estados cargados:', estadosData);
-
+ 
         setMunicipios(municipiosData || []);
         setAsesores(asesoresData || []);
         setEstados(estadosData || []);
@@ -65,10 +65,10 @@ export const RegistroExpedienteForm = () => {
         setIsLoadingCatalogos(false);
       }
     };
-
+ 
     cargarCatalogos();
   }, []);
-
+ 
   return (
     <div className="registro-expediente-container">
       <form onSubmit={handleSubmit} className="registro-expediente-form">
@@ -83,7 +83,7 @@ export const RegistroExpedienteForm = () => {
               {successMessage}
             </div>
           )}
-
+ 
           {isLoadingCatalogos ? (
             <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando datos...</div>
           ) : (
@@ -95,7 +95,7 @@ export const RegistroExpedienteForm = () => {
                 municipios={municipios}
                 asesores={asesores}
               />
-
+ 
               <DatosContribuyente
                 formData={formData}
                 erroresCampo={erroresCampo}
@@ -104,25 +104,26 @@ export const RegistroExpedienteForm = () => {
                 handleChangeNested={handleChangeNested}
                 handleTipoPersonaChange={handleTipoPersonaChange}
                 estados={estados}
+                readonly={esContribuyenteExistente}
               />
               <SolicitanteRepresentante
                 formData={formData}
                 erroresCampo={erroresCampo}
                 handleChangeNested={handleChangeNested}
               />
-
+ 
               <ClasificacionAtencion
                 formData={formData}
                 erroresCampo={erroresCampo}
                 handleClasificacionChange={handleClasificacionChange}
               />
-
+ 
               <ComponenteCritico onGuardar={handleSubmit} isLoading={isLoading} />
             </>
           )}
         </div>
       </form>
-
+ 
       <ModalGuardarExpediente
         visible={mostrarModalGuardar}
         isLoading={isLoading}
