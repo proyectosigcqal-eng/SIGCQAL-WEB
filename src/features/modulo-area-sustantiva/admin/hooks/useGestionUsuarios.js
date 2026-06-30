@@ -14,7 +14,8 @@ export const useGestionUsuarios = () => {
     setCargando(true);
     try {
       const [uRes, rRes, aRes] = await Promise.all([
-        fetch(`${API}/catalogos/usuarios`),
+        //fetch(`${API}/catalogos/usuarios`),
+        fetch(`${API}/api/v1/admin/usuarios`), 
         fetch(`${API}/catalogos/roles`),
         fetch(`${API}/catalogos/areas`),
       ]);
@@ -42,6 +43,7 @@ export const useGestionUsuarios = () => {
   };
 
   const actualizarRoles = async (idUsuario, idRoles) => {
+    console.log('>>> PUT roles:', idUsuario, idRoles);
     const res = await fetch(`${API}/api/v1/admin/usuarios/${idUsuario}/roles`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

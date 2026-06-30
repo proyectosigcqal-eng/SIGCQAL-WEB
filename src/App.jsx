@@ -40,7 +40,9 @@ import { GestionAsesoresPage } from "./pages/modulo-area-sustantiva/admin/Gestio
 import { GestionUsuariosPage } from "./pages/modulo-area-sustantiva/admin/GestionUsuariosPage";
 import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage";
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
-import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
+import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage";
+import { DemandaAmparoPage } from "./pages/modulo-area-sustantiva/demanda-amparo/DemandaAmparoPage";
+import { SeleccionRolPage } from "./pages/auth/seleccion-rol/SeleccionRolPage";
 
 function App() {
   return (
@@ -48,6 +50,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainLayout />}>
+        <Route path="/seleccion-rol" element={<SeleccionRolPage />} />
           <Route index element={<Navigate to="/login" replace />} />
           {/* Flujo de creación de Memorándum */}
           <Route
@@ -381,6 +384,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="atencion-juridica/demanda-amparo/:folio"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/demanda-amparo']}>
+      <DemandaAmparoPage />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="admin/asesores"
