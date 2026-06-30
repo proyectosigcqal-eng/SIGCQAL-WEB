@@ -10,7 +10,8 @@ export const useGestionAsesores = () => {
 
   const cargar = useCallback(() => {
     setCargando(true);
-    fetch(`${API}/catalogos/asesores`)
+    //fetch(`${API}/catalogos/asesores`)
+    fetch(`${API}/api/v1/admin/asesores`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       
       .then(data => { console.log('>>> asesores raw:', JSON.stringify(data[0]));  
