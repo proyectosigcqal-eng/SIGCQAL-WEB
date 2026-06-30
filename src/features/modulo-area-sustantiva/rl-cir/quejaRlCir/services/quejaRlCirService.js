@@ -41,3 +41,21 @@ export const obtenerResolucionPorId = async (id) => {
         throw error;
     }
 };
+
+/**
+ * OPCIONAL: Descargar el archivo directamente desde el FileDownloadController usando Axios
+ * @param {string} nombreArchivo - Ejemplo: "QUEJA_RL_CIR_RES_1.docx"
+ * @returns {Promise<Blob>}
+ */
+export const descargarQuejaDocxPorNombre = async (nombreArchivo) => {
+    try {
+        // Apunta al FileDownloadController que acabamos de corregir en el back
+        const response = await axios.get(`${API_BASE_URL}/api/files/queja-rl-cir/${nombreArchivo}`, {
+            responseType: 'blob' 
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error al descargar el documento DOCX:", error);
+        throw error;
+    }
+};

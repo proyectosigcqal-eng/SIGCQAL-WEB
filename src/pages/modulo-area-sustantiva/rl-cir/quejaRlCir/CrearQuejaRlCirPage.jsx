@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
-import { crearQuejaRlCir, obtenerResolucionPorId } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/services/quejaRlCirService';
+import { fileUrl } from '@/shared/config/api'; // <- Usamos tu configurador de URL estática
 import { FormularioQuejaRlCir } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/components/FormularioQuejaRlCir';
 import { VistaPreviaQuejaRlCir } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/components/VistaPreviaQuejaRlCir';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+import { crearQuejaRlCir, obtenerResolucionPorId } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/services/quejaRlCirService';
 
 const obtenerFechaActual = () => {
   const meses = [
@@ -36,17 +36,32 @@ export const CrearQuejaRlCirPage = () => {
   const catalogos = useCatalogos();
 
   const [formData, setFormData] = useState(ESTADO_INICIAL);
-  const [datosResolucion, setDatosResolucion] = useState(null); // Estado para almacenar los datos extras del backend
+  const [datosResolucion, setDatosResolucion] = useState(null); 
   const [cargando, setCargando] = useState(false);
+  
+  // Clonado de QuejasAri: Manejo del estado como URL directa
   const [downloadUrl, setDownloadUrl] = useState(null);
 
-  // Efecto para buscar los datos por Id de resolución final sin alterar el payload a enviar
+  // Helper idéntico a QuejasAri adaptado a las propiedades de tu DTO RL_CIR
+  const extraerRutaArchivo = (resultado) => {
+    if (!resultado) return null;
+    if (typeof resultado === 'string') return resultado;
+    if (typeof resultado === 'object') {
+      return resultado.rutaPdfQuejaRlCir // <- Propiedad que viene en tu DTO
+        || resultado.rutaDocxQuejaRlCir
+        || resultado.url
+        || resultado.archivo
+        || null;
+    }
+    return null;
+  };
+
+  const construirUrlDescarga = (ruta) => (ruta ? fileUrl(ruta) : null);
+
   useEffect(() => {
     if (formData.idResolucionFinal) {
       obtenerResolucionPorId(formData.idResolucionFinal)
-        .then(data => {
-          setDatosResolucion(data);
-        })
+        .then(data => setDatosResolucion(data))
         .catch(err => console.error("No se pudieron cargar los datos de vista previa:", err));
     }
   }, [formData.idResolucionFinal]);
@@ -56,10 +71,7 @@ export const CrearQuejaRlCirPage = () => {
     const value = e.target ? e.target.value : e.value;
 
     if (name === 'idAsesorRemitente' || name === 'idAsesorRecibe') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value ? Number(value) : ''
-      }));
+      setFormData(prev => ({ ...prev, [name]: value ? Number(value) : '' }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -69,28 +81,24 @@ export const CrearQuejaRlCirPage = () => {
     e.preventDefault();
     setCargando(true);
 
-    // 1. Obtenemos el día de hoy en formato internacional YYYY-MM-DD
     const hoy = new Date();
     const anio = hoy.getFullYear();
     const mes = String(hoy.getMonth() + 1).padStart(2, '0');
     const dia = String(hoy.getDate()).padStart(2, '0');
-    const fechaFormatoJava = `${anio}-${mes}-${dia}`; // "2026-06-30"
+    const fechaFormatoJava = `${anio}-${mes}-${dia}`; 
 
-    // 2. Creamos una copia del payload reemplazando únicamente la fecha de emisión
-    const payloadListo = {
-      ...formData,
-      fechaEmision: fechaFormatoJava
-    };
-    
-    console.log("PAYLOAD ENVIADO A /queja-rl-cir/generar (CORREGIDO):", payloadListo);
+    const payloadListo = { ...formData, fechaEmision: fechaFormatoJava };
     
     try {
-      // 3. Enviamos el payload corregido al backend
       const res = await crearQuejaRlCir(payloadListo);
-      if (res?.id) {
-        setDownloadUrl(`${API_BASE}/api/v1/queja-rl-cir/${res.id}/descargar`);
-      }
-      alert('Documento Queja RL_CIR generado con éxito.');
+      
+      // Extraemos la ruta del documento exactamente como lo hace QuejasAri
+      const rutaDescarga = extraerRutaArchivo(res);
+      const urlFinal = construirUrlDescarga(rutaDescarga);
+      
+      setDownloadUrl(urlFinal);
+
+      alert(`Documento Queja RL_CIR generado con éxito.${rutaDescarga ? ' Ya está disponible para descargar.' : ''}`);
     } catch (err) {
       console.error(err);
       alert('Error al guardar la queja.');
@@ -111,8 +119,9 @@ export const CrearQuejaRlCirPage = () => {
             handleSubmit={handleSubmit}
             catalogos={catalogos}
             cargando={cargando}
-            downloadUrl={downloadUrl}
+            downloadUrl={downloadUrl} // <- Le regresamos 'downloadUrl' a tu formulario original
           />
+
           <button 
             type="button" 
             className="btn-secundario" 
@@ -126,8 +135,9 @@ export const CrearQuejaRlCirPage = () => {
         <section className="panel-vista-previa-contenedor" style={{ height: '100%', overflow: 'hidden' }}>
           <VistaPreviaQuejaRlCir 
             formData={formData} 
-            datosResolucion={datosResolucion} // Pasamos los campos extras aquí
+            datosResolucion={datosResolucion} 
             asesores={catalogos?.asesores || catalogos?.usuarios || []} 
+            downloadUrl={downloadUrl} // Pasado también a la vista previa por consistencia
           />
         </section>
 

@@ -6,6 +6,7 @@ export const FormularioQuejaRlCir = ({ formData, handleChange, handleSubmit, cat
 
   const textoDefaultArticulos = "Artículos 14 y 16 de la Constitución Política de los Estados Unidos Mexicanos.";
 
+  // Inicializa el fundamento por defecto si viene vacío
   useEffect(() => {
     if (!formData.articulos) {
       handleChange({
@@ -48,14 +49,13 @@ export const FormularioQuejaRlCir = ({ formData, handleChange, handleSubmit, cat
         <label>Artículos</label>
         <textarea 
           name="articulos" 
-          value={formData.articulos ?? textoDefaultArticulos} 
+          value={formData.articulos || ''} // Cambiado a '||' para evitar problemas de control de estado en React
           onChange={handleChange} 
           rows={4} 
           placeholder="Escriba los artículos de fundamento..."
         />
       </div>
 
-      {/* CAMPO NÚMERO DE OFICIO - UBICADO ABAJO DE ARTÍCULOS */}
       <div className="form-group full-width">
         <label>Número de Oficio</label>
         <input 
@@ -82,7 +82,11 @@ export const FormularioQuejaRlCir = ({ formData, handleChange, handleSubmit, cat
       <div className="form-row">
         <div className="form-group">
           <label>Asesor Remitente</label>
-          <select name="idAsesorRemitente" value={formData.idAsesorRemitente || ''} onChange={handleChange}>
+          <select 
+            name="idAsesorRemitente" 
+            value={formData.idAsesorRemitente || ''} 
+            onChange={handleChange}
+          >
             <option value="">-- Seleccione Asesor --</option>
             {listaAsesores.map(as => {
               const idReal = as.idAsesor ?? as.id;
@@ -97,7 +101,11 @@ export const FormularioQuejaRlCir = ({ formData, handleChange, handleSubmit, cat
 
         <div className="form-group">
           <label>Asesor que Recibe</label>
-          <select name="idAsesorRecibe" value={formData.idAsesorRecibe || ''} onChange={handleChange}>
+          <select 
+            name="idAsesorRecibe" 
+            value={formData.idAsesorRecibe || ''} 
+            onChange={handleChange}
+          >
             <option value="">-- Seleccione Asesor --</option>
             {listaAsesores.map(as => {
               const idReal = as.idAsesor ?? as.id;
@@ -128,6 +136,8 @@ export const FormularioQuejaRlCir = ({ formData, handleChange, handleSubmit, cat
         <button className="btn-primario" type="submit" disabled={cargando}>
           {cargando ? 'Guardando...' : 'Guardar Queja RL_CIR'}
         </button>
+
+        {/* Mapeo directo y nativo de la URL de descarga idéntico a QuejasAri */}
         {downloadUrl && (
           <a
             className="btn-descargar-quejaari"
@@ -136,7 +146,7 @@ export const FormularioQuejaRlCir = ({ formData, handleChange, handleSubmit, cat
             rel="noopener noreferrer"
             download
           >
-            Descargar Queja RL_CIR
+            📥 Descargar Queja RL_CIR
           </a>
         )}
       </div>
