@@ -42,6 +42,9 @@
 //   '/area-sustantiva/busqueda-contribuyente': ['Administrador', 'Asesor'],
 //   '/area-sustantiva/registro-expediente': ['Administrador', 'Asesor'],
 //   '/area-sustantiva/quejas-ari':          ['Administrador', 'Asesor'],
+ // '/area-sustantiva/rl-cir': ['Administrador', 'Abogado', 'Abogado Calificador'],
+  //'/area-sustantiva/queja-rl-cir': ['Administrador', 'Abogado', 'Abogado Calificador'],
+
 
 //   // Admin — solo Administrador
 //   '/admin/usuarios':  ['Administrador'],

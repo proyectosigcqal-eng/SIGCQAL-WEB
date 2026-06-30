@@ -45,6 +45,14 @@ import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-
 import { DemandaAmparoPage } from "./pages/modulo-area-sustantiva/demanda-amparo/DemandaAmparoPage";
 import { SeleccionRolPage } from "./pages/auth/seleccion-rol/SeleccionRolPage";
 
+import { CrearRLCirPage } from "./pages/modulo-area-sustantiva/rl-cir/rl-cir/CrearRLCirPage"; // ← ADD THIS
+import { CrearQuejaRlCirPage } from "./pages/modulo-area-sustantiva/rl-cir/quejaRlCir/CrearQuejaRlCirPage";
+
+import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage";
+
+
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -535,6 +543,28 @@ function App() {
             }
           />
 
+          <Route
+            path="/area-sustantiva/rl-cir/:folio?"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/rl-cir"]}
+              >
+                <CrearRLCirPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="area-sustantiva/queja-rl-cir"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/queja-rl-cir"]}
+              >
+                <CrearQuejaRlCirPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Ruta de prueba para Cierre */}
           <Route
             path="area-sustantiva/cierre-test/:idExpediente?"
@@ -561,6 +591,7 @@ function App() {
           }
         />
       </Routes>
+      
     </BrowserRouter>
   );
 }

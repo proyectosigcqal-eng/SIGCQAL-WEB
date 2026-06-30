@@ -1,0 +1,177 @@
+.sigcqal-page-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+    background-color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+.split-view-container {
+    display: grid;
+    grid-template-columns: 35% 65%;
+    gap: 0;
+    flex: 1; 
+    overflow: hidden;
+    height: calc(100vh - 80px);
+}
+
+.panel-formulario {
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: white;
+    border-right: 1px solid #e2e8f0;
+}
+
+.panel-vista-previa-contenedor {
+    display: flex; 
+    justify-content: center;
+    background-color: #cbd5e1;
+    overflow-y: auto !important; 
+    overflow-x: hidden;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.panel-vista-previa {
+    padding: 2.5rem 1.5rem; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 30px; 
+    height: min-content; 
+    width: 100%; 
+    box-sizing: border-box;
+    align-self: flex-start; 
+}
+
+.quejaari-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    max-width: 100%;
+}
+
+.quejaari-form .full-width {
+    grid-column: 1 / -1;
+}
+
+.quejaari-form .form-row {
+    display: contents;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1A2238;
+    background-color: #ffffff;
+}
+
+.form-actions {
+    grid-column: 1 / -1;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-primario {
+    background-color: #1A2238;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-secundario {
+    background-color: transparent;
+    color: #1A2238;
+    border: 1px solid #1A2238;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-descargar-quejaari {
+    background-color: #1A2238;
+    color: white;
+    border: 1px solid #1A2238;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.hoja-membretada-papel {
+    background-color: #ffffff;
+    background-size: 100% 100%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 680px;
+    height: 880px; 
+    flex-shrink: 0; 
+    padding: 110px 65px 80px 65px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    border-radius: 4px;
+}
+
+.membrete-contenido {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+@media print {
+    .sigcqal-page-container, .split-view-container {
+        height: auto;
+        overflow: visible;
+        display: block;
+    }
+    .panel-formulario, .page-header {
+        display: none !important;
+    }
+    .hoja-membretada-papel {
+        width: 216mm !important;
+        height: 279mm !important;
+        padding: 40mm 20mm 30mm 20mm;
+        box-shadow: none;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
