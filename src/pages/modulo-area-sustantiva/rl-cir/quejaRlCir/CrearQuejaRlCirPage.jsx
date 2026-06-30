@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
-import { crearQuejaRlCir } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/services/quejaRlCirService';
+import { crearQuejaRlCir, obtenerResolucionPorId } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/services/quejaRlCirService';
 import { FormularioQuejaRlCir } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/components/FormularioQuejaRlCir';
 import { VistaPreviaQuejaRlCir } from '@/features/modulo-area-sustantiva/rl-cir/quejaRlCir/components/VistaPreviaQuejaRlCir';
-
-
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
@@ -14,17 +12,15 @@ const obtenerFechaActual = () => {
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
-  
   const hoy = new Date();
   const dia = String(hoy.getDate()).padStart(2, '0');
   const mes = meses[hoy.getMonth()];
   const anio = hoy.getFullYear();
-  
-  return `${dia} de ${mes} de ${anio}`; // Resultado: "29 de junio de 2026"
+  return `${dia} de ${mes} de ${anio}`;
 };
 
 const ESTADO_INICIAL = {
-  idResolucionFinal: 1, // Valor asignado por defecto para pruebas
+  idResolucionFinal: 1, 
   fechaEmision: obtenerFechaActual(),
   motivos: '',
   articulos: '',
@@ -35,15 +31,25 @@ const ESTADO_INICIAL = {
   director: ''
 };
 
-
-
 export const CrearQuejaRlCirPage = () => {
   const navigate = useNavigate();
   const catalogos = useCatalogos();
 
   const [formData, setFormData] = useState(ESTADO_INICIAL);
+  const [datosResolucion, setDatosResolucion] = useState(null); // Estado para almacenar los datos extras del backend
   const [cargando, setCargando] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState(null);
+
+  // Efecto para buscar los datos por Id de resolución final sin alterar el payload a enviar
+  useEffect(() => {
+    if (formData.idResolucionFinal) {
+      obtenerResolucionPorId(formData.idResolucionFinal)
+        .then(data => {
+          setDatosResolucion(data);
+        })
+        .catch(err => console.error("No se pudieron cargar los datos de vista previa:", err));
+    }
+  }, [formData.idResolucionFinal]);
 
   const handleChange = (e) => {
     const name = e.target ? e.target.name : e.name;
@@ -62,13 +68,25 @@ export const CrearQuejaRlCirPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
+
+    // 1. Obtenemos el día de hoy en formato internacional YYYY-MM-DD
+    const hoy = new Date();
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    const fechaFormatoJava = `${anio}-${mes}-${dia}`; // "2026-06-30"
+
+    // 2. Creamos una copia del payload reemplazando únicamente la fecha de emisión
+    const payloadListo = {
+      ...formData,
+      fechaEmision: fechaFormatoJava
+    };
     
-    // Aquí verás reflejado exactamente la estructura limpia de tu JSON requerido
-    console.log("PAYLOAD ENVIADO A /queja-rl-cir/generar:", formData);
+    console.log("PAYLOAD ENVIADO A /queja-rl-cir/generar (CORREGIDO):", payloadListo);
     
     try {
-      const res = await crearQuejaRlCir(formData);
-      
+      // 3. Enviamos el payload corregido al backend
+      const res = await crearQuejaRlCir(payloadListo);
       if (res?.id) {
         setDownloadUrl(`${API_BASE}/api/v1/queja-rl-cir/${res.id}/descargar`);
       }
@@ -108,6 +126,7 @@ export const CrearQuejaRlCirPage = () => {
         <section className="panel-vista-previa-contenedor" style={{ height: '100%', overflow: 'hidden' }}>
           <VistaPreviaQuejaRlCir 
             formData={formData} 
+            datosResolucion={datosResolucion} // Pasamos los campos extras aquí
             asesores={catalogos?.asesores || catalogos?.usuarios || []} 
           />
         </section>

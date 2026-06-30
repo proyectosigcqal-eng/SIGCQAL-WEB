@@ -2,7 +2,7 @@ import React from 'react';
 import membreteImg from '@/assets/membrete.jpg';
 import '../styles/quejaRlCir.css';
 
-export const VistaPreviaQuejaRlCir = ({ formData = {}, asesores = [], tramiteContext = {} }) => {
+export const VistaPreviaQuejaRlCir = ({ formData = {}, datosResolucion = null, asesores = [], tramiteContext = {} }) => {
 
   const estiloHojaFondo = { backgroundImage: `url(${membreteImg})` };
   const borderStyle = '1px solid #000000';
@@ -21,12 +21,16 @@ export const VistaPreviaQuejaRlCir = ({ formData = {}, asesores = [], tramiteCon
   const nombreRemitente = asesorRemitenteSeleccionado?.nombre || 'Nombre asesor que remite';
   const nombreRecibe = asesorRecibeSeleccionado?.nombre || 'Nombre asesor que recibe';
 
-  // Variables de apoyo del trámite (si vienen en el contexto o en el formData de la URL)
-  const folioGobierno = formData.folioGobierno || tramiteContext.folio || '{{FOLIO_GOBIERNO}}';
-  const contribuyente = formData.contribuyente || tramiteContext.contribuyente || '{{CONTRIBUYENTE}}';
-  const numExpedienteOficial = formData.numExpedienteOficial || '{{NUM_EXPEDIENTE_OFICIAL}}';
-  const numeroOficioPuntoUno = formData.numeroOficioPuntoUno || '{{NUMERO_OFICIO}}';
-  const multasCredito = formData.multasCredito || '{{MULTAS_CREDITO}}';
+  // Mapeo priorizando el JSON de Resolución Final del Back-end
+  const numeroOficio = datosResolucion?.numeroOficio || '{{NUMERO_OFICIO}}';
+  const folioGobierno = datosResolucion?.folioGobierno || tramiteContext.folio || '{{FOLIO_GOBIERNO}}';
+  const contribuyente = datosResolucion?.nombreContribuyente || formData.contribuyente || tramiteContext.contribuyente || '{{CONTRIBUYENTE}}';
+  const identificacionOficial = datosResolucion?.identificacionOficial || '{{IDENTIFICACION_OFICIAL}}';
+  const numExpedienteOficial = datosResolucion?.numExpedienteOficial || '{{NUM_EXPEDIENTE_OFICIAL}}';
+  const numeroCreditoAri = datosResolucion?.numeroCreditoAri || '{{NUMERO_CREDITO_ARI}}';
+
+  // Mantenemos multasCredito por si el formulario original de quejas lo usara de fallback
+  const multasCredito = formData.multasCredito || numeroCreditoAri;
 
   return (
     <div className="panel-vista-previa" id="queja-rl-cir-pdf-content">
@@ -43,6 +47,7 @@ export const VistaPreviaQuejaRlCir = ({ formData = {}, asesores = [], tramiteCon
               <div style={{ alignSelf: 'flex-end', width: '50%', textAlign: 'left', marginTop: '5px', fontSize: '11px', paddingRight: '10px' }}>
                 <p style={{ margin: '2px 0' }}><strong>Número de Folio:</strong> {folioGobierno}.</p>
                 <p style={{ margin: '2px 0' }}><strong>Contribuyente:</strong> {contribuyente}.</p>
+                <p style={{ margin: '2px 0' }}><strong>Identificación Oficial:</strong> {identificacionOficial}.</p>
               </div>
             </div>
 
@@ -66,10 +71,10 @@ export const VistaPreviaQuejaRlCir = ({ formData = {}, asesores = [], tramiteCon
               <strong style={{ display: 'block', marginBottom: '6px' }}>Documentación que se remite:</strong>
               <ol style={{ margin: '0', paddingLeft: '20px', lineHeight: '1.4' }}>
                 <li style={{ marginBottom: '8px' }}>
-                  Copia simple de oficio {numeroOficioPuntoUno}, de la dirección de Ingresos de la secretaría de Finanzas del Estado de Zacatecas, donde se rinde informe respecto al Acuerdo de Acciones de Investigación derivado de la queja {numExpedienteOficial}.
+                  Copia simple de oficio {numeroOficio}, de la dirección de Ingresos de la secretaría de Finanzas del Estado de Zacatecas, donde se rinde informe respecto al Acuerdo de Acciones de Investigación derivado de la queja {numExpedienteOficial}.
                 </li>
                 <li>
-                  <strong>Anexo: Oficio {formData.oficio || '{{OFICIO}}'}</strong> dirigido al C. {contribuyente}, donde se le notifica que quedan sin efectos las multas de Impuesto Sobre Nómina con números de crédito {multasCredito}.
+                  <strong>Anexo: Oficio {formData.oficio || '{{OFICIO}}'}</strong> dirigido al C. {contribuyente}, donde se le notifica que quedan sin efectos las multas de Impuesto Sobre Nómina con números de crédito: {multasCredito}.
                 </li>
               </ol>
             </div>

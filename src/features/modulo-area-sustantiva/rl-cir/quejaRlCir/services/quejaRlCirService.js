@@ -3,6 +3,10 @@ import API_BASE_URL from '@/shared/config/api';
 
 const API_URL = `${API_BASE_URL}/queja-rl-cir`;
 
+
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API_RESOLUCION_FINAL = `${API}/api/modulo-area-sustantiva/resolucion-final`;
+
 /**
  * Crear un nuevo registro Queja_RL_CIR
  * @param {Object} payload - Datos esperados por el Back-End (QuejaRlCirRequestDTO)
@@ -25,4 +29,15 @@ export const crearQuejaRlCir = async (payload) => {
 export const listarQuejaRlCir = async () => {
     const res = await axios.get(`${API_URL}/listar`);
     return res.data;
+};
+
+
+export const obtenerResolucionPorId = async (id) => {
+    try {
+        const response = await axios.get(`${API_RESOLUCION_FINAL}/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al obtener resolución final por ID:", error.response?.data || error.message);
+        throw error;
+    }
 };
