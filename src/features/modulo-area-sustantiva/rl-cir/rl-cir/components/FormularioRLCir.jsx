@@ -109,6 +109,7 @@ export const FormularioRLCir = ({ formData, handleChange, handleSubmit, catalogo
         <button className="btn-primario" type="submit" disabled={cargando}>
           {cargando ? 'Guardando...' : 'Guardar RL_CIR'}
         </button>
+        
         {downloadUrl && (
           <a
             className="btn-descargar-quejaari"
@@ -117,7 +118,7 @@ export const FormularioRLCir = ({ formData, handleChange, handleSubmit, catalogo
             rel="noopener noreferrer"
             download
           >
-            Descargar RL_CIR
+            📥 Descargar RL_CIR
           </a>
         )}
       </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
-import { fileUrl } from '@/shared/config/api';
+import { fileUrl } from '@/shared/config/api'; 
 import { crearRLCir } from '@/features/modulo-area-sustantiva/rl-cir/rl-cir/services/rlCirService';
 import { FormularioRLCir } from '@/features/modulo-area-sustantiva/rl-cir/rl-cir/components/FormularioRLCir';
 import { VistaPreviaRLCir } from '@/features/modulo-area-sustantiva/rl-cir/rl-cir/components/VistaPreviaRLCir';
@@ -32,10 +32,34 @@ export const CrearRLCirPage = () => {
   const [formData, setFormData] = useState(ESTADO_INICIAL);
   const [cargando, setCargando] = useState(false);
   const [cargandoCtx, setCargandoCtx] = useState(true);
-  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [downloadUrl, setDownloadUrl] = useState(null); 
   const [errorCtx, setErrorCtx] = useState(null);
 
-  // 1. Cargar contexto del Expediente
+  // 1. Extractor adaptado específicamente a las llaves de respuesta para RL_CIR
+  const extraerRutaArchivo = (resultado) => {
+    if (!resultado) return null;
+    if (typeof resultado === 'string') return resultado;
+    if (typeof resultado === 'object') {
+      return resultado.rutaDocxRLCir 
+        || resultado.rutaPdfRLCir 
+        || resultado.rutaRLCir
+        || resultado.rutaArchivo
+        || resultado.url
+        || null;
+    }
+    return null;
+  };
+
+  const construirUrlDescarga = (ruta) => {
+    if (!ruta) return null;
+    // Si el backend ya devolvió la URL completa o la ruta relativa corregida de descargas
+    if (ruta.startsWith('http') || ruta.startsWith('/api/files')) {
+      return ruta.startsWith('http') ? ruta : `${API_BASE}${ruta}`;
+    }
+    return fileUrl(ruta);
+  };
+
+  // Cargar contexto del Expediente
   useEffect(() => {
     if (!folio) { setCargandoCtx(false); return; }
 
@@ -45,10 +69,6 @@ export const CrearRLCirPage = () => {
         
         if (res.ok) {
           const detalle = await res.json();
-          
-          console.log('--- VALIDACIÓN DE PAYLOAD REAL DE EXPEDIENTE ---');
-          console.log(detalle);
-          console.log('-------------------------------------------------');
           
           let contribuyenteAsignado = '';
           if (detalle?.contribuyenteCompleto) {
@@ -83,7 +103,7 @@ export const CrearRLCirPage = () => {
     })();
   }, [folio]);
 
-  // 2. Escuchar cambios de listas desplegables (CORREGIDO: validación idAsesor ?? id)
+  // Escuchar cambios de listas desplegables
   const handleChange = (e) => {
     const name = e.target ? e.target.name : e.name;
     const value = e.target ? e.target.value : e.value;
@@ -91,7 +111,6 @@ export const CrearRLCirPage = () => {
 
     if (name === 'idAsesorRemitente') {
       const numId = value ? Number(value) : '';
-      // CORRECCIÓN: Buscamos considerando ambas posibilidades de nombres de llaves primarias
       const objAsesor = listaAsesores.find(a => (a.idAsesor ?? a.id) === numId);
       
       setFormData(prev => ({
@@ -101,7 +120,6 @@ export const CrearRLCirPage = () => {
       }));
     } else if (name === 'idAsesorRecibe') {
       const numId = value ? Number(value) : '';
-      // CORRECCIÓN: Buscamos considerando ambas posibilidades de nombres de llaves primarias
       const objAsesor = listaAsesores.find(a => (a.idAsesor ?? a.id) === numId);
       
       setFormData(prev => ({
@@ -117,14 +135,27 @@ export const CrearRLCirPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
-    console.log("PAYLOAD QUE SE ENVIARÁ AL BACKEND:", formData);
+    setDownloadUrl(null); // Limpiamos estados de descargas previas
+    
     try {
       const res = await crearRLCir(formData);
+      console.log("Respuesta real del Backend en Consola:", res);
       
-      if (res?.id) {
-        setDownloadUrl(`${API_BASE}/api/v1/rl-cir/${res.id}/descargar`);
+      // 1. Validamos usando el identificador exacto que arrojó tu log: idRlCir
+      if (res && res.idRlCir) {
+        
+        const idExpedienteReal = res.idExpediente || formData.idExpediente;
+        const nombreArchivoDocx = `RL_CIR_EXP_${idExpedienteReal}.docx`;
+        
+        // 2. Apuntamos directo al controlador de descargas independientes que configuramos al inicio
+        const urlDescargaDirecta = `${API_BASE}/api/files/RLCir/${nombreArchivoDocx}`;
+        
+        setDownloadUrl(urlDescargaDirecta);
+        alert('Documento RL_CIR generado con éxito. El botón de descarga ya está disponible.');
+      } else {
+        alert('Documento generado, pero no se pudo recuperar el ID del registro para la descarga.');
       }
-      alert('Documento RL_CIR generado con éxito.');
+      
     } catch (err) {
       console.error(err);
       alert('Error al guardar y procesar la petición.');
@@ -152,7 +183,7 @@ export const CrearRLCirPage = () => {
             handleSubmit={handleSubmit}
             catalogos={catalogos}
             cargando={cargando}
-            downloadUrl={downloadUrl}
+            downloadUrl={downloadUrl} 
           />
           <button 
             type="button" 
@@ -164,7 +195,6 @@ export const CrearRLCirPage = () => {
           </button>
         </section>
 
-        {/* MODIFICACIÓN: Pasamos la lista de asesores directa de los catálogos a la Vista Previa */}
         <section className="panel-vista-previa-contenedor" style={{ height: '100%', overflow: 'hidden' }}>
           <VistaPreviaRLCir 
             formData={formData} 
