@@ -41,11 +41,10 @@ import { GestionAsesoresPage } from "./pages/modulo-area-sustantiva/admin/Gestio
 import { GestionUsuariosPage } from "./pages/modulo-area-sustantiva/admin/GestionUsuariosPage";
 import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage";
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
-
+import PersonalPage from "./pages/modulo-correspondencia/personal/PersonalPage";
 import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
 import BandejaComisionadoPage from "./pages/modulo-area-sustantiva/comisionado/BandejaComisionadoPage";
 
-import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage";
 import { DemandaAmparoPage } from "./pages/modulo-area-sustantiva/demanda-amparo/DemandaAmparoPage";
 import { SeleccionRolPage } from "./pages/auth/seleccion-rol/SeleccionRolPage";
 
@@ -600,6 +599,18 @@ function App() {
               allowedRoles={ROUTE_ROLES["/atencion-juridica/checklist"]}
             >
               <ChecklistDocumentosPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* ... dentro de <Route path="/" element={<MainLayout />}> ... */}
+
+        <Route
+          path="correspondencia/personal"
+          element={
+            <ProtectedRoute
+              allowedRoles={ROUTE_ROLES["/correspondencia/personal"]} // Asegúrate de definir esta ruta en tu config de roles
+            >
+              <PersonalPage />
             </ProtectedRoute>
           }
         />
