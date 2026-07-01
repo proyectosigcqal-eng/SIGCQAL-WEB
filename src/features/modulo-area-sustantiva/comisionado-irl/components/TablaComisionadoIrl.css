@@ -1,0 +1,37 @@
+.comisionado-irl-semaforo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.semaforo-verde,
+.semaforo-amarillo,
+.semaforo-rojo,
+.semaforo-vencido {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.semaforo-verde {
+  color: #28a745;
+}
+
+.semaforo-amarillo {
+  color: #ffc107;
+}
+
+.semaforo-rojo {
+  color: #dc3545;
+}
+
+.semaforo-vencido {
+  color: #6c757d;
+  text-decoration: line-through;
+}
+
+.comisionado-irl-semaforo-texto {
+  font-size: 0.8rem;
+  color: #666;
+}
