@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa - Sentencia Ejecutoria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-color: #f3f4f6;
+            --form-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-radius: 16px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .sentencia-form {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--form-bg);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        h3 { font-size: 1.75rem; margin-bottom: 2.5rem; color: var(--text-color); }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
+
+        .full-width { grid-column: span 2; }
+
+        .field { display: flex; flex-direction: column; }
+
+        .field label { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; color: #6b7280; }
+
+        /* Solo marcas asterisco en campos requeridos */
+        .required label::after { content: " *"; color: #ef4444; }
+
+        .field input, .field textarea {
+            height: 52px;
+            padding: 0 1.25rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+        }
+
+        .field textarea { height: auto; padding: 1.25rem; resize: vertical; }
+
+        .field input:focus, .field textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-submit {
+            grid-column: span 2;
+            margin-top: 1rem;
+            height: 52px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover { background-color: #2563eb; }
+
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width, .btn-submit { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+<form class="sentencia-form">
+    <h3>Registro de Sentencia Ejecutoria</h3>
+    
+    <div class="form-grid">
+        <div class="field required">
+            <label>ID Sentencia</label>
+            <input type="number" required>
+        </div>
+        <div class="field">
+            <label>ID Recurso de Revisión</label>
+            <input type="number">
+        </div>
+
+        <div class="field required">
+            <label>Número de Oficio</label>
+            <input type="text" maxlength="100" required>
+        </div>
+        <div class="field required">
+            <label>Fecha Declaración Ejecutoria</label>
+            <input type="date" required>
+        </div>
+
+        <div class="field full-width">
+            <label>Requerimiento de Cumplimiento</label>
+            <textarea rows="4"></textarea>
+        </div>
+        
+        <button type="submit" class="btn-submit">Guardar Ejecutoria</button>
+    </div>
+</form>
+
+</body>
+</html>
