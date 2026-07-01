@@ -5,7 +5,6 @@ const API_BASE =
   import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_dev";
 
 const ETAPAS = [
-  { key: "TODAS", label: "Todas", estatus: null },
   {
     key: "ASIGNADA_ASESOR",
     label: "Asignada a Asesor",

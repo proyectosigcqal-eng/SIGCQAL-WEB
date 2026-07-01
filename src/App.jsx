@@ -41,8 +41,6 @@ import { GestionAsesoresPage } from "./pages/modulo-area-sustantiva/admin/Gestio
 import { GestionUsuariosPage } from "./pages/modulo-area-sustantiva/admin/GestionUsuariosPage";
 import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage";
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
-
-import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
 import BandejaComisionadoPage from "./pages/modulo-area-sustantiva/comisionado/BandejaComisionadoPage";
 
 import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage";

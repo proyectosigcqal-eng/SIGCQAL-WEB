@@ -224,24 +224,28 @@ const calcularAcciones = (t, estUp) => {
 
 export const TablaTramites = ({ tramites, tipoActivo }) => {
   const navigate = useNavigate();
-
-  // El estado de tipoActivo se movió al Padre para poder renderizar el switch arriba
   const [idQuejaSeleccionada, setIdQuejaSeleccionada] = useState(null);
 
   const isIrlActivo = tipoActivo === "REPRESENTACION_LEGAL_IRL";
+
   const {
     busqueda: irlBusqueda,
     setBusqueda: setIrlBusqueda,
     subSwitchActivo,
     setSubSwitchActivo,
-    estatusActivo,
-    setEstatusActivo,
+    // ✅ CORRECCIÓN: se usa etapaActiva/setEtapaActiva, no estatusActivo/setEstatusActivo.
+    // fetchBandeja en useBandejaIrl depende de etapaActiva — sin esto el tab cambia
+    // visualmente pero no dispara refetch y los datos nunca se filtran.
+    etapaActiva: irlEtapaActiva,
+    setEtapaActiva: setIrlEtapaActiva,
     items: irlItems,
     cargando: irlCargando,
     error: irlError,
     SUB_SWITCHES,
     ESTATUS_TABS,
+    recargar: irlRecargar,
   } = useBandejaIrl({ enabled: isIrlActivo });
+  
 
   const tramitesFiltrados =
     tipoActivo === "QUEJAS_RECLAMACIONES" ? (tramites ?? []) : [];
@@ -250,9 +254,8 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
     primerEstatusUp.includes("ASIGNADA A ASESOR") ||
     primerEstatusUp.includes("VALIDACIÓN") ||
     primerEstatusUp.includes("VALIDACION");
-  const headerSemaforo = usaSemaforo
-    ? "SEMÁFORO / CONTADOR"
-    : "FECHA DE REGISTRO";
+  const headerSemaforo = usaSemaforo ? "SEMÁFORO / CONTADOR" : "FECHA DE REGISTRO";
+
   return (
     <div className="bdg-tabla-wrapper">
       {/* ── Tab IRL ── */}
@@ -260,8 +263,10 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
         <TablaIrl
           subSwitchActivo={subSwitchActivo}
           setSubSwitchActivo={setSubSwitchActivo}
-          estatusActivo={estatusActivo}
-          setEstatusActivo={setEstatusActivo}
+          // ✅ Se pasan las props correctas: TablaIrl usa setEtapaActiva al hacer clic
+          // en un tab → actualiza etapaActiva → fetchBandeja reacciona → refetch con filtro
+          etapaActiva={irlEtapaActiva}
+          setEtapaActiva={setIrlEtapaActiva}
           busqueda={irlBusqueda}
           setBusqueda={setIrlBusqueda}
           items={irlItems}
@@ -269,6 +274,7 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
           error={irlError}
           SUB_SWITCHES={SUB_SWITCHES}
           ESTATUS_TABS={ESTATUS_TABS}
+          recargar={irlRecargar}
         />
       ) : tramitesFiltrados.length === 0 ? (
         <div className="bdg-empty">
@@ -321,7 +327,11 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
                       <div className="bdg-asunto">{t.asunto}</div>
                     </td>
                     <td className="bdg-celda-fecha">
-                      <span>{t.fecha ? new Date(t.fecha).toLocaleDateString('es-MX') : '—'}</span>
+                      <span>
+                        {t.fecha
+                          ? new Date(t.fecha).toLocaleDateString("es-MX")
+                          : "—"}
+                      </span>
                     </td>
                     <td>
                       <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />
@@ -349,7 +359,6 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
                       )}
                     </td>
                     <td className="bdg-action-cell">
-                      {/* Botón Bitácora — siempre visible */}
                       <button
                         className="bdg-btn-action bdg-btn-action--icon"
                         onClick={() => setIdQuejaSeleccionada(t.id)}
@@ -399,7 +408,6 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
         </div>
       )}
 
-      {/* Modal de bitácora — fuera de la tabla */}
       {idQuejaSeleccionada && (
         <BitacoraHistoricaSustantivaModal
           idQueja={idQuejaSeleccionada}

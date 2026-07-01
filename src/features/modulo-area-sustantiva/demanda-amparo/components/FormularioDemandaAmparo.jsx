@@ -199,8 +199,8 @@ export const FormularioDemandaAmparo = ({
       setUrlGenerada(data.rutaPdfDemandaGenerada);
       setExito('Documento generado correctamente.');
 
-      // Actualiza el semáforo si ya hay fecha de pago
-      if (fechaPrimerPago && onSemaforoActualizado) {
+      // Actualiza el semáforo si hay una demanda creada (el backend debe usar fecha_registro)
+      if (idDemanda && onSemaforoActualizado) {
         fetch(`${API}/api/v1/irl-demanda-amparo/${idDemanda}/semaforo-judicial`)
           .then(r => r.ok ? r.json() : null)
           .then(sem => sem && onSemaforoActualizado(sem))

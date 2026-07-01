@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useBandejaGestion } from "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion";
 import {
@@ -8,6 +8,11 @@ import {
 import "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css";
 
 export const BandejaGestionPage = () => {
+  const [tipoActivo, setTipoActivo] = useState("QUEJAS_RECLAMACIONES");
+
+  const isIrl    = tipoActivo === "REPRESENTACION_LEGAL_IRL";
+  const isQuejas = tipoActivo === "QUEJAS_RECLAMACIONES";
+
   const {
     busqueda,
     setBusqueda,
@@ -17,11 +22,16 @@ export const BandejaGestionPage = () => {
     cargando,
     error,
     ETAPAS,
-  } = useBandejaGestion();
+    recargar,
+  } = useBandejaGestion({
+    // ← Solo activo cuando el tab de quejas está visible
+    enabled: isQuejas,
+  });
 
-  const [tipoActivo, setTipoActivo] = useState("QUEJAS_RECLAMACIONES");
-
-  const isIrl = tipoActivo === "REPRESENTACION_LEGAL_IRL";
+  // ← Cuando el usuario regresa al tab de Quejas, refetch automático
+  useEffect(() => {
+    if (isQuejas) recargar();
+  }, [tipoActivo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="bdg-page">
@@ -49,8 +59,9 @@ export const BandejaGestionPage = () => {
       </div>
 
       <div className="bdg-filtros-card">
-        {/* ── Quejas: Buscador + ETAPAS (solo si NO es IRL) ── */}
-        {!isIrl && (
+
+        {/* ── Buscador + etapas — solo en Quejas ── */}
+        {isQuejas && (
           <>
             <div className="bdg-filtros-row">
               <div className="bdg-search-wrap">
@@ -85,18 +96,30 @@ export const BandejaGestionPage = () => {
           </>
         )}
 
-        {/* ── Contenido ── */}
-        {cargando ? (
-          <div className="bdg-empty">
-            <p>Cargando...</p>
-          </div>
-        ) : error ? (
-          <div className="bdg-empty">
-            <p>{error}</p>
-          </div>
-        ) : (
-          <TablaTramites tramites={tramites} tipoActivo={tipoActivo} />
+        {/* ── Contenido Quejas ── */}
+        {isQuejas && (
+          cargando ? (
+            <div className="bdg-empty"><p>Cargando...</p></div>
+          ) : error ? (
+            <div className="bdg-empty"><p>{error}</p></div>
+          ) : (
+            <TablaTramites tramites={tramites} tipoActivo={tipoActivo} />
+          )
         )}
+
+        {/* ── Contenido IRL — TablaTramites maneja su propio fetch interno ── */}
+        {isIrl && (
+          <TablaTramites tramites={[]} tipoActivo={tipoActivo} />
+        )}
+
+        {/* ── Asesoría Simplificada — próximamente ── */}
+        {tipoActivo === "ASESORIA_SIMPLIFICADA" && (
+          <div className="bdg-empty">
+            <div className="bdg-empty-icon">📂</div>
+            <p>Asesoría Simplificada estará disponible próximamente.</p>
+          </div>
+        )}
+
       </div>
     </div>
   );
