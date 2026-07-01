@@ -693,3 +693,60 @@
   padding: 1rem;
   min-width: 0;
 }
+
+/* ============================================================
+   FILTROS DE QUEJAS
+   ============================================================ */
+.bdg-input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #374151;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.bdg-input:focus {
+  border-color: #1e3a8a;
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.bdg-filtro-asesor {
+  width: 100%;
+  max-width: 300px;
+  flex: 0 0 300px;
+}
+
+.bdg-filtros-etapas-scroll {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 0.5px solid var(--color-border-secondary);
+  scrollbar-width: thin;
+}
+
+.bdg-filtros-etapas-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.bdg-filtros-etapas-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.bdg-etapa-tab {
+  flex-shrink: 0;
+}
+
+.bdg-celda-fecha {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

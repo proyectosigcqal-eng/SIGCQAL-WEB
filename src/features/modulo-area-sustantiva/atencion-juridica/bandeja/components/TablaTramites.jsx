@@ -176,6 +176,7 @@ const headerSemaforo = usaSemaforo ? 'SEMÁFORO / CONTADOR' : 'FECHA DE REGISTRO
                 <th>EXPEDIENTE QUEJA</th>
                 <th>QUEJOSO</th>
                 <th>ASUNTO</th>
+                <th>FECHA</th>
                 <th>ESTATUS</th>
                 <th>{headerSemaforo}</th>
                 <th>ACCIONES</th>
@@ -201,6 +202,9 @@ const headerSemaforo = usaSemaforo ? 'SEMÁFORO / CONTADOR' : 'FECHA DE REGISTRO
                     </td>
                     <td>
                       <div className="bdg-asunto">{t.asunto}</div>
+                    </td>
+                    <td className="bdg-celda-fecha">
+                      <span>{t.fecha ? new Date(t.fecha).toLocaleDateString('es-MX') : '—'}</span>
                     </td>
                     <td>
                       <BadgeEstatus label={t.estatus} bloqueado={bloqueado} />

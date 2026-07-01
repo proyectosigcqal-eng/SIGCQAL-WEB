@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { getAsesores } from "@/shared/services/catalogosServices";
 
 const API_BASE =
   import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_dev";
@@ -60,12 +61,48 @@ const ETAPAS = [
 // Etapas que requieren enriquecimiento con semáforo de plazos
 const ETAPAS_CON_SEMAFORO = ["TODAS", "ASIGNADA_ASESOR", "VALIDACION"];
 
+const extractAsesorId = (item) => {
+  if (!item || typeof item !== "object") return "";
+  if (item.idAsesor !== undefined && item.idAsesor !== null) {
+    return String(item.idAsesor);
+  }
+  if (item.id_asesor !== undefined && item.id_asesor !== null) {
+    return String(item.id_asesor);
+  }
+  if (item.id !== undefined && item.id !== null) return String(item.id);
+  return "";
+};
+
+const getAsesorNombre = (item) => {
+  if (!item || typeof item !== "object") return "";
+  return (
+    item.nombreCompleto ??
+    item.nombre_completo ??
+    item.nombreAsesor ??
+    item.nombre_asesor ??
+    item.nombre ??
+    ""
+  );
+};
+
+const normalizarTexto = (valor) =>
+  String(valor ?? "")
+    .trim()
+    .toLowerCase();
+
 const adaptarTramite = (item) => {
   console.log(">>> item bandeja:", item);
   return {
     id: item.folio,
     folio: item.folio,
     idExpediente: item.idExpediente ?? item.id_expediente ?? null,
+    idAsesor: item.idAsesor ?? item.id_asesor ?? null,
+    asesor:
+      item.asesor ??
+      item.nombreAsesor ??
+      item.nombre_asesor ??
+      item.nombreCompletoAsesor ??
+      "",
     municipio: item.municipio_procedencia ?? "",
     contribuyente: item.contribuyente ?? "",
     asunto: item.tipo_acto ?? "",
@@ -114,13 +151,53 @@ const filtrarPorEtapa = (tramites, etapaActiva) => {
   });
 };
 
-export const useBandejaGestion = ({ enabled = true } = {}) => {
+const filtrarPorAsesor = (tramites, asesorSeleccionado, asesores) => {
+  if (!asesorSeleccionado) return tramites;
+
+  const asesorActual = asesores.find(
+    (asesor) => extractAsesorId(asesor) === String(asesorSeleccionado),
+  );
+  const nombreSeleccionado = normalizarTexto(getAsesorNombre(asesorActual));
+
+  return tramites.filter((tramite) => {
+    const idTramite =
+      tramite.idAsesor !== undefined && tramite.idAsesor !== null
+        ? String(tramite.idAsesor)
+        : "";
+    const nombreTramite = normalizarTexto(tramite.asesor);
+
+    return (
+      (idTramite && idTramite === String(asesorSeleccionado)) ||
+      (nombreSeleccionado && nombreTramite === nombreSeleccionado)
+    );
+  });
+};
+
+export const useBandejaGestion = ({
+  enabled = true,
+  tipoTramite = "QUEJAS_Y_RECLAMACIONES",
+} = {}) => {
   const [busqueda, setBusqueda] = useState("");
   const [etapaActiva, setEtapaActiva] = useState("TODAS");
+  const [asesorSeleccionado, setAsesorSeleccionado] = useState("");
+  const [asesores, setAsesores] = useState([]);
+  const [tramitesBase, setTramitesBase] = useState([]);
   const [tramites, setTramites] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
   const controllerRef = useRef(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    getAsesores()
+      .then((data) => {
+        if (Array.isArray(data)) setAsesores(data);
+      })
+      .catch(() => {
+        setAsesores([]);
+      });
+  }, [enabled]);
 
   const fetchBandeja = useCallback(() => {
     if (controllerRef.current) controllerRef.current.abort();
@@ -137,7 +214,7 @@ export const useBandejaGestion = ({ enabled = true } = {}) => {
     if (etapa?.estatus && etapaActiva !== "CERRADA") {
       params.append("estatus", etapa.estatus);
     }
-    params.append("tipo_tramite", "QUEJAS_Y_RECLAMACIONES");
+    params.append("tipo_tramite", tipoTramite);
 
     fetch(`${API_BASE}/api/v1/tramites/bandeja?${params.toString()}`, {
       signal: controller.signal,
@@ -149,10 +226,10 @@ export const useBandejaGestion = ({ enabled = true } = {}) => {
       .then(async (data) => {
         if (!Array.isArray(data)) throw new Error("Respuesta inesperada");
 
-        const tramitesBase = data.map(adaptarTramite);
-        const visibles = filtrarPorEtapa(tramitesBase, etapaActiva);
+        const tramitesAdaptados = data.map(adaptarTramite);
+        const visibles = filtrarPorEtapa(tramitesAdaptados, etapaActiva);
 
-        if (!controller.signal.aborted) setTramites(visibles);
+        if (!controller.signal.aborted) setTramitesBase(visibles);
 
         const necesitaSemaforo = ETAPAS_CON_SEMAFORO.includes(etapaActiva);
         if (!necesitaSemaforo) return;
@@ -165,17 +242,22 @@ export const useBandejaGestion = ({ enabled = true } = {}) => {
           })),
         );
 
-        if (!controller.signal.aborted) setTramites(enriquecidos);
+        if (!controller.signal.aborted) setTramitesBase(enriquecidos);
       })
       .catch((err) => {
         if (err.name === "AbortError") return;
         setError(err.message);
+        setTramitesBase([]);
         setTramites([]);
       })
       .finally(() => {
         if (!controller.signal.aborted) setCargando(false);
       });
-  }, [busqueda, etapaActiva]);
+  }, [busqueda, etapaActiva, tipoTramite]);
+
+  useEffect(() => {
+    setTramites(filtrarPorAsesor(tramitesBase, asesorSeleccionado, asesores));
+  }, [tramitesBase, asesorSeleccionado, asesores]);
 
   useEffect(() => {
     if (!enabled) return; // 👈 no fetch si está deshabilitado
@@ -186,6 +268,9 @@ export const useBandejaGestion = ({ enabled = true } = {}) => {
   // Cuando se deshabilita, limpiamos estado para que no quede basura visible
   useEffect(() => {
     if (!enabled) {
+      setAsesorSeleccionado("");
+      setAsesores([]);
+      setTramitesBase([]);
       setTramites([]);
       setCargando(false);
       setError(null);
@@ -199,6 +284,9 @@ export const useBandejaGestion = ({ enabled = true } = {}) => {
     setBusqueda,
     etapaActiva,
     setEtapaActiva,
+    asesorSeleccionado,
+    setAsesorSeleccionado,
+    asesores,
     tramites,
     cargando,
     error,

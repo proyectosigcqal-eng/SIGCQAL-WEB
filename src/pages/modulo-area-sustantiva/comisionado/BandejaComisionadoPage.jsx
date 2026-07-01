@@ -21,7 +21,14 @@ export const BandejaComisionadoPage = () => {
   const isIrl = vistaActiva === "IRL";
 
   // Hooks siempre llamados (reglas de hooks). `enabled` controla el fetch.
-  const bandeja = useBandejaGestion({ enabled: isQuejas });
+  const quejas = useBandejaGestion({
+    enabled: isQuejas,
+    tipoTramite: "QUEJAS_Y_RECLAMACIONES",
+  });
+  const asesoria = useBandejaGestion({
+    enabled: isAsesoriaSimplificada,
+    tipoTramite: "ASESORIA_SIMPLIFICADA",
+  });
   const irl = useComisionadoIrl({ enabled: isIrl });
 
   return (
@@ -58,39 +65,61 @@ export const BandejaComisionadoPage = () => {
       {/* ── Contenido scrolleable ── */}
       <div className="bdg-contenido-scroll">
         {isAsesoriaSimplificada && (
-          <div className="bdg-vista-asesoria-simplificada bdg-empty">
-            <p>
-              <strong>Asesoría Simplificada</strong> — vista del expediente.
-            </p>
-            <p style={{ opacity: 0.6, fontSize: "0.85rem" }}>
-              (Placeholder — cablear el componente de vista literal del
-              expediente una vez confirmado por el Team Leader.)
-            </p>
+          <div className="bdg-vista-quejas">
+            <FiltrosBandejaGestion
+              busqueda={asesoria.busqueda}
+              setBusqueda={asesoria.setBusqueda}
+              etapaActiva={asesoria.etapaActiva}
+              setEtapaActiva={asesoria.setEtapaActiva}
+              ETAPAS={asesoria.ETAPAS}
+              cargando={asesoria.cargando}
+              asesores={asesoria.asesores}
+              asesorSeleccionado={asesoria.asesorSeleccionado}
+              setAsesorSeleccionado={asesoria.setAsesorSeleccionado}
+            />
+
+            {asesoria.cargando ? (
+              <div className="bdg-empty">
+                <p>Cargando trámites...</p>
+              </div>
+            ) : asesoria.error ? (
+              <div className="bdg-empty">
+                <p style={{ color: "#b91c1c" }}>Error: {asesoria.error}</p>
+              </div>
+            ) : (
+              <TablaTramites
+                tramites={asesoria.tramites}
+                tipoActivo="ASESORIA_SIMPLIFICADA"
+              />
+            )}
           </div>
         )}
 
         {isQuejas && (
           <div className="bdg-vista-quejas">
             <FiltrosBandejaGestion
-              busqueda={bandeja.busqueda}
-              setBusqueda={bandeja.setBusqueda}
-              etapaActiva={bandeja.etapaActiva}
-              setEtapaActiva={bandeja.setEtapaActiva}
-              ETAPAS={bandeja.ETAPAS}
-              cargando={bandeja.cargando}
+              busqueda={quejas.busqueda}
+              setBusqueda={quejas.setBusqueda}
+              etapaActiva={quejas.etapaActiva}
+              setEtapaActiva={quejas.setEtapaActiva}
+              ETAPAS={quejas.ETAPAS}
+              cargando={quejas.cargando}
+              asesores={quejas.asesores}
+              asesorSeleccionado={quejas.asesorSeleccionado}
+              setAsesorSeleccionado={quejas.setAsesorSeleccionado}
             />
 
-            {bandeja.cargando ? (
+            {quejas.cargando ? (
               <div className="bdg-empty">
                 <p>Cargando trámites...</p>
               </div>
-            ) : bandeja.error ? (
+            ) : quejas.error ? (
               <div className="bdg-empty">
-                <p style={{ color: "#b91c1c" }}>Error: {bandeja.error}</p>
+                <p style={{ color: "#b91c1c" }}>Error: {quejas.error}</p>
               </div>
             ) : (
               <TablaTramites
-                tramites={bandeja.tramites}
+                tramites={quejas.tramites}
                 tipoActivo="QUEJAS_RECLAMACIONES"
               />
             )}
