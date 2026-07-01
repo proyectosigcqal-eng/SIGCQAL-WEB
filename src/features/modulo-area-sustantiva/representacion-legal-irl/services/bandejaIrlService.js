@@ -3,6 +3,7 @@
 const API_BASE =
   import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_dev";
 
+
 const normalizarDiasRestantes = (value) => {
   if (value === null || value === undefined || value === "") return null;
 
@@ -18,6 +19,7 @@ const extraerItems = (data) => {
   return null;
 };
 
+
 const adaptarItem = (item) => ({
   idRepresentacionLegal: item.idRepresentacionLegal ?? item.id ?? null,
   id: item.id ?? item.idRepresentacionLegal ?? null,
@@ -30,12 +32,14 @@ const adaptarItem = (item) => ({
   esEvolucion: item.esEvolucion ?? false,
   idEstatus: item.idEstatus ?? null,
   diasRestantes: normalizarDiasRestantes(item.diasRestantes),
+
 });
 
 export async function listarBandejaIrl({
   esEvolucion,
   idEstatus,
   idAsesor,
+
   query,
   signal,
 } = {}) {
@@ -47,9 +51,11 @@ export async function listarBandejaIrl({
   if (idEstatus !== undefined && idEstatus !== null) {
     params.append("id_estatus", String(idEstatus));
   }
+
   if (idAsesor !== undefined && idAsesor !== null) {
     params.append("id_asesor", String(idAsesor));
   }
+
   if (query?.trim()) params.append("search", query.trim());
 
   const url = `${API_BASE}/api/v1/representacion-legal/bandeja?${params.toString()}`;

@@ -21,6 +21,7 @@ export const ModalRoles = ({ abierto, usuario, roles, onCerrar, onGuardar }) => 
     );
 
   const handleGuardar = async () => {
+    console.log('>>> roles a guardar:', seleccionados); 
     setGuardando(true);
     setError(null);
     try {

@@ -1,13 +1,19 @@
 import { useState, useMemo } from 'react';
 import { formatForBackend } from '@/shared/utils/dateUtils';
 import { registrarExpediente } from '../services/registroExpedienteService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const FE_CAMPOS_OBLIGATORIOS = 'Todos los campos obligatorios deben estar completos.';
 
 export const useRegistroExpediente = () => {
   const hoy = useMemo(() => formatForBackend(new Date()), []);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Si venimos de Búsqueda de Contribuyente con un registro ya existente,
+  // precargamos sus datos y los marcamos como readonly en el formulario.
+  const contribuyenteExistente = location.state?.contribuyenteExistente || null;
+  const esContribuyenteExistente = Boolean(contribuyenteExistente);
 
   const [formData, setFormData] = useState({
     // Control Operativo
@@ -16,17 +22,17 @@ export const useRegistroExpediente = () => {
     idAsesorResponsable: '',
 
     // Datos del Contribuyente
-    tipoPersona: 'fisica', // 'fisica' o 'moral'
-    nombre: '',
-    apellidoPaterno: '',
-    apellidoMaterno: '',
-    rfc: '',
-    rec: '',
-    identificacionTipo: '',
-    identificacionNumero: '',
-    correoElectronico: '',
-    telefono: '',
-    telefonoFijo: '',
+    tipoPersona: contribuyenteExistente?.idTipoPersona === 2 ? 'moral' : 'fisica', // 'fisica' o 'moral'
+    nombre: contribuyenteExistente?.nombre || '',
+    apellidoPaterno: contribuyenteExistente?.apellidoPaterno || '',
+    apellidoMaterno: contribuyenteExistente?.apellidoMaterno || '',
+    rfc: contribuyenteExistente?.rfc || '',
+    rec: contribuyenteExistente?.rec || '',
+    identificacionTipo: contribuyenteExistente?.tipoIdentificacion || '',
+    identificacionNumero: contribuyenteExistente?.identificacionOficial || '',
+    correoElectronico: contribuyenteExistente?.correo || '',
+    telefono: contribuyenteExistente?.telefono || '',
+    telefonoFijo: contribuyenteExistente?.telefonoFijo || '',
     documentoPersonalidad: '',
     archivoDocumentoPersonalidad: null,
     domicilioFiscal: {
@@ -62,7 +68,7 @@ export const useRegistroExpediente = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [mostrarModalGuardar, setMostrarModalGuardar] = useState(false);
-  
+
   // NUEVO: Estado para guardar el asesor consultado automáticamente
   const [asesorAsignado, setAsesorAsignado] = useState(null);
 
@@ -105,6 +111,8 @@ export const useRegistroExpediente = () => {
   };
 
   const handleTipoPersonaChange = (tipo) => {
+    // No permitir cambiar tipo de persona si los datos vienen de un contribuyente existente
+    if (esContribuyenteExistente) return;
     setFormData((prev) => ({ ...prev, tipoPersona: tipo }));
   };
 
@@ -118,7 +126,7 @@ export const useRegistroExpediente = () => {
     // Validar Control Operativo
     if (!formData.fechaSolicitud) errores.fechaSolicitud = 'La fecha de solicitud es obligatoria.';
     if (!formData.idMunicipio) errores.idMunicipio = 'El municipio es obligatorio.';
-    
+
     // MODIFICADO: Se comenta porque la asignación ahora es 100% automática y el usuario no llena este campo
     // if (!formData.idAsesorResponsable) errores.idAsesorResponsable = 'El asesor responsable es obligatorio.';
 
@@ -130,15 +138,18 @@ export const useRegistroExpediente = () => {
     } else {
       if (!formData.nombre) errores.nombre = 'La razón social es obligatoria.';
     }
-    
+
     if (!formData.identificacionTipo) errores.identificacionTipo = 'El tipo de identificación es obligatorio.';
     if (!formData.identificacionNumero) errores.identificacionNumero = 'El número/folio de identificación es obligatorio.';
-    
-    // Validar Domicilio Fiscal
-    if (!formData.domicilioFiscal.calle) errores['domicilioFiscal.calle'] = 'La calle es obligatoria.';
-    if (!formData.domicilioFiscal.numero) errores['domicilioFiscal.numero'] = 'El número es obligatorio.';
-    if (!formData.domicilioFiscal.colonia) errores['domicilioFiscal.colonia'] = 'La colonia es obligatoria.';
-    if (!formData.domicilioFiscal.localidad) errores['domicilioFiscal.localidad'] = 'La localidad es obligatoria.';
+
+    // Validar Domicilio Fiscal — solo aplica cuando se va a crear contribuyente nuevo,
+    // ya que un contribuyente existente no vuelve a capturar domicilio aquí.
+    if (!esContribuyenteExistente) {
+      if (!formData.domicilioFiscal.calle) errores['domicilioFiscal.calle'] = 'La calle es obligatoria.';
+      if (!formData.domicilioFiscal.numero) errores['domicilioFiscal.numero'] = 'El número es obligatorio.';
+      if (!formData.domicilioFiscal.colonia) errores['domicilioFiscal.colonia'] = 'La colonia es obligatoria.';
+      if (!formData.domicilioFiscal.localidad) errores['domicilioFiscal.localidad'] = 'La localidad es obligatoria.';
+    }
 
     // Validar Representante Legal (Campos individuales requeridos por el JSX)
     if (!formData.representanteLegal.nombre) errores['representanteLegal.nombre'] = 'El nombre del representante es obligatorio.';
@@ -186,56 +197,64 @@ export const useRegistroExpediente = () => {
   };
 
   const handleConfirmarGuardar = async () => {
-  setIsLoading(true);
-  setError(null);
-  setSuccessMessage(null);
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
 
-  try {
-    const direccionPayload = {
-      calle:      formData.domicilioFiscal.calle || null,
-      numExt:     formData.domicilioFiscal.numero ? String(formData.domicilioFiscal.numero) : null,
-      numInt:     formData.domicilioFiscal.numeroInterior ? String(formData.domicilioFiscal.numeroInterior) : null,
-      colonia:    formData.domicilioFiscal.colonia || null,
-      cp:         formData.domicilioFiscal.codigoPostal ? String(formData.domicilioFiscal.codigoPostal) : null,
-      idEstado:   formData.domicilioFiscal.estado ? parseInt(formData.domicilioFiscal.estado, 10) : null,
-      idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
-    };
+    try {
+      const direccionPayload = {
+        calle:      formData.domicilioFiscal.calle || null,
+        numExt:     formData.domicilioFiscal.numero ? String(formData.domicilioFiscal.numero) : null,
+        numInt:     formData.domicilioFiscal.numeroInterior ? String(formData.domicilioFiscal.numeroInterior) : null,
+        colonia:    formData.domicilioFiscal.colonia || null,
+        cp:         formData.domicilioFiscal.codigoPostal ? String(formData.domicilioFiscal.codigoPostal) : null,
+        idEstado:   formData.domicilioFiscal.estado ? parseInt(formData.domicilioFiscal.estado, 10) : null,
+        idMunicipio: formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
+      };
 
-    const payloadListoParaEnviar = {
-      ...formData,
-      idMunicipio:         formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
-      idAsesorResponsable: formData.idAsesorResponsable ? parseInt(formData.idAsesorResponsable, 10) : null,
-      domicilioFiscal:     direccionPayload,
-    };
+      const payloadListoParaEnviar = {
+        ...formData,
+        idMunicipio:         formData.idMunicipio ? parseInt(formData.idMunicipio, 10) : null,
+        idAsesorResponsable: formData.idAsesorResponsable ? parseInt(formData.idAsesorResponsable, 10) : null,
+        domicilioFiscal:     direccionPayload,
+        // NUEVO: si venimos de un contribuyente ya existente, pasamos sus ids
+        // para que el service se salte la creación de Persona + Contribuyente.
+        contribuyenteExistente: contribuyenteExistente
+          ? {
+              idPersona: contribuyenteExistente.idPersona,
+              idContribuyente: contribuyenteExistente.idContribuyente || null
+            }
+          : null,
+      };
 
-    // ✅ UNA SOLA llamada — guarda el resultado
-    const resultado = await registrarExpediente(payloadListoParaEnviar);
-    console.log('Respuesta del backend:', resultado);
+      // ✅ UNA SOLA llamada — guarda el resultado
+      const resultado = await registrarExpediente(payloadListoParaEnviar);
+      console.log('Respuesta del backend:', resultado);
 
-    // ✅ Extrae el folio del resultado
-    const folioOId = resultado?.folioGobierno
-      || resultado?.folio
-      || resultado?.idExpediente
-      || resultado?.id;
+      // ✅ Extrae el folio del resultado
+      const folioOId = resultado?.folioGobierno
+        || resultado?.folio
+        || resultado?.idExpediente
+        || resultado?.id;
 
-    setSuccessMessage('Expediente guardado correctamente.');
-    setMostrarModalGuardar(false);
+      setSuccessMessage('Expediente guardado correctamente.');
+      setMostrarModalGuardar(false);
 
-    // ✅ Navega con el folio real
-    if (folioOId) {
-      navigate(`/atencion-juridica/clasificacion/${folioOId}`);
-    } else {
-      console.error('El backend no devolvió un folio/id para redirigir:', resultado);
-      setError('Expediente guardado pero no se pudo obtener el folio para continuar.');
+      // ✅ Navega con el folio real
+      if (folioOId) {
+        navigate(`/atencion-juridica/clasificacion/${folioOId}`);
+      } else {
+        console.error('El backend no devolvió un folio/id para redirigir:', resultado);
+        setError('Expediente guardado pero no se pudo obtener el folio para continuar.');
+      }
+
+    } catch (err) {
+      setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
+      setMostrarModalGuardar(false);
+    } finally {
+      setIsLoading(false);
     }
-
-  } catch (err) {
-    setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
-    setMostrarModalGuardar(false);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const handleCancelarGuardar = () => {
     setMostrarModalGuardar(false);
@@ -249,6 +268,7 @@ export const useRegistroExpediente = () => {
     successMessage,
     mostrarModalGuardar,
     asesorAsignado, // NUEVO: Se expone el asesor asignado para usarlo en el modal
+    esContribuyenteExistente, // NUEVO: para que el form sepa qué campos bloquear
     handleChange,
     handleChangeNested,
     handleTipoPersonaChange,

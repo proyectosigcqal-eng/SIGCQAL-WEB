@@ -1,0 +1,307 @@
+/* ==========================================================================
+   Contenedor Principal y Estructura Split-View (Basado en el diseño original)
+   ========================================================================== */
+.sigcqal-page-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+    background-color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.page-header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1A2238;
+    margin: 0;
+}
+
+/* Contenedor Split (Formulario Izquierda 35% | Vista Previa Derecha 65%) */
+.split-view-container {
+    display: grid;
+    grid-template-columns: 35% 65%;
+    gap: 0;
+    flex: 1; 
+    overflow: hidden; /* Fuerza el scroll independiente por panel */
+    height: calc(100vh - 80px);
+}
+
+/* ==========================================================================
+   Paneles con Scroll Independiente
+   ========================================================================== */
+.panel-formulario {
+    padding: 2rem;
+    overflow-y: auto;
+    background-color: white;
+    border-right: 1px solid #e2e8f0;
+}
+
+.panel-vista-previa-contenedor {
+    display: flex; 
+    justify-content: center;
+    background-color: #cbd5e1; /* Fondo gris slate original */
+    overflow-y: auto !important; 
+    overflow-x: hidden;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.panel-vista-previa {
+    padding: 2.5rem 1.5rem; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 30px; 
+    height: min-content; 
+    width: 100%; 
+    box-sizing: border-box;
+    align-self: flex-start; 
+}
+
+/* Scrollbar Minimalista Corporativa */
+.panel-formulario::-webkit-scrollbar,
+.panel-vista-previa-contenedor::-webkit-scrollbar {
+    width: 6px;
+}
+.panel-formulario::-webkit-scrollbar-thumb,
+.panel-vista-previa-contenedor::-webkit-scrollbar-thumb {
+    background-color: #94a3b8;
+    border-radius: 10px;
+}
+
+/* ==========================================================================
+   Formulario Grid (Campos e Inputs)
+   ========================================================================== */
+.quejaari-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    max-width: 100%;
+}
+
+.quejaari-form .full-width {
+    grid-column: 1 / -1;
+}
+
+.quejaari-form .form-row {
+    display: contents;
+}
+
+.quejaari-form .form-row .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.form-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: border-color 0.2s, background-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1A2238;
+    background-color: #ffffff;
+}
+
+.form-group input:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Botones y Acciones
+   ========================================================================== */
+.form-actions {
+    grid-column: 1 / -1;
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-primario {
+    background-color: #1A2238;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primario:hover:not(:disabled) {
+    background-color: #2a3655;
+}
+
+.btn-primario:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.btn-descargar-quejaari,
+.btn-secundario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    box-sizing: border-box;
+}
+
+.btn-secundario {
+    background-color: transparent;
+    color: #1A2238;
+    border: 1px solid #1A2238;
+}
+
+.btn-descargar-quejaari {
+    background-color: #1A2238;
+    color: white;
+    border: 1px solid #1A2238;
+}
+
+.btn-descargar-quejaari:hover,
+.btn-secundario:hover {
+    background-color: #2a3655;
+    color: white;
+    border-color: #2a3655;
+}
+
+/* ==========================================================================
+   Diseño de la Hoja Membretada (Forzado a una sola página limpia)
+   ========================================================================== */
+.hoja-membretada-papel {
+    background-color: #ffffff;
+    background-size: 100% 100%; 
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 680px;
+    height: 880px; 
+    flex-shrink: 0; 
+    max-width: 100%; 
+    aspect-ratio: 680 / 880;
+    padding: 110px 65px 80px 65px; /* Ligeramente ajustado para maximizar el espacio de la hoja única */
+    box-sizing: border-box;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    border-radius: 4px;
+}
+
+.membrete-contenido {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Mantiene firmas al fondo y meta arriba */
+    color: #1e293b;
+    font-size: 14px; 
+    line-height: 1.6;
+}
+
+.membrete-meta-info {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.meta-folio strong {
+    font-size: 15px;
+    color: #1A2238;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.placeholder-muted {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* Firmas en la parte inferior */
+.membrete-footer-firma {
+    margin-bottom: 0px;
+    margin-top: auto; /* Empuja las firmas al fondo de la hoja */
+    padding-top: 15px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.bloque-firma p {
+    margin: 0;
+}
+
+/* ==========================================================================
+   Estilos Nativos de Impresión (Media Print)
+   ========================================================================== */
+@media print {
+    .sigcqal-page-container, 
+    .split-view-container {
+        height: auto;
+        overflow: visible;
+        display: block;
+    }
+    .panel-formulario, 
+    .page-header {
+        display: none !important; /* Oculta todo excepto la hoja al mandar a imprimir/PDF */
+    }
+    .panel-vista-previa-contenedor {
+        background: none;
+        overflow: visible;
+    }
+    .panel-vista-previa {
+        padding: 0;
+        background: none;
+        display: block;
+    }
+    .hoja-membretada-papel {
+        width: 216mm !important; /* Dimensiones oficiales de Carta */
+        height: 279mm !important;
+        padding: 40mm 20mm 30mm 20mm;
+        box-shadow: none;
+        margin: 0;
+        page-break-after: avoid;
+        page-break-inside: avoid;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

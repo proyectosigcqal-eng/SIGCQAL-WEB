@@ -1,38 +1,64 @@
-// features/modulo-correspondencia/components/LoginForm.jsx
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { loginService } from '../services/loginService';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/shared/context/AuthContext';
+
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 export const LoginForm = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [alerta, setAlerta]     = useState(null);
+    const [cargando, setCargando] = useState(false);
+
     const navigate = useNavigate();
-    const location = useLocation();
+    const auth     = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        try {
-            // Llamamos al servicio (actualmente simulado) y guardamos el resultado
-            const result = await loginService(username, password);
-            
-            // Al ser exitoso, guardamos un usuario simulado en localStorage
-            // (en producción el backend debe devolver el rol de usuario)
-            const role = (() => {
-                const u = (username || '').toLowerCase();
-                if (u.includes('admin')) return 'Administrador';
-                if (u.includes('rev') || u.includes('revisor')) return 'Revisor';
-                if (u.includes('capt') || u.includes('capturista')) return 'Capturista';
-                return 'Capturista';
-            })();
-            const userObj = { username, role, token: (result && result.token) || null };
-            localStorage.setItem('user', JSON.stringify(userObj));
 
-            // Si venimos de una ruta protegida, redirigir ahí; si no, al /registrar
-            const from = location.state?.from?.pathname || '/correspondencia/registrar';
-            navigate(from, { replace: true });
-        } catch (error) {
-            console.error("Error al iniciar sesión", error);
+        if (!username.trim() || !password.trim()) {
+            setAlerta({
+                type: 'warning',
+                message: 'Ingresa tu usuario y contraseña para continuar.'
+            });
+            return;
+        }
+
+        setCargando(true);
+        setAlerta(null);
+
+        try {
+            const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ usuarioLogin: username, password }),
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.detail ?? 'Credenciales incorrectas.');
+            }
+
+            const data = await res.json();
+
+            auth.login(data);
+            setAlerta({ type: 'success', message: 'Inicio de sesión correcto. Redirigiendo...' });
+
+            const roles = data.roles ?? [];
+            if (roles.length === 0) {
+                navigate('/correspondencia/bandeja', { replace: true });
+            } else if (roles.length === 1) {
+                auth.seleccionarRol(roles[0]);
+                const destino = roles[0].urlBase || '/correspondencia/bandeja';
+                navigate(destino, { replace: true });
+            } else {
+                navigate('/seleccion-rol', { replace: true });
+            }
+
+        } catch (err) {
+            setAlerta({ type: 'error', message: err.message || 'No se pudo iniciar sesión.' });
+        } finally {
+            setCargando(false);
         }
     };
 
@@ -40,6 +66,15 @@ export const LoginForm = () => {
         <div className="login-form-container">
             <h1 className="login-title">Bienvenido de nuevo</h1>
             <p className="login-subtitle">Ingresa tus credenciales</p>
+
+            {alerta && (
+                <div className={`login-alert login-alert-${alerta.type}`} role="alert" aria-live="polite">
+                    <span className="login-alert-icon">
+                        {alerta.type === 'success' ? '✓' : alerta.type === 'warning' ? '⚠' : '✕'}
+                    </span>
+                    <span>{alerta.message}</span>
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="login-form">
                 <div className="input-group">
@@ -59,7 +94,7 @@ export const LoginForm = () => {
                 <div className="input-group">
                     <div className="label-row">
                         <label htmlFor="password">Contraseña</label>
-                        <a href="#forgot" className="forgot-password">¿Olvido su contraseña?</a>
+                        <a href="#forgot" className="forgot-password">¿Olvidó su contraseña?</a>
                     </div>
                     <input
                         type="password"
@@ -73,7 +108,9 @@ export const LoginForm = () => {
                     />
                 </div>
 
-                <button type="submit" className="login-button">Iniciar sesion</button>
+                <button type="submit" className="login-button" disabled={cargando}>
+                    {cargando ? 'Iniciando sesión...' : 'Iniciar sesión'}
+                </button>
             </form>
         </div>
     );

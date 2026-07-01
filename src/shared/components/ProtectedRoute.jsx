@@ -1,57 +1,30 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-
-function getUserRoleFromStorage() {
-  try {
-    // Common keys where an app might store the user object
-    const candidateKeys = ['usuario', 'user', 'auth', 'currentUser', 'current_user'];
-    for (const key of candidateKeys) {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-      try {
-        const parsed = JSON.parse(raw);
-        const possibles = [
-          parsed?.role,
-          parsed?.rol,
-          parsed?.nombreRol,
-          parsed?.roleName,
-          parsed?.usuarioRol,
-          parsed?.tipoUsuario,
-        ];
-        for (const p of possibles) if (p) return p;
-      } catch {
-        // raw might be a plain role string
-        if (raw) return raw;
-      }
-    }
-
-    // fallback to explicit stored role keys
-    const extra = localStorage.getItem('userRole') || localStorage.getItem('role') || localStorage.getItem('rol');
-    if (extra) {
-      try { return JSON.parse(extra); } catch { return extra; }
-    }
-  } catch (err) {
-    // ignore
-  }
-  return null;
-}
+import { useAuth } from '@/shared/context/AuthContext';
 
 const ProtectedRoute = ({ allowedRoles = [], children }) => {
-  const location = useLocation();
-  const userRole = getUserRoleFromStorage();
+    const { isAuthenticated, session, rolActivo } = useAuth();
+    const location = useLocation();
 
-  // Not authenticated -> redirect to login
-  if (!userRole) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+    // 1. No autenticado → login
+    if (!isAuthenticated) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
 
-  // Allowed role -> render children
-  if (!allowedRoles || allowedRoles.length === 0 || allowedRoles.includes(userRole)) {
+    // 2. Múltiples roles sin haber elegido uno → selección
+    if (session?.roles?.length > 1 && !rolActivo) {
+        return <Navigate to="/seleccion-rol" replace />;
+    }
+
+    // 3. Verificación de rol (si la ruta exige alguno)
+    if (allowedRoles.length > 0) {
+        const rolNombre = rolActivo?.nombreRol ?? session?.roles?.[0]?.nombreRol;
+        if (!allowedRoles.includes(rolNombre)) {
+            return <Navigate to="/acceso-restringido" state={{ from: location }} replace />;
+        }
+    }
+
     return children;
-  }
-
-  // Authenticated but not authorized -> acceso restringido
-  return <Navigate to="/acceso-restringido" state={{ from: location }} replace />;
 };
 
 export default ProtectedRoute;

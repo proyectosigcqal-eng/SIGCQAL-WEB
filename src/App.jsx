@@ -27,6 +27,7 @@ import { GenerarOficioContestacionPage } from "./pages/modulo-correspondencia/of
 import { BandejaGestionPage } from "./pages/modulo-area-sustantiva/atencion-juridica/bandeja/BandejaGestionPage";
 import { ClasificacionJuridicaPage } from "./pages/modulo-area-sustantiva/atencion-juridica/clasificacion/ClasificacionJuridicaPage";
 import { RegistroExpedientePage } from "./pages/modulo-area-sustantiva/registroexpediente/RegistroExpedientePage";
+import { BusquedaContribuyentePage } from "./pages/modulo-area-sustantiva/busqueda-contribuyente/BusquedaContribuyentePage";
 import ProtectedRoute from "./shared/components/ProtectedRoute";
 import { ROUTE_ROLES } from "./shared/config/routeRoles";
 import AccesoRestringidoPage from "./pages/AccesoRestringidoPage";
@@ -40,8 +41,19 @@ import { GestionAsesoresPage } from "./pages/modulo-area-sustantiva/admin/Gestio
 import { GestionUsuariosPage } from "./pages/modulo-area-sustantiva/admin/GestionUsuariosPage";
 import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage";
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
+
 import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
 import BandejaComisionadoPage from "./pages/modulo-area-sustantiva/comisionado/BandejaComisionadoPage";
+
+import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage";
+import { DemandaAmparoPage } from "./pages/modulo-area-sustantiva/demanda-amparo/DemandaAmparoPage";
+import { SeleccionRolPage } from "./pages/auth/seleccion-rol/SeleccionRolPage";
+
+import { CrearRLCirPage } from "./pages/modulo-area-sustantiva/rl-cir/rl-cir/CrearRLCirPage"; // ← ADD THIS
+import { CrearQuejaRlCirPage } from "./pages/modulo-area-sustantiva/rl-cir/quejaRlCir/CrearQuejaRlCirPage";
+
+
+
 
 function App() {
   return (
@@ -49,6 +61,7 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<MainLayout />}>
+        <Route path="/seleccion-rol" element={<SeleccionRolPage />} />
           <Route index element={<Navigate to="/login" replace />} />
           {/* Flujo de creación de Memorándum */}
           <Route
@@ -395,6 +408,15 @@ function App() {
           />
 
           <Route
+  path="atencion-juridica/demanda-amparo/:folio"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES['/atencion-juridica/demanda-amparo']}>
+      <DemandaAmparoPage />
+    </ProtectedRoute>
+  }
+/>
+
+          <Route
             path="admin/asesores"
             element={
               <ProtectedRoute allowedRoles={ROUTE_ROLES["/admin/asesores"]}>
@@ -511,6 +533,17 @@ function App() {
             }
           />
 
+          <Route
+            path="area-sustantiva/busqueda-contribuyente"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/busqueda-contribuyente"]}
+              >
+                <BusquedaContribuyentePage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Módulo Área Sustantiva - Crear Queja ARI */}
           <Route
             path="area-sustantiva/quejas-ari/:folio"
@@ -519,6 +552,28 @@ function App() {
                 allowedRoles={ROUTE_ROLES["/area-sustantiva/quejas-ari"]}
               >
                 <CrearQuejaAriPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/area-sustantiva/rl-cir/:folio?"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/rl-cir"]}
+              >
+                <CrearRLCirPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="area-sustantiva/queja-rl-cir"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/queja-rl-cir"]}
+              >
+                <CrearQuejaRlCirPage />
               </ProtectedRoute>
             }
           />
@@ -549,6 +604,7 @@ function App() {
           }
         />
       </Routes>
+      
     </BrowserRouter>
   );
 }
