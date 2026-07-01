@@ -41,6 +41,7 @@ import { GestionUsuariosPage } from "./pages/modulo-area-sustantiva/admin/Gestio
 import { ResolucionFinalPage } from "./pages/modulo-area-sustantiva/resolucion-final/ResolucionFinalPage";
 import { CrearQuejaAriPage } from "./pages/modulo-area-sustantiva/quejas-ari/CrearQuejaAriPage";
 import BandejaIrlPage from "./pages/modulo-area-sustantiva/representacion-legal-irl/BandejaIrlPage"; // ← ADD THIS
+import BandejaComisionadoPage from "./pages/modulo-area-sustantiva/comisionado/BandejaComisionadoPage";
 
 function App() {
   return (
@@ -261,6 +262,17 @@ function App() {
                 allowedRoles={ROUTE_ROLES["/atencion-juridica/tramites-irl"]}
               >
                 <DetalleTramiteIrlPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="comisionado/bandeja"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/atencion-juridica/bandeja"]}
+              >
+                <BandejaComisionadoPage />
               </ProtectedRoute>
             }
           />
