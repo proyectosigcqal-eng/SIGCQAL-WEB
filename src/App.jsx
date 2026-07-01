@@ -51,6 +51,14 @@ import { SeleccionRolPage } from "./pages/auth/seleccion-rol/SeleccionRolPage";
 import { CrearRLCirPage } from "./pages/modulo-area-sustantiva/rl-cir/rl-cir/CrearRLCirPage"; // ← ADD THIS
 import { CrearQuejaRlCirPage } from "./pages/modulo-area-sustantiva/rl-cir/quejaRlCir/CrearQuejaRlCirPage";
 
+import AudienciaEsperaPage        from './pages/modulo-area-sustantiva/audiencia/AudienciaEsperaPage';
+import AudienciaCelebradaPage      from './pages/modulo-area-sustantiva/audiencia/AudienciaCelebradaPage';
+import  SentenciaDictadaPage         from './pages/modulo-area-sustantiva/sentencia/SentenciaDictadaPage';
+import SentenciaEjecutoriaPage     from './pages/modulo-area-sustantiva/sentencia/SentenciaEjecutoriaPage';
+import NotificacionSentenciaPage   from './pages/modulo-area-sustantiva/sentencia/NotificacionSentenciaPage';
+
+
+
 
 
 
@@ -480,6 +488,51 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="sustantiva/audiencia-espera"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES["/sustantiva/audiencia-espera"]}>
+      <AudienciaEsperaPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="sustantiva/audiencia-celebrada"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES["/sustantiva/audiencia-celebrada"]}>
+      <AudienciaCelebradaPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="sustantiva/sentencia-dictada"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES["/sustantiva/sentencia-dictada"]}>
+      <SentenciaDictadaPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="sustantiva/sentencia-ejecutoria"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES["/sustantiva/sentencia-ejecutoria"]}>
+      <SentenciaEjecutoriaPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="sustantiva/notificacion-sentencia"
+  element={
+    <ProtectedRoute allowedRoles={ROUTE_ROLES["/sustantiva/notificacion-sentencia"]}>
+      <NotificacionSentenciaPage />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="atencion-juridica/resolucion-final/:folio"

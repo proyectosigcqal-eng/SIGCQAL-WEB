@@ -31,8 +31,8 @@ export const DemandaAmparoPage = () => {
         setExpediente(detalle);
         setDemandaExistente(demanda);
 
-        // Si ya existe la demanda y tiene fecha de pago, carga el semáforo
-        if (demanda?.idDemandaAmparo && demanda?.fechaPrimerPago) {
+        // Si ya existe la demanda, carga el semáforo (backend debe calcular con fecha_registro)
+        if (demanda?.idDemandaAmparo) {
           return fetch(
             `${API}/api/v1/irl-demanda-amparo/${demanda.idDemandaAmparo}/semaforo-judicial`
           ).then(r => r.ok ? r.json() : null);
