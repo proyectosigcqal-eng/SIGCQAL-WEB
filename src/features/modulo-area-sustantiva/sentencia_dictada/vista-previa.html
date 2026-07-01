@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa - Sentencia Dictada (Moderno)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3b82f6; /* Azul moderno vibrante */
+            --bg-color: #f3f4f6;
+            --form-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-radius: 16px; /* Bordes mucho más redonditos */
+            --input-height: 52px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sentencia-form {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--form-bg);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            /* Sombra suave y difusa para efecto de elevación */
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+            box-sizing: border-box;
+        }
+
+        h3 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 2.5rem;
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem 2rem;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #6b7280;
+        }
+
+        .field label::after {
+            content: " *";
+            color: #ef4444;
+        }
+        .field.not-required label::after { content: ""; }
+
+        .field input, 
+        .field textarea {
+            height: var(--input-height);
+            padding: 0 1.25rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            background-color: #f9fafb;
+            border: 2px solid #e5e7eb; /* Borde sutil */
+            border-radius: var(--border-radius); /* Inputs también redonditos */
+            transition: all 0.2s ease-in-out;
+            box-sizing: border-box;
+        }
+
+        .field textarea {
+            height: auto;
+            padding: 1.25rem;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* Estado de foco moderno */
+        .field input:focus, 
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); /* Anillo de foco */
+        }
+
+        .btn-submit {
+            grid-column: span 2;
+            margin-top: 2rem;
+            height: var(--input-height);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-submit:hover {
+            background-color: #2563eb;
+        }
+
+        /* Validaciones nativas */
+        input:invalid, textarea:invalid {
+            border-color: #fecaca;
+        }
+        input:focus:invalid, textarea:focus:invalid {
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+            .btn-submit { grid-column: span 1; }
+            .sentencia-form { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<form class="sentencia-form">
+    <h3>Registro de Sentencia Dictada</h3>
+    
+    <div class="form-grid">
+        <!-- id_audiencia_celebrada -->
+        <div class="field">
+            <label for="id_audiencia_celebrada">ID Audiencia</label>
+            <input type="number" id="id_audiencia_celebrada" name="id_audiencia_celebrada" required placeholder="Ej. 1234">
+        </div>
+
+        <!-- Espaciador vacio para mantener la estructura de 2 columnas en pantallas grandes -->
+        <div class="field" style="visibility: hidden;"></div>
+
+        <!-- fechas -->
+        <div class="field">
+            <label for="fecha_dictado">Fecha de Dictado</label>
+            <input type="date" id="fecha_dictado" name="fecha_dictado" required>
+        </div>
+        <div class="field">
+            <label for="fecha_notificacion_sentencia">Fecha de Notificación</label>
+            <input type="date" id="fecha_notificacion_sentencia" name="fecha_notificacion_sentencia" required>
+        </div>
+
+        <!-- sentido_fallo -->
+        <div class="field full-width">
+            <label for="sentido_fallo">Sentido del Fallo</label>
+            <input type="text" id="sentido_fallo" name="sentido_fallo" maxLength="100" required placeholder="Ej. Desechamiento por improcedencia...">
+        </div>
+
+        <!-- puntos_resolutivos (TEXT) -->
+        <div class="field full-width">
+            <label for="puntos_resolutivos">Puntos Resolutivos</label>
+            <textarea id="puntos_resolutivos" name="puntos_resolutivos" rows="5" required placeholder="Redacte los puntos resolutivos aquí..."></textarea>
+        </div>
+
+        <!-- numero_oficio_sentencia -->
+        <div class="field not-required">
+            <label for="numero_oficio_sentencia">Número de Oficio</label>
+            <input type="text" id="numero_oficio_sentencia" name="numero_oficio_sentencia" maxLength="100" placeholder="Opcional">
+        </div>
+
+        <!-- ruta_archivo_sentencia -->
+        <div class="field not-required">
+            <label for="ruta_archivo_sentencia">Ruta del Archivo</label>
+            <input type="text" id="ruta_archivo_sentencia" name="ruta_archivo_sentencia" maxLength="500" placeholder="Opcional">
+        </div>
+        
+        <!-- Botón de acción -->
+        <button type="submit" class="btn-submit">Registrar Sentencia</button>
+    </div>
+</form>
+
+</body>
+</html>
