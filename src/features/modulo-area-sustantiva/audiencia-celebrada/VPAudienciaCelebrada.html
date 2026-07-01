@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Previa - Audiencia Celebrada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-color: #3b82f6; --bg-color: #f3f4f6; --form-bg: #ffffff; --text-color: #1f2937; --border-radius: 16px; }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); padding: 40px 20px; display: flex; justify-content: center; }
+        .form-container { width: 100%; max-width: 850px; background-color: var(--form-bg); padding: 3rem; border-radius: var(--border-radius); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+        h3 { margin-bottom: 2.5rem; color: var(--text-color); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; }
+        .full-width { grid-column: span 2; }
+        .field { display: flex; flex-direction: column; }
+        .field label { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; color: #6b7280; }
+        .required label::after { content: " *"; color: #ef4444; }
+        .field input, .field textarea, .field select { height: 52px; padding: 0 1.25rem; font-size: 1rem; border: 2px solid #e5e7eb; border-radius: var(--border-radius); background-color: #f9fafb; }
+        .field textarea { height: auto; min-height: 150px; padding: 1.25rem; resize: vertical; }
+        .btn-submit { grid-column: span 2; height: 52px; background-color: var(--primary-color); color: white; border: none; border-radius: var(--border-radius); font-weight: 600; cursor: pointer; }
+        .btn-submit:hover { background-color: #2563eb; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h3>Audiencia Celebrada</h3>
+        <form class="form-grid">
+            <div class="field required"><label>ID Audiencia Espera</label><input type="number" required></div>
+            <div class="field required"><label>Fecha y Hora Celebración</label><input type="datetime-local" required></div>
+            
+            <div class="field"><label>Número de Oficio Acta</label><input type="text" maxlength="100"></div>
+            <div class="field"><label>Sala o Modalidad</label><input type="text" maxlength="150"></div>
+            
+            <div class="field full-width required"><label>Resultado de la Audiencia</label><textarea rows="6" required></textarea></div>
+            
+            <div class="field required">
+                <label>¿Asistió la Autoridad?</label>
+                <select required>
+                    <option value="true">Sí</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-submit">Guardar Audiencia</button>
+        </form>
+    </div>
+</body>
+</html>
