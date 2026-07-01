@@ -1,0 +1,113 @@
+/* FormPersonal.module.css */
+.form-container {
+    background-color: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    max-width: 600px;
+    margin: 2rem auto;
+    border: 1px solid #e2e8f0;
+}
+
+.form-title {
+    color: #2b6cb0; /* Azul institucional */
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.formGroup {
+    display: grid;
+    /* Esto crea 4 columnas iguales de forma automática */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px;
+    margin-top: 10px;
+    align-items: center;
+}
+
+/* Para elementos que queremos que ocupen más espacio (opcional) */
+.spanTwo {
+    grid-column: span 2;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+
+.btn-submit {
+    background-color: #2b6cb0;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #2c5282;
+}
+
+.fieldset {
+    border: 1px solid #e0e0e0;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+}
+
+legend {
+    font-weight: bold;
+    color: #190360; /* Color institucional, ajústalo a tu gusto */
+    padding: 0 10px;
+}
+
+.formInput, .formSelect {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.btnSubmit {
+    background-color: #190360;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btnSubmit:hover {
+    background-color: #170268;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 10px; /* Espacio entre el botón de guardar y cancelar */
+    justify-content: flex-start; /* Alineados a la izquierda */
+    margin-top: 20px;
+}
+
+.btnCancel {
+    background-color: #620700; /* Rojo para cancelar */
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btnCancel:hover {
+    background-color: #620700;
+}
