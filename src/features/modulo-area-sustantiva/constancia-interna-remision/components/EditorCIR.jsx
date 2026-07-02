@@ -58,23 +58,34 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
     setExito(false);
 
     try {
-      const expedienteId = expediente?.id_expediente || expediente?.idExpediente || expediente?.id;
+      const expedienteId =
+        expediente?.id_expediente ||
+        expediente?.idExpediente ||
+        expediente?.id;
 
       if (!expedienteId) {
-        setError("Error critico: No se pudo encontrar el ID del expediente en el sistema.");
+        setError(
+          "Error critico: No se pudo encontrar el ID del expediente en el sistema.",
+        );
         return;
       }
 
-      // Payload exacto que espera el Backend
+      // ✅ CORRECCIÓN: se envían TODOS los campos al backend.
+      // Los 4 que faltaban (areaQueRemite, areaQueRecibe, servicioPrestado,
+      // asesorQueRecibe) son leídos en construirVariablesTemplate() para
+      // rellenar {{AREA_QUE_REMITE}}, {{AREA_QUE_RECIBE}},
+      // {{SERVICIO_PREVIO}} y {{NOMBRE_ASESOR_RECIBE}} en el docx.
       const payload = {
         documentacionRemite,
         motivosRemite,
         fundamentos,
         observaciones,
+        areaQueRemite,                              // ← antes faltaba
+        areaQueRecibe,                              // ← antes faltaba
+        servicioPrestado,                           // ← antes faltaba
         asesorQueRemite: asesorQueRemite || "ASESOR EN TURNO",
+        asesorQueRecibe,                            // ← antes faltaba
         nombreEncargado: nombreTitular,
-        // Nota: areaQueRemite, areaQueRecibe y servicioPrestado
-        // se usan para la vista previa. Si tu backend los guarda, agrégaselos al payload.
       };
 
       const res = await fetch(
@@ -229,8 +240,12 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
           </div>
 
           <div
-            style={{ height: "1px", background: "#e2e8f0", margin: "0.5rem 0" }}
-          ></div>
+            style={{
+              height: "1px",
+              background: "#e2e8f0",
+              margin: "0.5rem 0",
+            }}
+          />
           <h3 style={{ margin: 0, fontSize: "1rem", color: "#475569" }}>
             Datos de la Remisión
           </h3>
@@ -397,8 +412,12 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
           </div>
 
           <div
-            style={{ height: "1px", background: "#e2e8f0", margin: "0.5rem 0" }}
-          ></div>
+            style={{
+              height: "1px",
+              background: "#e2e8f0",
+              margin: "0.5rem 0",
+            }}
+          />
           <h3 style={{ margin: 0, fontSize: "1rem", color: "#475569" }}>
             Firmas
           </h3>
@@ -662,7 +681,7 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
                   {observaciones || "Ninguna."}
                 </div>
 
-                {/* Tabla de Firmas Exacta al Oficio */}
+                {/* Tabla de Firmas */}
                 <table
                   style={{
                     width: "100%",
@@ -714,9 +733,7 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
                           color: "#dc2626",
                         }}
                       >
-                        {asesorQueRemite
-                          ? asesorQueRemite.split(" ").pop()
-                          : "[Remite]"}
+                        {asesorQueRemite || "[Remite]"}
                       </td>
                       <td
                         style={{
@@ -726,9 +743,7 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
                           color: "#dc2626",
                         }}
                       >
-                        {asesorQueRecibe
-                          ? asesorQueRecibe.split(" ").pop()
-                          : "[Recibe]"}
+                        {asesorQueRecibe || "[Recibe]"}
                       </td>
                       <td
                         style={{
@@ -738,9 +753,7 @@ export const EditorCIR = ({ expediente, folioExpediente }) => {
                           color: "#dc2626",
                         }}
                       >
-                        {nombreTitular
-                          ? nombreTitular.split(" ").pop()
-                          : "[Autorizó]"}
+                        {nombreTitular || "[Autorizó]"}
                       </td>
                     </tr>
                   </tbody>

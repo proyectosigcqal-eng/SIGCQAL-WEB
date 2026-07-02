@@ -80,20 +80,21 @@ export const CrearQuejaAriPage = () => {
         // b) prefill de datos de contexto — reutiliza el endpoint que ya usa el checklist
         let prefill = {};
         try {
-          const res = await fetch(`${API_BASE}/api/v1/expedientes/${folio}/detalle-asesoria`);
-          if (res.ok) {
-            const detalle = await res.json();
-            prefill = {
-              folioGobierno: folio,
-              nombreContribuyente: detalle?.contribuyente ?? '',
-              // ⚠️ Ajusta estos 4 si tu endpoint de detalle-asesoria usa otros nombres de campo
-              nombreAsesor: detalle?.nombreAsesor ?? '',
-              rfcAsesor: detalle?.rfcAsesor ?? '',
-              nombreRepresentante: detalle?.nombreRepresentante ?? '',
-              identificacionContribuyente: detalle?.identificacionContribuyente ?? '',
-              fechaSolicitud: detalle?.fechaSolicitud ?? '',
-            };
-          }
+  const res = await fetch(`${API_BASE}/api/v1/expedientes/${folio}/detalle-asesoria`);
+  if (res.ok) {
+    const detalle = await res.json();
+    console.log('>>> detalle-asesoria completo:', detalle); // ← VER QUÉ TRAE
+   prefill = {
+  folioGobierno:               folio,
+  nombreContribuyente:         detalle?.contribuyente                ?? '',
+  // ✅ el backend devuelve snake_case — hay que leerlos así
+  nombreAsesor:                detalle?.nombre_asesor                ?? '',
+  rfcAsesor:                   detalle?.rfc_asesor                   ?? '',
+  nombreRepresentante:         detalle?.nombre_representante         ?? '',
+  identificacionContribuyente: detalle?.identificacion_contribuyente ?? '',
+  fechaSolicitud:              detalle?.fecha_solicitud              ?? '',
+};
+  }
         } catch {
           // no crítico — el formulario sigue disponible aunque no haya prefill
         }
