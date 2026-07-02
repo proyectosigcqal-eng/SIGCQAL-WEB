@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { guardarSeguimiento, obtenerProximoFolio } from '../services/seguimientoService';
 
+const FIRMANTE_FIJO = 5;
+
 export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, onGuardado, onError }) => {
   const [folioGenerado, setFolioGenerado] = useState(null);
   const [folioPreview, setFolioPreview]   = useState(null);
@@ -34,32 +36,6 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
       onError && onError('El informe de atención es obligatorio.');
       return;
     }
-
-   // 1. Obtener el token del localStorage
-    const token = localStorage.getItem('token');
-    let idUsuarioAutenticado = null;
-
-    if (token) {
-        try {
-            // 2. Decodificar el JWT (el payload es la segunda parte después del primer punto)
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            const payload = JSON.parse(jsonPayload);
-            idUsuarioAutenticado = payload.idUsuario; // ¡Aquí está tu ID 14!
-        } catch (e) {
-            console.error("Error al decodificar el token:", e);
-        }
-    }
-
-    if (!idUsuarioAutenticado) {
-        onError && onError('No se pudo identificar al usuario. Por favor, inicia sesión de nuevo.');
-        return;
-    }
-    
     setGuardando(true);
     try {
       const payload = {
@@ -69,7 +45,7 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
         fechaResolucion:                     new Date().toISOString().split('T')[0],
         horaResolucion:                      new Date().toTimeString().split(' ')[0],
         archivoAdjunto:                      archivo ?? null,
-        idUsuario:                           idUsuarioAutenticado,
+        idUsuario:                           5,
         idEstatus:                           5,
         numeroOficioContestacion:            '',
       };
@@ -85,19 +61,15 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
   };
 
   const handleGenerarOficio = () => {
-
-    const userString = localStorage.getItem('user');
-    const userData = userString ? JSON.parse(userString) : {};
-
     setMostrarModalOficio(false);
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia: acuse?.idCorrespondencia || correspondencia?.id || null,
-        idUsuarioFirmante: userData.id ?? userData.idUsuario,
-        firmante:          userData.nombreRemitente || 'Firmante',
-        areaFirmante:      userData.dependenciaRemitente || 'Área del firmante',
-        idUsuarioEmisor:   userData.id ?? userData.idUsuario,
-        nombreEmisor:      userData.nombreEmisor,
+        idUsuarioFirmante: FIRMANTE_FIJO,
+        firmante:          'ana_admin',
+        areaFirmante:      'Administración',
+        idUsuarioEmisor:   FIRMANTE_FIJO,
+        nombreEmisor:      'ana_admin',
         textoSugerido:     respuesta,
       }
     });

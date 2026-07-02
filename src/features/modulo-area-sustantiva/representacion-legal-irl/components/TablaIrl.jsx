@@ -404,7 +404,9 @@ export const TablaIrl = ({
                               {accion.label}
                             </button>
                           );
-                            if (accion.tipo === "modal") {
+                        }
+
+                        if (accion.tipo === "modal") {
                           return (
                             <button
                               key={i}
@@ -415,9 +417,6 @@ export const TablaIrl = ({
                             </button>
                           );
                         }
-                        }
-
-                      
 
                           if (accion.tipo === "tab") {
   return (
@@ -498,13 +497,17 @@ if (cierreExitoso) {
                       </div>
                     </td>
                   </tr>
-                  
                 );
               })}
             </tbody>
-
           </table>
-              {detalleModal && (
+        </div>
+      )}
+    </div>
+  );
+};
+
+      {detalleModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200 }}>
           <div style={{ width: 680, maxWidth: '94%', background: '#fff', borderRadius: 8, padding: 20 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -538,12 +541,5 @@ if (cierreExitoso) {
           </div>
         </div>
       )}
-           
-        </div>
-      )}
-    </div>
-  );
-};
-
 
 export default TablaIrl;

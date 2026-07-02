@@ -6,55 +6,39 @@ export const useCorrespondenciaPendientePorArea = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  
-const getAreaDesdeToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    try {
-      // El payload es la segunda parte del JWT
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(window.atob(base64));
-      return payload.idArea; // Aquí está el idArea que viene de tu JwtService
-    } catch (e) {
-      console.error("Error al decodificar token para obtener idArea:", e);
-      return null;
-    }
-  };
+  // TODO: Obtener el área del usuario logueado.
+  // Por ahora se fuerza un área para pruebas.
+  const AREA_FORZADA = 1;
 
-
-const cargarCorrespondencia = async () => {
-    const idArea = getAreaDesdeToken(); // Obtenemos el valor aquí
-    
-    if (!idArea) {
-      setError("No se pudo determinar el área del usuario logueado.");
-      return;
-    }
-
+  const cargarCorrespondencia = async (idArea) => {
     setLoading(true);
     setError(null);
     try {
       const data = await obtenerCorrespondenciaPendientePorArea(idArea);
+      console.log('Correspondencia pendiente por área recibida:', data);
+      console.log('Primer elemento (keys):', data.length > 0 ? Object.keys(data[0]) : 'sin datos');
       setCorrespondencia(data);
     } catch (err) {
       setError(err?.message || 'Error al obtener correspondencia pendiente por área');
+      console.error('Error al cargar correspondencia pendiente por área:', err);
     } finally {
       setLoading(false);
     }
   };
 
- useEffect(() => {
-    cargarCorrespondencia();
-  }, []); // Se ejecuta al montar
+  useEffect(() => {
+    cargarCorrespondencia(AREA_FORZADA);
+  }, []);
 
   const recargar = () => {
-    cargarCorrespondencia();
+    cargarCorrespondencia(AREA_FORZADA);
   };
 
   return {
     correspondencia,
     loading,
     error,
-    recargar
+    recargar,
+    areaForzada: AREA_FORZADA
   };
 };

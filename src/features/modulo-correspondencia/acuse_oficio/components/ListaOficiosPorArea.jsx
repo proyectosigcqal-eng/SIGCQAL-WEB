@@ -4,7 +4,7 @@ import '@/features/modulo-correspondencia/oficio/styles/listaOficiosPorArea.css'
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaOficiosPorArea = () => {
-  const { oficios, loading, error, recargar } = useListaOficiosPorArea();
+  const { oficios, loading, error, recargar, areaForzada } = useListaOficiosPorArea();
   const navigate = useNavigate();
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
@@ -17,7 +17,7 @@ export const ListaOficiosPorArea = () => {
       <div className="lista-header">
         <h2>Oficios asignados</h2>
         <div className="header-info">
-          <span className="area-badge">Área: Asignada</span>
+          <span className="area-badge">Área: {areaForzada}</span>
           <button onClick={recargar} className="btn-actualizar">↻ Actualizar</button>
         </div>
       </div>
