@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { X, FileText } from 'lucide-react';
 
+
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+
 
 const Field = ({ label, value }) => (
   <div style={{ marginBottom: '0.75rem' }}>

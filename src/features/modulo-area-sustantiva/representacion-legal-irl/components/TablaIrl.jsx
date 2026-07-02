@@ -1,10 +1,12 @@
-// features/modulo-area-sustantiva/representacion-legal-irl/components/TablaIrl.jsx
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatearFecha, obtenerColorSemaforo } from "../../../modulo-area-sustantiva/comisionado-irl/utils/semaforo";
 import { SemaforoJudicial } from "@/features/modulo-area-sustantiva/demanda-amparo/components/SemaforoJudicial";
 import { cerrarExpediente } from "@/features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/services/cierreService";
+// ✅ corregido: import NOMBRADO (tu archivo exporta `export const ModalDetalleIrl`, no default) + nombre bien escrito
+import { ModalDetalleIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/ModalDetalleIrl";
+
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
@@ -22,100 +24,163 @@ const tabStyle = (active) => ({
 
 const calcularAccionesIrl = (item, estUp) => {
   const folio = item.folioGobierno ?? item.folio ?? item.idExpediente ?? item.id;
+  const acciones = [];
+  // Normalizar flags: aceptamos booleanos o la presencia de una fecha (/snake_case)
+  const tieneAudienciaFlag = !!(
+    item?.tieneAudiencia || item?.tiene_audiencia || item?.fechaAudiencia || item?.fecha_audiencia
+  );
+  const tieneSentenciaFlag = !!(
+    item?.tieneSentencia || item?.tiene_sentencia || item?.fechaSentencia || item?.fecha_sentencia
+  );
 
   if (!estUp || estUp.includes('ASIGNADO')) {
-    return [{ tipo: 'navegacion', label: 'REGISTRAR CIR',
-              ruta: `/area-sustantiva/rl-cir/${folio}` }];
+    acciones.push({ tipo: 'navegacion', label: 'REGISTRAR CIR',
+      ruta: `/area-sustantiva/rl-cir/${folio}` });
+    return acciones;
   }
 
   if (estUp.includes('CIR')) {
-    return [{
+    acciones.push({
       tipo: 'navegacion',
       label: item.tieneDemanda ? 'VER DEMANDA' : 'REGISTRAR DEMANDA',
       ruta: `/atencion-juridica/demanda-amparo/${folio}`,
-    }];
+    });
+    const idRlCir = item.idRlCir ?? item.id_rl_cir;
+    const idQuejaRlCir = item.idQuejaRlCir ?? item.id_queja_rl_cir;
+    if (idRlCir) {
+      acciones.push({
+        tipo: 'descarga',
+        label: 'DESCARGAR CIR',
+        url: `${API}/api/v1/rl-cir/${idRlCir}/descargar`,
+        filename: `CIR-${folio}.docx`,
+      });
+    }
+    if (idQuejaRlCir) {
+      acciones.push({
+        tipo: 'descarga',
+        label: 'DESCARGAR CIR QUEJA',
+        url: `${API}/api/v1/queja-rl-cir/${idQuejaRlCir}/descargar`,
+        filename: `CIR-QUEJA-${folio}.docx`,
+      });
+    }
+    return acciones;
   }
 
   if (estUp.includes('DEMANDA')) {
-    return [{ tipo: 'navegacion', label: 'REGISTRAR AUDIENCIA',
-              ruta: `/sustantiva/audiencia-espera` }];
+    acciones.push({ tipo: 'navegacion', label: 'REGISTRAR AUDIENCIA',
+      ruta: `/sustantiva/audiencia-espera` });
+    const idDemanda = item.idDemandaAmparo ?? item.idDemanda;
+    if (idDemanda) {
+      acciones.push({
+        tipo: 'descarga',
+        label: 'DESCARGAR DEMANDA',
+        url: `${API}/api/v1/irl-demanda-amparo/${idDemanda}/descargar`,
+        filename: `DEMANDA-${folio}.docx`,
+      });
+    }
+    return acciones;
   }
 
   if (estUp.includes('ESPERA')) {
-    return [{
+    acciones.push({
       tipo: 'navegacion',
-      label: item.tieneAudiencia ? 'VER AUDIENCIA' : 'REGISTRAR AUDIENCIA',
+      label: tieneAudienciaFlag ? 'VER AUDIENCIA' : 'REGISTRAR AUDIENCIA',
       ruta: `/sustantiva/audiencia-celebrada`,
-    }];
+    });
+    if (tieneAudienciaFlag) {
+      acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'DATOS AUDIENCIA' });
+    }
+    return acciones;
   }
 
   if (estUp.includes('CELEBRADA')) {
-    return [{
+    acciones.push({
       tipo: 'navegacion',
-      label: item.tieneSentencia ? 'VER SENTENCIA' : 'REGISTRAR SENTENCIA',
+      label: tieneSentenciaFlag ? 'VER SENTENCIA' : 'REGISTRAR SENTENCIA',
       ruta: `/sustantiva/sentencia-dictada`,
-    }];
+    });
+    // ✅ el modal de audiencia también se ofrece aquí — ya se registró en la etapa anterior
+    if (tieneAudienciaFlag) {
+      acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'DATOS AUDIENCIA' });
+    }
+    if (tieneSentenciaFlag) {
+      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'DATOS SENTENCIA' });
+    }
+    return acciones;
   }
 
   if (estUp.includes('DICTADA')) {
-    return [
-      { tipo: 'navegacion', label: 'RECURSO REVISIÓN', ruta: `/sustantiva/recurso-revision` },
-      {
-        tipo: 'navegacion',
-        label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'SENTENCIA EJECUTORIA',
-        ruta: `/sustantiva/sentencia-ejecutoria`,
-      },
-    ];
+
+    acciones.push({ tipo: 'navegacion', label: 'RECURSO REVISIÓN',
+      ruta: `/sustantiva/recurso-revision` });
+    acciones.push({
+      tipo: 'navegacion',
+      label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'SENTENCIA EJECUTORIA',
+      ruta: `/sustantiva/sentencia-ejecutoria`,
+    });
+    // ✅ la sentencia ya está registrada en esta etapa — se puede consultar sin navegar
+    if (tieneSentenciaFlag) {
+      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'DATOS SENTENCIA' });
+    }
+    return acciones;
+
   }
 
   if (estUp.includes('REVISIÓN') || estUp.includes('REVISION')) {
-    return [{
+    acciones.push({
       tipo: 'navegacion',
       label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'REGISTRAR EJECUTORIA',
       ruta: `/sustantiva/sentencia-ejecutoria`,
-    }];
+    });
+    // ✅ el recurso ya está en curso en esta etapa — se puede consultar
+    acciones.push({ tipo: 'modal', modalType: 'RECURSO_REVISION', label: 'DATOS RECURSO' });
+    return acciones;
   }
 
   if (estUp.includes('EJECUTORIA')) {
-    return [{
+    acciones.push({
       tipo: 'navegacion',
       label: item.tieneCumplimiento ? 'VER NOTIFICACIÓN' : 'NOTIFICAR CUMPLIMIENTO',
       ruta: `/sustantiva/notificacion-sentencia`,
-    }];
+    });
+    if (item.tieneEjecutoria) {
+      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA_EJECUTADA', label: 'DATOS EJECUTORIA' });
+    }
+    return acciones;
   }
 
   if (estUp.includes('CUMPLIMIENTO')) {
-    return [{ tipo: 'tab', label: 'PASAR A CONCLUIDO', tab: 'CONCLUIDO' }];
+    acciones.push({ tipo: 'tab', label: 'PASAR A CONCLUIDO', tab: 'CONCLUIDO' });
+    if (item.tieneCumplimiento) {
+      acciones.push({ tipo: 'modal', modalType: 'CUMPLIMIENTO', label: 'DATOS CUMPLIMIENTO' });
+    }
+    return acciones;
   }
 
   if (estUp.includes('CONCLUIDO')) {
-    return [{ tipo: 'info', label: 'CONCLUIDO', ruta: null }];
+    acciones.push({ tipo: 'info', label: 'CONCLUIDO', ruta: null });
+    return acciones;
   }
 
-  return [{ tipo: 'navegacion', label: 'ATENDER',
-            ruta: `/atencion-juridica/demanda-amparo/${folio}` }];
+  acciones.push({ tipo: 'navegacion', label: 'ATENDER',
+    ruta: `/atencion-juridica/demanda-amparo/${folio}` });
+  return acciones;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const TablaIrl = ({
-  subSwitchActivo,
-  setSubSwitchActivo,
-  etapaActiva,
-  setEtapaActiva,
-  estatusActivo,
-  setEstatusActivo,
-  busqueda,
-  setBusqueda,
-  items,
-  cargando,
-  error,
-  SUB_SWITCHES,
-  ESTATUS_TABS,
+  subSwitchActivo, setSubSwitchActivo,
+  etapaActiva, setEtapaActiva,
+  estatusActivo, setEstatusActivo,
+  busqueda, setBusqueda,
+  items, cargando, error,
+  SUB_SWITCHES, ESTATUS_TABS,
+
   recargar,
 }) => {
   const navigate = useNavigate();
   const [procesandoConcluir, setProcesandoConcluir] = useState(false);
+
   const [semaforos,          setSemaforos]          = useState({});
   const [semaforoCargando,   setSemaforoCargando]   = useState(false);
   const [detalleModal,       setDetalleModal]       = useState(null); // item completo
@@ -126,17 +191,21 @@ export const TablaIrl = ({
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
+
   const descargarDesdeUrl = async (url, filenameFallback) => {
     try {
       const res = await fetch(url);
-      if (!res.ok) { window.alert('No fue posible descargar el archivo.'); return; }
+      if (!res.ok) {
+        window.alert('No fue posible descargar el archivo.');
+        return;
+      }
       const blob = await res.blob();
       const disposition = res.headers.get('content-disposition') || '';
       let filename = filenameFallback || 'documento.docx';
       const m = disposition.match(/filename="?([^";]+)"?/);
       if (m?.[1]) filename = m[1];
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
+      link.href  = window.URL.createObjectURL(blob);
       link.download = filename;
       document.body.appendChild(link);
       link.click();
@@ -159,6 +228,7 @@ export const TablaIrl = ({
     actual.setDate(actual.getDate() + 1);
     while (diasHabiles > 0) {
       if (actual.getDay() !== 0 && actual.getDay() !== 6) diasHabiles--;
+
       if (diasHabiles > 0) actual.setDate(actual.getDate() + 1);
     }
     return actual.toISOString().slice(0, 10);
@@ -187,6 +257,7 @@ export const TablaIrl = ({
     const diasHabilesRestantes = contarDiasHabilesEntre(inicioCuenta, new Date(fechaLimite));
     const color = obtenerColorSemaforo(diasHabilesRestantes);
     const limite = new Date(fechaLimite); limite.setHours(23,59,59,999);
+    
     return { color, diasHabilesRestantes, fechaLimite,
              vencido: diasHabilesRestantes === 0 && hoy > limite };
   };
@@ -202,6 +273,7 @@ export const TablaIrl = ({
     let mounted = true;
     const ids = (items || []).map(getDemandaId).filter(Boolean);
     if (etapaActual !== 'DEMANDA_PRESENTADA' || ids.length === 0) {
+
       setSemaforos({}); return;
     }
     setSemaforoCargando(true);
@@ -213,7 +285,9 @@ export const TablaIrl = ({
     ).then(results => {
       if (!mounted) return;
       const map = {};
+
       ids.forEach((id, i) => { map[id] = results[i]; });
+
       setSemaforos(map);
     }).finally(() => { if (mounted) setSemaforoCargando(false); });
     return () => { mounted = false; };
@@ -240,7 +314,9 @@ export const TablaIrl = ({
         overflow: "hidden", width: "fit-content",
       }}>
         {SUB_SWITCHES.map((sw, i) => (
+
           <button key={sw.key} type="button" onClick={() => setSubSwitchActivo(sw.key)}
+
             style={{
               ...tabStyle(subSwitchActivo === sw.key),
               borderRight: i < SUB_SWITCHES.length - 1
@@ -299,6 +375,7 @@ export const TablaIrl = ({
                 const acciones = calcularAccionesIrl(item, estUp);
                 const demandaId = getDemandaId(item);
 
+
                 // Botón de descarga de demanda si existe
                 if (demandaId || item.tieneDemanda) {
                   acciones.push({
@@ -316,6 +393,7 @@ export const TablaIrl = ({
                   acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'VER SENTENCIA' });
                 }
 
+
                 const rowKey = item.idRepresentacionLegal ?? item.id
                   ?? item.idExpediente ?? item.folioGobierno ?? `irl-row-${index}`;
 
@@ -328,16 +406,16 @@ export const TablaIrl = ({
 
                     {etapaActual === 'DEMANDA_PRESENTADA' && (
                       <td>
-                        {!demandaId ? <span className="semaforo-na">—</span>
-                          : semaforoCargando && !semaforos[demandaId]
+
+                        {demandaId ? (
+                          semaforoCargando && !semaforos[demandaId]
                             ? <span className="semaforo-cargando">Calculando...</span>
                             : (() => {
                                 const sem = semaforos[demandaId] || obtenerSemaforoLocal(item);
-                                return sem
-                                  ? <SemaforoJudicial semaforo={sem} />
-                                  : <span className="semaforo-na">—</span>;
+                                return sem ? <SemaforoJudicial semaforo={sem} /> : <span>—</span>;
                               })()
-                        }
+                        ) : <span>—</span>}
+
                       </td>
                     )}
 
@@ -397,6 +475,7 @@ export const TablaIrl = ({
                                   setProcesandoConcluir(true);
 
                                   try {
+
                                     // ✅ mismo patrón que CierrePage.jsx
                                     const storedUser = leerUsuarioSesion();
                                     const userId = storedUser?.idUsuario
@@ -437,6 +516,7 @@ export const TablaIrl = ({
                                       setEtapaActual('CONCLUIDO');
                                       if (typeof recargar === 'function') await recargar().catch(() => {});
                                     }
+
                                   } finally {
                                     setProcesandoConcluir(false);
                                   }
@@ -446,7 +526,7 @@ export const TablaIrl = ({
                             );
                           }
 
-                          // tipo === "navegacion" (default)
+
                           return (
                             <button key={i} className="bdg-btn-action"
                               onClick={() => accion.ruta && navigate(accion.ruta)}>
