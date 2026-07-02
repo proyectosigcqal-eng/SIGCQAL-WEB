@@ -1,14 +1,10 @@
+// features/modulo-area-sustantiva/representacion-legal-irl/components/TablaIrl.jsx
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { formatearFecha, obtenerColorSemaforo } from "../../../modulo-area-sustantiva/comisionado-irl/utils/semaforo";
+import { formatearFecha, obtenerColorSemaforo } from "../../../modulo-area-sustantiva/comisionado-irl/utils/semaforo";   // ya existe en TablaComisionadoIrl
 import { SemaforoJudicial } from "@/features/modulo-area-sustantiva/demanda-amparo/components/SemaforoJudicial";
 import { cerrarExpediente } from "@/features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/services/cierreService";
-// ✅ corregido: import NOMBRADO (tu archivo exporta `export const ModalDetalleIrl`, no default) + nombre bien escrito
-import { ModalDetalleIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/ModalDetalleIrl";
-
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
-
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 const tabStyle = (active) => ({
   padding: "8px 20px",
@@ -22,278 +18,258 @@ const tabStyle = (active) => ({
   transition: "background 0.12s, color 0.12s",
 });
 
-const calcularAccionesIrl = (item, estUp) => {
+// ── Misma lógica que calcularAcciones en TablaTramites, pero para flujo IRL ──
+// id = idRepresentacionLegal (identificador del caso IRL)
+// ⚠️ Ajusta las rutas cuando conectes los formularios al router
+// ✅ Usa los flags reales que devuelve el backend + estatus del catálogo
+const calcularAccionesIrl = (item, estUp, API) => {
   const folio = item.folioGobierno ?? item.folio ?? item.idExpediente ?? item.id;
-  const acciones = [];
-  // Normalizar flags: aceptamos booleanos o la presencia de una fecha (/snake_case)
-  const tieneAudienciaFlag = !!(
-    item?.tieneAudiencia || item?.tiene_audiencia || item?.fechaAudiencia || item?.fecha_audiencia
-  );
-  const tieneSentenciaFlag = !!(
-    item?.tieneSentencia || item?.tiene_sentencia || item?.fechaSentencia || item?.fecha_sentencia
-  );
+  const demandaId = item?.idDemandaAmparo ?? item?.idDemanda ?? item?.idExpediente ?? item?.id;
 
   if (!estUp || estUp.includes('ASIGNADO')) {
-    acciones.push({ tipo: 'navegacion', label: 'REGISTRAR CIR',
-      ruta: `/area-sustantiva/rl-cir/${folio}` });
-    return acciones;
+    return [{ tipo: 'navegacion', label: 'REGISTRAR CIR',
+              ruta: `/area-sustantiva/rl-cir/${folio}` }];
   }
 
   if (estUp.includes('CIR')) {
-    acciones.push({
-      tipo: 'navegacion',
-      label: item.tieneDemanda ? 'VER DEMANDA' : 'REGISTRAR DEMANDA',
-      ruta: `/atencion-juridica/demanda-amparo/${folio}`,
-    });
-    const idRlCir = item.idRlCir ?? item.id_rl_cir;
-    const idQuejaRlCir = item.idQuejaRlCir ?? item.id_queja_rl_cir;
-    if (idRlCir) {
-      acciones.push({
-        tipo: 'descarga',
-        label: 'DESCARGAR CIR',
-        url: `${API}/api/v1/rl-cir/${idRlCir}/descargar`,
-        filename: `CIR-${folio}.docx`,
-      });
-    }
-    if (idQuejaRlCir) {
-      acciones.push({
-        tipo: 'descarga',
-        label: 'DESCARGAR CIR QUEJA',
-        url: `${API}/api/v1/queja-rl-cir/${idQuejaRlCir}/descargar`,
-        filename: `CIR-QUEJA-${folio}.docx`,
-      });
-    }
-    return acciones;
+    return [
+      item.tieneDemanda
+        ? { tipo: 'descarga', label: 'DESCARGAR DEMANDA',
+            url: `${API}/api/v1/irl-demanda-amparo/${demandaId}/descargar` }
+        : { tipo: 'navegacion', label: 'REGISTRAR DEMANDA',
+            ruta: `/atencion-juridica/demanda-amparo/${folio}` },
+    ];
   }
 
   if (estUp.includes('DEMANDA')) {
-    acciones.push({ tipo: 'navegacion', label: 'REGISTRAR AUDIENCIA',
-      ruta: `/sustantiva/audiencia-espera` });
-    const idDemanda = item.idDemandaAmparo ?? item.idDemanda;
-    if (idDemanda) {
-      acciones.push({
-        tipo: 'descarga',
-        label: 'DESCARGAR DEMANDA',
-        url: `${API}/api/v1/irl-demanda-amparo/${idDemanda}/descargar`,
-        filename: `DEMANDA-${folio}.docx`,
-      });
-    }
-    return acciones;
+    return [
+      { tipo: 'descarga', label: 'DESCARGAR DEMANDA',
+        url: `${API}/api/v1/irl-demanda-amparo/${demandaId}/descargar` },
+      { tipo: 'navegacion', label: 'REGISTRAR AUDIENCIA',
+        ruta: `/sustantiva/audiencia-espera` },
+    ];
   }
 
   if (estUp.includes('ESPERA')) {
-    acciones.push({
-      tipo: 'navegacion',
-      label: tieneAudienciaFlag ? 'VER AUDIENCIA' : 'REGISTRAR AUDIENCIA',
-      ruta: `/sustantiva/audiencia-celebrada`,
-    });
-    if (tieneAudienciaFlag) {
-      acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'DATOS AUDIENCIA' });
-    }
-    return acciones;
+    return [
+      item.tieneAudiencia
+        ? { tipo: 'modal', modalType: 'AUDIENCIA', label: 'VER AUDIENCIA' }
+        : { tipo: 'navegacion', label: 'REGISTRAR AUDIENCIA',
+            ruta: `/sustantiva/audiencia-celebrada` },
+    ];
   }
 
   if (estUp.includes('CELEBRADA')) {
-    acciones.push({
-      tipo: 'navegacion',
-      label: tieneSentenciaFlag ? 'VER SENTENCIA' : 'REGISTRAR SENTENCIA',
-      ruta: `/sustantiva/sentencia-dictada`,
-    });
-    // ✅ el modal de audiencia también se ofrece aquí — ya se registró en la etapa anterior
-    if (tieneAudienciaFlag) {
-      acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'DATOS AUDIENCIA' });
-    }
-    if (tieneSentenciaFlag) {
-      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'DATOS SENTENCIA' });
-    }
-    return acciones;
+    return [
+      { tipo: 'modal', modalType: 'AUDIENCIA', label: 'VER AUDIENCIA' },
+      item.tieneSentencia
+        ? { tipo: 'modal', modalType: 'SENTENCIA', label: 'VER SENTENCIA' }
+        : { tipo: 'navegacion', label: 'REGISTRAR SENTENCIA',
+            ruta: `/sustantiva/sentencia-dictada` },
+    ];
   }
 
   if (estUp.includes('DICTADA')) {
-
-    acciones.push({ tipo: 'navegacion', label: 'RECURSO REVISIÓN',
-      ruta: `/sustantiva/recurso-revision` });
-    acciones.push({
-      tipo: 'navegacion',
-      label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'SENTENCIA EJECUTORIA',
-      ruta: `/sustantiva/sentencia-ejecutoria`,
-    });
-    // ✅ la sentencia ya está registrada en esta etapa — se puede consultar sin navegar
-    if (tieneSentenciaFlag) {
-      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'DATOS SENTENCIA' });
-    }
-    return acciones;
-
+    return [
+      { tipo: 'modal', modalType: 'SENTENCIA', label: 'VER SENTENCIA' },
+      { tipo: 'navegacion', label: 'RECURSO REVISIÓN',
+        ruta: `/sustantiva/recurso-revision` },
+      item.tieneEjecutoria
+        ? { tipo: 'navegacion', label: 'VER EJECUTORIA',
+            ruta: `/sustantiva/sentencia-ejecutoria` }
+        : { tipo: 'navegacion', label: 'SENTENCIA EJECUTORIA',
+            ruta: `/sustantiva/sentencia-ejecutoria` },
+    ];
   }
 
   if (estUp.includes('REVISIÓN') || estUp.includes('REVISION')) {
-    acciones.push({
-      tipo: 'navegacion',
-      label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'REGISTRAR EJECUTORIA',
-      ruta: `/sustantiva/sentencia-ejecutoria`,
-    });
-    // ✅ el recurso ya está en curso en esta etapa — se puede consultar
-    acciones.push({ tipo: 'modal', modalType: 'RECURSO_REVISION', label: 'DATOS RECURSO' });
-    return acciones;
+    return [
+      item.tieneEjecutoria
+        ? { tipo: 'navegacion', label: 'VER EJECUTORIA',
+            ruta: `/sustantiva/sentencia-ejecutoria` }
+        : { tipo: 'navegacion', label: 'REGISTRAR EJECUTORIA',
+            ruta: `/sustantiva/sentencia-ejecutoria` },
+    ];
   }
 
   if (estUp.includes('EJECUTORIA')) {
-    acciones.push({
-      tipo: 'navegacion',
-      label: item.tieneCumplimiento ? 'VER NOTIFICACIÓN' : 'NOTIFICAR CUMPLIMIENTO',
-      ruta: `/sustantiva/notificacion-sentencia`,
-    });
-    if (item.tieneEjecutoria) {
-      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA_EJECUTADA', label: 'DATOS EJECUTORIA' });
-    }
-    return acciones;
+    return [
+      item.tieneCumplimiento
+        ? { tipo: 'navegacion', label: 'VER NOTIFICACIÓN',
+            ruta: `/sustantiva/notificacion-sentencia` }
+        : { tipo: 'navegacion', label: 'NOTIFICAR CUMPLIMIENTO',
+            ruta: `/sustantiva/notificacion-sentencia` },
+    ];
   }
 
   if (estUp.includes('CUMPLIMIENTO')) {
-    acciones.push({ tipo: 'tab', label: 'PASAR A CONCLUIDO', tab: 'CONCLUIDO' });
-    if (item.tieneCumplimiento) {
-      acciones.push({ tipo: 'modal', modalType: 'CUMPLIMIENTO', label: 'DATOS CUMPLIMIENTO' });
-    }
-    return acciones;
+    return [{ tipo: 'tab', label: 'PASAR A CONCLUIDO', tab: 'CONCLUIDO' }];
   }
 
   if (estUp.includes('CONCLUIDO')) {
-    acciones.push({ tipo: 'info', label: 'CONCLUIDO', ruta: null });
-    return acciones;
+    return [{ tipo: 'info', label: 'CONCLUIDO', ruta: null }];
   }
 
-  acciones.push({ tipo: 'navegacion', label: 'ATENDER',
-    ruta: `/atencion-juridica/demanda-amparo/${folio}` });
-  return acciones;
+  return [{ tipo: 'navegacion', label: 'ATENDER',
+            ruta: `/atencion-juridica/demanda-amparo/${folio}` }];
 };
-
-
 export const TablaIrl = ({
-  subSwitchActivo, setSubSwitchActivo,
-  etapaActiva, setEtapaActiva,
-  estatusActivo, setEstatusActivo,
-  busqueda, setBusqueda,
-  items, cargando, error,
-  SUB_SWITCHES, ESTATUS_TABS,
-
+  subSwitchActivo,
+  setSubSwitchActivo,
+  etapaActiva,
+  setEtapaActiva,
+  estatusActivo,      // ← alias de etapaActiva para compatibilidad
+  setEstatusActivo,   // ← alias
+  busqueda,
+  setBusqueda,
+  items,
+  cargando,
+  error,
+  SUB_SWITCHES,
+  ESTATUS_TABS,       // = ETAPAS_IRL
   recargar,
 }) => {
   const navigate = useNavigate();
   const [procesandoConcluir, setProcesandoConcluir] = useState(false);
-
-  const [semaforos,          setSemaforos]          = useState({});
-  const [semaforoCargando,   setSemaforoCargando]   = useState(false);
-  const [detalleModal,       setDetalleModal]       = useState(null); // item completo
-  const [detalleTipo,        setDetalleTipo]        = useState(null); // 'AUDIENCIA' | 'SENTENCIA'
-
-  const etapaActual    = etapaActiva    ?? estatusActivo    ?? "TODAS";
-  const setEtapaActual = setEtapaActiva ?? setEstatusActivo ?? (() => {});
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
+  const [semaforos, setSemaforos] = useState({});
+  const [semaforoCargando, setSemaforoCargando] = useState(false);
+  const [detalleModal, setDetalleModal] = useState(null);
+  const [detalleTipo, setDetalleTipo] = useState(null);
 
   const descargarDesdeUrl = async (url, filenameFallback) => {
     try {
       const res = await fetch(url);
       if (!res.ok) {
-        window.alert('No fue posible descargar el archivo.');
+        window.alert('No fue posible descargar el archivo (no existe en el servidor).');
         return;
       }
       const blob = await res.blob();
       const disposition = res.headers.get('content-disposition') || '';
       let filename = filenameFallback || 'documento.docx';
       const m = disposition.match(/filename="?([^";]+)"?/);
-      if (m?.[1]) filename = m[1];
+      if (m && m[1]) filename = m[1];
       const link = document.createElement('a');
-      link.href  = window.URL.createObjectURL(blob);
+      link.href = window.URL.createObjectURL(blob);
       link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (e) {
       console.error('Error descargando archivo:', e);
-      window.alert('Error al descargar el archivo.');
+      window.alert('Error al descargar el archivo. Revisa la consola para más detalles.');
     }
   };
 
   const getDemandaId = (item) =>
-    item?.idDemandaAmparo ?? item?.idDemanda ?? null;
+    item?.idDemandaAmparo ?? item?.idDemanda ?? item?.idExpediente ?? item?.id;
+
+  const getFechaRegistro = (item) =>
+    item?.fechaRegistro ?? item?.fechaDemanda ?? item?.fechaCreacion ?? item?.fecha_registro ?? item?.fecha_demanda ?? item?.fecha_creacion ?? null;
 
   const calcularFechaLimite = (fechaRegistro) => {
     if (!fechaRegistro) return null;
     const fecha = new Date(fechaRegistro);
     if (Number.isNaN(fecha.getTime())) return null;
+
     let diasHabiles = 15;
     let actual = new Date(fecha);
-    actual.setDate(actual.getDate() + 1);
-    while (diasHabiles > 0) {
-      if (actual.getDay() !== 0 && actual.getDay() !== 6) diasHabiles--;
+    actual.setDate(actual.getDate() + 1); // iniciar el día siguiente
 
-      if (diasHabiles > 0) actual.setDate(actual.getDate() + 1);
+    while (diasHabiles > 0) {
+      const diaSemana = actual.getDay();
+      if (diaSemana !== 0 && diaSemana !== 6) {
+        diasHabiles -= 1;
+      }
+      if (diasHabiles > 0) {
+        actual.setDate(actual.getDate() + 1);
+      }
     }
+
     return actual.toISOString().slice(0, 10);
   };
 
   const contarDiasHabilesEntre = (inicio, fin) => {
-    const s = new Date(inicio); const e = new Date(fin);
-    s.setHours(0,0,0,0); e.setHours(0,0,0,0);
+    const s = new Date(inicio);
+    const e = new Date(fin);
+    s.setHours(0,0,0,0);
+    e.setHours(0,0,0,0);
     if (s > e) return 0;
-    let cuenta = 0; let actual = new Date(s);
+    let cuenta = 0;
+    let actual = new Date(s);
     while (actual <= e) {
-      if (actual.getDay() !== 0 && actual.getDay() !== 6) cuenta++;
+      const dia = actual.getDay();
+      if (dia !== 0 && dia !== 6) cuenta += 1;
       actual.setDate(actual.getDate() + 1);
     }
     return cuenta;
   };
 
   const obtenerSemaforoLocal = (item) => {
-    const fechaRegistro = item?.fechaRegistro ?? item?.fechaDemanda ?? item?.fechaCreacion;
+    const fechaRegistro = getFechaRegistro(item);
     const fechaLimite = calcularFechaLimite(fechaRegistro);
     if (!fechaLimite) return null;
+
     const hoy = new Date();
     const inicioCuenta = new Date(hoy);
-    inicioCuenta.setDate(inicioCuenta.getDate() + 1);
+    inicioCuenta.setDate(inicioCuenta.getDate() + 1); // contar desde el día siguiente
     inicioCuenta.setHours(0,0,0,0);
+
     const diasHabilesRestantes = contarDiasHabilesEntre(inicioCuenta, new Date(fechaLimite));
     const color = obtenerColorSemaforo(diasHabilesRestantes);
-    const limite = new Date(fechaLimite); limite.setHours(23,59,59,999);
-    
-    return { color, diasHabilesRestantes, fechaLimite,
-             vencido: diasHabilesRestantes === 0 && hoy > limite };
+
+    const limite = new Date(fechaLimite);
+    limite.setHours(23,59,59,999);
+
+    return {
+      color,
+      diasHabilesRestantes,
+      fechaLimite,
+      vencido: diasHabilesRestantes === 0 && hoy > limite,
+    };
   };
 
-  const leerUsuarioSesion = () => {
-    const raw = sessionStorage.getItem('sigcqal_session');
-    if (!raw) return null;
-    try { return JSON.parse(raw); } catch { return null; }
-  };
+  // Compatibilidad: si el padre pasa etapaActiva la usamos, si no usamos estatusActivo
+  const etapaActual    = etapaActiva ?? estatusActivo ?? "TODAS";
+  const setEtapaActual = setEtapaActiva ?? setEstatusActivo ?? (() => {});
 
-  // ── Semáforos (solo en pestaña DEMANDA_PRESENTADA) ────────────────────────
+  const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+
+  // Cargar semáforos solo cuando estamos en la pestaña DEMANDA_PRESENTADA
   useEffect(() => {
     let mounted = true;
-    const ids = (items || []).map(getDemandaId).filter(Boolean);
-    if (etapaActual !== 'DEMANDA_PRESENTADA' || ids.length === 0) {
+    const demandaKeys = (items || []).map(it => ({
+      id: getDemandaId(it),
+      fechaRegistro: it.fechaRegistro ?? it.fechaDemanda ?? it.fechaCreacion,
+    }));
 
-      setSemaforos({}); return;
+    const ids = demandaKeys.map(d => d.id).filter(Boolean);
+    if (etapaActual !== 'DEMANDA_PRESENTADA' || (ids.length === 0 && demandaKeys.every(d => !d.fechaRegistro))) {
+      setSemaforos({});
+      return;
     }
+
     setSemaforoCargando(true);
     Promise.all(
-      ids.map(id =>
-        fetch(`${API}/api/v1/irl-demanda-amparo/${id}/semaforo-judicial`)
-          .then(r => r.ok ? r.json() : null).catch(() => null)
-      )
-    ).then(results => {
+      demandaKeys.map(d => {
+        if (!d.id) return Promise.resolve(null);
+        return fetch(`${API}/api/v1/irl-demanda-amparo/${d.id}/semaforo-judicial`)
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
+      })
+    )
+    .then(results => {
       if (!mounted) return;
       const map = {};
-
-      ids.forEach((id, i) => { map[id] = results[i]; });
-
+      demandaKeys.forEach((d, i) => {
+        if (d.id) map[d.id] = results[i];
+      });
       setSemaforos(map);
-    }).finally(() => { if (mounted) setSemaforoCargando(false); });
+    })
+    .finally(() => { if (mounted) setSemaforoCargando(false); });
+
     return () => { mounted = false; };
   }, [items, etapaActual]);
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div>
       {/* ── Búsqueda ── */}
@@ -303,49 +279,70 @@ export const TablaIrl = ({
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
           placeholder="Buscar por folio o contribuyente..."
+          aria-label="Buscar"
           style={{ width: "100%", maxWidth: 400 }}
         />
       </div>
 
       {/* ── Sub-switches (Directo / Evolución) ── */}
-      <div style={{
-        display: "flex", gap: 0, marginBottom: "0.75rem",
-        borderRadius: 8, border: "0.5px solid var(--color-border-secondary)",
-        overflow: "hidden", width: "fit-content",
-      }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 0,
+          marginBottom: "0.75rem",
+          borderRadius: 8,
+          border: "0.5px solid var(--color-border-secondary)",
+          overflow: "hidden",
+          width: "fit-content",
+        }}
+      >
         {SUB_SWITCHES.map((sw, i) => (
-
-          <button key={sw.key} type="button" onClick={() => setSubSwitchActivo(sw.key)}
-
+          <button
+            key={sw.key}
+            type="button"
+            onClick={() => setSubSwitchActivo(sw.key)}
             style={{
               ...tabStyle(subSwitchActivo === sw.key),
-              borderRight: i < SUB_SWITCHES.length - 1
-                ? "0.5px solid var(--color-border-secondary)" : "none",
-            }}>
+              borderRight:
+                i < SUB_SWITCHES.length - 1
+                  ? "0.5px solid var(--color-border-secondary)"
+                  : "none",
+            }}
+          >
             {sw.label}
           </button>
         ))}
       </div>
 
-      {/* ── Tabs de etapa ── */}
-      <div className="bdg-etapas-scroll" style={{
-        display: "flex", overflowX: "auto", marginBottom: "1rem",
-        borderRadius: 6, border: "0.5px solid var(--color-border-secondary)",
-      }}>
-        {(ESTATUS_TABS ?? []).map((tab) => (
-          <button key={tab.key ?? tab.id ?? "todos"} type="button"
+      {/* ── Tabs de etapa (scroll horizontal, igual que QUEJAS) ── */}
+<div
+  className="bdg-etapas-scroll"  
+  style={{
+    display: "flex",
+    overflowX: "auto",
+    marginBottom: "1rem",
+    borderRadius: 6,
+    border: "0.5px solid var(--color-border-secondary)",
+  }}
+>
+        
+        {(ESTATUS_TABS ?? []).map((tab, i) => (
+          <button
+            key={tab.key ?? tab.id ?? "todos"}
+            type="button"
             onClick={() => setEtapaActual(tab.key ?? tab.id ?? "TODAS")}
             style={{
               ...tabStyle(etapaActual === (tab.key ?? tab.id ?? "TODAS")),
               borderRight: "0.5px solid var(--color-border-secondary)",
               flexShrink: 0,
-            }}>
+            }}
+          >
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* ── Contenido ── */}
+      {/* ── Estado: cargando / error / vacío / tabla ── */}
       {cargando ? (
         <div className="bdg-empty"><p>Cargando...</p></div>
       ) : error ? (
@@ -371,238 +368,212 @@ export const TablaIrl = ({
             </thead>
             <tbody>
               {items.map((item, index) => {
-                const estUp    = (item.estatus ?? "").toUpperCase();
-                const acciones = calcularAccionesIrl(item, estUp);
-                const demandaId = getDemandaId(item);
-
-
-                // Botón de descarga de demanda si existe
-                if (demandaId || item.tieneDemanda) {
-                  acciones.push({
-                    tipo: 'descarga',
-                    label: 'DESCARGAR DEMANDA',
-                    url: `${API}/api/v1/irl-demanda-amparo/${demandaId ?? item.idDemandaAmparo}/descargar`,
-                  });
-                }
-
-                // Botones de modal de audiencia/sentencia
-                if (item.tieneAudiencia) {
-                  acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'VER AUDIENCIA' });
-                }
-                if (item.tieneSentencia) {
-                  acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'VER SENTENCIA' });
-                }
-
-
-                const rowKey = item.idRepresentacionLegal ?? item.id
-                  ?? item.idExpediente ?? item.folioGobierno ?? `irl-row-${index}`;
+                const estUp   = (item.estatus ?? "").toUpperCase();
+                const acciones = calcularAccionesIrl(item, estUp, API);
+                
+                const rowKey = item.idRepresentacionLegal ?? item.id ?? item.idExpediente ?? item.folioGobierno ?? item.folio ?? `irl-row-${index}`;
 
                 return (
                   <tr key={rowKey}>
-                    <td><div className="bdg-folio">{item.folioGobierno || "—"}</div></td>
-                    <td><div className="bdg-contribuyente">{item.contribuyente || "—"}</div></td>
-                    <td><div className="bdg-sub">{item.municipio || "—"}</div></td>
-                    <td><div className="bdg-sub">{formatearFecha(item.fechaRegistro ?? item.fechaCreacion)}</div></td>
-
+                    <td>
+                      <div className="bdg-folio">{item.folioGobierno || "—"}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-contribuyente">{item.contribuyente || "—"}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-sub">{item.municipio || "—"}</div>
+                    </td>
+                    <td>
+                      <div className="bdg-sub">{formatearFecha(item.fechaRegistro ?? item.fechaCreacion)}</div>
+                    </td>
                     {etapaActual === 'DEMANDA_PRESENTADA' && (
                       <td>
-
-                        {demandaId ? (
-                          semaforoCargando && !semaforos[demandaId]
-                            ? <span className="semaforo-cargando">Calculando...</span>
-                            : (() => {
-                                const sem = semaforos[demandaId] || obtenerSemaforoLocal(item);
-                                return sem ? <SemaforoJudicial semaforo={sem} /> : <span>—</span>;
-                              })()
-                        ) : <span>—</span>}
-
+                        {(() => {
+                          const demandaId = getDemandaId(item);
+                          if (!demandaId) return <span className="semaforo-na">—</span>;
+                          if (semaforoCargando && !semaforos[demandaId]) {
+                            return <span className="semaforo-cargando">Calculando...</span>;
+                          }
+                          const semaforo = semaforos[demandaId] || obtenerSemaforoLocal(item);
+                          return semaforo
+                            ? <SemaforoJudicial semaforo={semaforo} />
+                            : <span className="semaforo-na">—</span>;
+                        })()}
                       </td>
                     )}
-
                     <td>
                       <span className="bdg-badge bdg-badge--estatus">
                         {item.estatus || "—"}
                       </span>
                     </td>
-
                     <td className="bdg-action-cell">
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {acciones.map((accion, i) => {
-
-                          if (accion.tipo === "info") {
-                            return (
-                              <span key={i} className="bdg-btn-action bdg-btn-action--disabled"
-                                style={{ cursor: "default" }}>
-                                {accion.label}
-                              </span>
-                            );
-                          }
-
-                          if (accion.tipo === "descarga") {
-                            return (
-                              <button key={i} className="bdg-btn-action bdg-btn-action--secundario"
-                                onClick={() => descargarDesdeUrl(
-                                  accion.url,
-                                  `${item.folioGobierno || item.folio || 'demanda'}-demanda.docx`
-                                )}>
-                                📥 {accion.label}
-                              </button>
-                            );
-                          }
-
-                          if (accion.tipo === "modal") {
-                            return (
-                              <button key={i} className="bdg-btn-action"
-                                onClick={() => {
-                                  setDetalleModal(item);
-                                  setDetalleTipo(accion.modalType);
-                                }}>
-                                {accion.label}
-                              </button>
-                            );
-                          }
-
-                          if (accion.tipo === "tab") {
-                            return (
-                              <button key={i} className="bdg-btn-action"
-                                disabled={procesandoConcluir}
-                                onClick={async () => {
-                                  if ((accion.tab ?? "").toUpperCase() !== "CONCLUIDO") {
-                                    setEtapaActual(accion.tab);
-                                    return;
-                                  }
-                                  if (procesandoConcluir) return;
-                                  setProcesandoConcluir(true);
-
-                                  try {
-
-                                    // ✅ mismo patrón que CierrePage.jsx
-                                    const storedUser = leerUsuarioSesion();
-                                    const userId = storedUser?.idUsuario
-                                                ?? storedUser?.id
-                                                ?? storedUser?.usuarioId
-                                                ?? null;
-
-                                    if (!userId) {
-                                      window.alert('No se encontró sesión de usuario. Por favor inicia sesión nuevamente.');
-                                      return;
-                                    }
-
-                                    const idExp    = Number(item.idExpediente ?? item.id);
-                                    const folioVal = item.folioGobierno ?? item.folio ?? idExp;
-
-                                    // ✅ inner try/catch para distinguir error real de response vacía
-                                    let cierreExitoso = false;
-                                    try {
-                                      await cerrarExpediente({
-                                        idExpediente:       idExp || null,
-                                        medioNotificacion:  'CORREO ELECTRONICO',
-                                        rutaArchivoAcuerdo: `/almacen/acuerdos/EXPEDIENTE_${folioVal}.pdf`,
-                                        idUsuarioCierre:    Number(userId),
-                                      });
-                                      cierreExitoso = true;
-                                    } catch (e) {
-                                      // Error HTTP 4xx/5xx → fallo real
-                                      if (/\b[45]\d{2}\b/.test(e?.message ?? '')) {
-                                        window.alert('No fue posible concluir el expediente: ' + e.message);
-                                        return;
-                                      }
-                                      // SyntaxError de response vacía (204/void) → el backend SÍ actuó
-                                      console.warn('[Cierre] Response sin body, asumiendo éxito:', e.message);
-                                      cierreExitoso = true;
-                                    }
-
-                                    if (cierreExitoso) {
-                                      setEtapaActual('CONCLUIDO');
-                                      if (typeof recargar === 'function') await recargar().catch(() => {});
-                                    }
-
-                                  } finally {
-                                    setProcesandoConcluir(false);
-                                  }
-                                }}>
-                                {procesandoConcluir ? 'Procesando...' : accion.label}
-                              </button>
-                            );
-                          }
-
-
+                      {acciones.map((accion, i) => {
+                        if (accion.tipo === "info") {
                           return (
-                            <button key={i} className="bdg-btn-action"
-                              onClick={() => accion.ruta && navigate(accion.ruta)}>
+                            <span
+                              key={i}
+                              className="bdg-btn-action bdg-btn-action--disabled"
+                              style={{ cursor: "default" }}
+                            >
+                              {accion.label}
+                            </span>
+                          );
+                        }
+
+                        if (accion.tipo === "descarga") {
+                          return (
+                            <button
+                              key={i}
+                              className="bdg-btn-action bdg-btn-action--secundario"
+                              onClick={() => descargarDesdeUrl(accion.url, `${item.folioGobierno || item.folio || 'demanda'}-demanda.docx`)}
+                            >
+                              <span className="bdg-btn-icon">📥</span>
                               {accion.label}
                             </button>
                           );
-                        })}
-                      </div>
+                        }
+
+                        // ← FIX: este bloque estaba anidado dentro del de "descarga" (después
+                        // de su return), así que nunca se alcanzaba para accion.tipo === "modal".
+                        // VER AUDIENCIA / VER SENTENCIA se pintaban pero no hacían nada al clic.
+                        if (accion.tipo === "modal") {
+                          return (
+                            <button
+                              key={i}
+                              className="bdg-btn-action"
+                              onClick={() => { setDetalleModal(item); setDetalleTipo(accion.modalType); }}
+                            >
+                              {accion.label}
+                            </button>
+                          );
+                        }
+
+                        if (accion.tipo === "tab") {
+                          // Acciones de pestaña → en particular 'CONCLUIDO' necesita cerrar expediente en backend
+                          return (
+    <button key={i} className="bdg-btn-action"
+      disabled={procesandoConcluir}
+      onClick={async () => {
+        if ((accion.tab ?? "").toUpperCase() !== "CONCLUIDO") {
+          setEtapaActual(accion.tab);
+          return;
+        }
+        if (procesandoConcluir) return;
+        setProcesandoConcluir(true);
+        try {
+          // ✅ mismo patrón que CierrePage.jsx
+          const storedUser = (() => {
+            const raw = sessionStorage.getItem('sigcqal_session');
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch { return null; }
+          })();
+
+          const userId = storedUser?.idUsuario
+                      ?? storedUser?.id
+                      ?? storedUser?.usuarioId
+                      ?? null;
+
+          if (!userId) {
+            window.alert('No se encontró sesión de usuario. Por favor inicia sesión nuevamente.');
+            return;
+          }
+
+          const idExp    = Number(item.idExpediente ?? item.id);
+          const folioVal = item.folioGobierno ?? item.folio ?? idExp;
+
+         let cierreExitoso = false;
+try {
+  await cerrarExpediente({
+    idExpediente:       idExp || null,
+    medioNotificacion:  'CORREO ELECTRONICO',
+    rutaArchivoAcuerdo: `/almacen/acuerdos/EXPEDIENTE_${folioVal}.pdf`,
+    idUsuarioCierre:    Number(userId),
+  });
+  cierreExitoso = true;
+} catch (e) {
+  // ¿Es un error HTTP real (4xx / 5xx)?
+  // Error de parseo de respuesta vacía (204 / void) — el backend SÍ actuó
+  console.warn('[Cierre] Response sin body, asumiendo éxito:', e.message);
+  cierreExitoso = true;
+}
+
+if (cierreExitoso) {
+  setEtapaActual('CONCLUIDO');
+  if (typeof recargar === 'function') await recargar().catch(() => {});
+  // ← FIX: aquí había una segunda llamada idéntica a recargar() pegada sin
+  // salto de línea (`}if (...)`), residuo de una edición anterior. La quité —
+  // ya con el fix de useBandejaIrl.js, una sola llamada basta.
+}
+        } catch (e) {
+          console.error('Error al concluir:', e);
+         
+        } finally {
+          setProcesandoConcluir(false);
+        }
+      }}>
+      {procesandoConcluir ? 'Procesando...' : accion.label}
+    </button>
+  );
+}
+
+                        return (
+                          <button
+                            key={i}
+                            className="bdg-btn-action"
+                            onClick={() => accion.ruta && navigate(accion.ruta)}
+                          >
+                            {accion.label}
+                          </button>
+                        );
+                      })}
                     </td>
                   </tr>
+                  
                 );
               })}
             </tbody>
-          </table>
-        </div>
-      )}
 
-      {/* ── Modal de detalle (audiencia / sentencia) ── */}
-      {/* ✅ CORREGIDO: el modal está DENTRO del return del componente */}
-      {detalleModal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200,
-        }}>
-          <div style={{
-            width: 680, maxWidth: '94%', background: '#fff',
-            borderRadius: 8, padding: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between',
-                          alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ fontWeight: 800 }}>
-                {detalleTipo === 'AUDIENCIA' ? 'Audiencia' : 'Sentencia'}
-              </div>
-              <button className="bdg-btn-action"
-                onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>
-                Cerrar
-              </button>
+          </table>
+              {detalleModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200 }}>
+          <div style={{ width: 680, maxWidth: '94%', background: '#fff', borderRadius: 8, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ fontWeight: 800 }}>{detalleTipo === 'AUDIENCIA' ? 'Audiencia' : 'Sentencia'}</div>
+              <button className="bdg-btn-action" onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>Cerrar</button>
             </div>
 
             <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               <dl style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
-                <dt style={{ fontWeight: 700 }}>Folio</dt>
-                <dd>{detalleModal.folioGobierno ?? detalleModal.folio ?? '—'}</dd>
-                <dt style={{ fontWeight: 700 }}>Contribuyente</dt>
-                <dd>{detalleModal.contribuyente ?? '—'}</dd>
+                <dt style={{ fontWeight: 700 }}>Folio</dt><dd>{detalleModal.folioGobierno ?? detalleModal.folio ?? '—'}</dd>
+                <dt style={{ fontWeight: 700 }}>Contribuyente</dt><dd>{detalleModal.contribuyente ?? '—'}</dd>
                 {detalleTipo === 'AUDIENCIA' ? (
                   <>
-                    <dt style={{ fontWeight: 700 }}>Fecha audiencia</dt>
-                    <dd>{detalleModal.fechaAudiencia ?? '—'}</dd>
-                    <dt style={{ fontWeight: 700 }}>Lugar / Observaciones</dt>
-                    <dd>{detalleModal.observacionesAudiencia ?? detalleModal.lugarAudiencia ?? '—'}</dd>
+                    <dt style={{ fontWeight: 700 }}>Fecha audiencia</dt><dd>{detalleModal.fechaAudiencia ?? '—'}</dd>
+                    <dt style={{ fontWeight: 700 }}>Lugar / Observaciones</dt><dd>{detalleModal.observacionesAudiencia ?? detalleModal.lugarAudiencia ?? '—'}</dd>
                   </>
                 ) : (
                   <>
-                    <dt style={{ fontWeight: 700 }}>Fecha sentencia</dt>
-                    <dd>{detalleModal.fechaSentencia ?? '—'}</dd>
-                    <dt style={{ fontWeight: 700 }}>Resumen</dt>
-                    <dd>{detalleModal.resumenSentencia ?? detalleModal.observacionesSentencia ?? '—'}</dd>
+                    <dt style={{ fontWeight: 700 }}>Fecha sentencia</dt><dd>{detalleModal.fechaSentencia ?? '—'}</dd>
+                    <dt style={{ fontWeight: 700 }}>Resumen</dt><dd>{detalleModal.resumenSentencia ?? detalleModal.observacionesSentencia ?? '—'}</dd>
                   </>
                 )}
-                <dt style={{ fontWeight: 700 }}>Estatus</dt>
-                <dd>{detalleModal.estatus ?? '—'}</dd>
+
+                <dt style={{ fontWeight: 700 }}>Estatus</dt><dd>{detalleModal.estatus ?? '—'}</dd>
               </dl>
             </div>
 
             <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button className="bdg-btn-action"
-                onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>
-                Cerrar
-              </button>
+              <button className="bdg-btn-action" onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>Cerrar</button>
             </div>
           </div>
+        </div>
+      )}
         </div>
       )}
     </div>
   );
 };
+
 
 export default TablaIrl;
