@@ -6,34 +6,17 @@ export const useListaMemorandumsPorArea = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
- // Función unificada para extraer datos del token
-  const getDatosUsuarioToken = () => {
-    const token = localStorage.getItem('token');
-    if (!token) return { idArea: null, idUsuario: null };
-    try {
-      const payload = JSON.parse(window.atob(token.split('.')[1]));
-      return { 
-        idArea: payload.idArea, 
-        idUsuario: payload.idUsuario // Ajusta si en tu token se llama diferente
-      };
-    } catch (e) {
-      console.error("Error al decodificar token:", e);
-      return { idArea: null, idUsuario: null };
-    }
-  };
+  // TODO: Obtener el área del usuario logueado
+  // Por ahora se fuerza un área para pruebas
+  const AREA_FORZADA = 1;
 
- const cargarMemorandums = async () => {
-    const { idArea } = getDatosUsuarioToken();
-
-    if (!idArea) {
-      setError("No se pudo determinar el área del usuario logueado.");
-      return;
-    }
-
+  const cargarMemorandums = async (idArea) => {
     setLoading(true);
     setError(null);
     try {
       const data = await listarPorArea(idArea);
+      console.log('Memorandums por área recibidos de la API:', data);
+      console.log('Primer memo (keys):', data.length > 0 ? Object.keys(data[0]) : 'sin datos');
       setMemorandums(data);
     } catch (err) {
       setError(err.message);
@@ -44,13 +27,18 @@ export const useListaMemorandumsPorArea = () => {
   };
 
   useEffect(() => {
-    cargarMemorandums();
+    cargarMemorandums(AREA_FORZADA);
   }, []);
+
+  const recargar = () => {
+    cargarMemorandums(AREA_FORZADA);
+  };
 
   return {
     memorandums,
     loading,
     error,
-    recargar: cargarMemorandums // Ya no necesitamos pasarle un argumento
+    recargar,
+    areaForzada: AREA_FORZADA
   };
 };

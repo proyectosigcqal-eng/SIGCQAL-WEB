@@ -41,7 +41,7 @@ export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
 
       const request = {
         idCorrespondencia: correspondencia.id,
-        idUsuarioRevisor: null, // TODO: Obtener del usuario logueado
+        idUsuarioRevisor: 1, // TODO: Obtener del usuario logueado
         esDelArea: true
       };
 
@@ -64,7 +64,7 @@ export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
 
       const request = {
         idCorrespondencia: correspondencia.id,
-        idUsuarioRevisor: null, // TODO: Obtener del usuario logueado
+        idUsuarioRevisor: 1, // TODO: Obtener del usuario logueado
         esDelArea: false
       };
 

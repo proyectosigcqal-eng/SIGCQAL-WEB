@@ -4,7 +4,7 @@ import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 import { useNavigate } from 'react-router-dom';
 
 export const ListaAcusesOficioPorArea = () => {
-  const { acuses, loading, error, recargar } = useListaAcusesOficioPorArea();
+  const { acuses, loading, error, recargar, areaForzada } = useListaAcusesOficioPorArea();
   const navigate = useNavigate();
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
@@ -36,7 +36,7 @@ export const ListaAcusesOficioPorArea = () => {
       <div className="lista-header">
         <h2>Oficios asignados</h2>
         <div className="header-info">
-          <span className="area-badge">Área: Asignada</span>
+          <span className="area-badge">Área: {areaForzada}</span>
           <button onClick={recargar} className="btn-actualizar-acuse">
             ↻ Actualizar
           </button>

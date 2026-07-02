@@ -263,17 +263,6 @@ function App() {
             }
           />
 
-          <Route
-          path="correspondencia/personal"
-          element={
-            <ProtectedRoute
-              allowedRoles={ROUTE_ROLES["/correspondencia/personal"]} // Asegúrate de definir esta ruta en tu config de roles
-            >
-              <PersonalPage />
-            </ProtectedRoute>
-          }
-        />
-
           {/* Representación Legal IRL — standalone (temporal para pruebas) */}
           <Route
             path="atencion-juridica/representacion-legal-irl"
@@ -668,7 +657,16 @@ function App() {
         />
         {/* ... dentro de <Route path="/" element={<MainLayout />}> ... */}
 
-        
+        <Route
+          path="correspondencia/personal"
+          element={
+            <ProtectedRoute
+              allowedRoles={ROUTE_ROLES["/correspondencia/personal"]} // Asegúrate de definir esta ruta en tu config de roles
+            >
+              <PersonalPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       
     </BrowserRouter>
