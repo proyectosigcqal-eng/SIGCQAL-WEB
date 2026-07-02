@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { formatearFecha, obtenerColorSemaforo } from "../../../modulo-area-sustantiva/comisionado-irl/utils/semaforo";
 import { SemaforoJudicial } from "@/features/modulo-area-sustantiva/demanda-amparo/components/SemaforoJudicial";
 import { cerrarExpediente } from "@/features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/services/cierreService";
+// ✅ corregido: import NOMBRADO (tu archivo exporta `export const ModalDetalleIrl`, no default) + nombre bien escrito
+import { ModalDetalleIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/ModalDetalleIrl";
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
@@ -21,6 +23,13 @@ const tabStyle = (active) => ({
 const calcularAccionesIrl = (item, estUp) => {
   const folio = item.folioGobierno ?? item.folio ?? item.idExpediente ?? item.id;
   const acciones = [];
+  // Normalizar flags: aceptamos booleanos o la presencia de una fecha (/snake_case)
+  const tieneAudienciaFlag = !!(
+    item?.tieneAudiencia || item?.tiene_audiencia || item?.fechaAudiencia || item?.fecha_audiencia
+  );
+  const tieneSentenciaFlag = !!(
+    item?.tieneSentencia || item?.tiene_sentencia || item?.fechaSentencia || item?.fecha_sentencia
+  );
 
   if (!estUp || estUp.includes('ASIGNADO')) {
     acciones.push({ tipo: 'navegacion', label: 'REGISTRAR CIR',
@@ -29,13 +38,11 @@ const calcularAccionesIrl = (item, estUp) => {
   }
 
   if (estUp.includes('CIR')) {
-    // Botón principal: ir a demanda
     acciones.push({
       tipo: 'navegacion',
       label: item.tieneDemanda ? 'VER DEMANDA' : 'REGISTRAR DEMANDA',
       ruta: `/atencion-juridica/demanda-amparo/${folio}`,
     });
-    // Botón secundario: descargar CIR si existe
     const idRlCir = item.idRlCir ?? item.id_rl_cir;
     const idQuejaRlCir = item.idQuejaRlCir ?? item.id_queja_rl_cir;
     if (idRlCir) {
@@ -60,7 +67,6 @@ const calcularAccionesIrl = (item, estUp) => {
   if (estUp.includes('DEMANDA')) {
     acciones.push({ tipo: 'navegacion', label: 'REGISTRAR AUDIENCIA',
       ruta: `/sustantiva/audiencia-espera` });
-    // Descarga de demanda si existe
     const idDemanda = item.idDemandaAmparo ?? item.idDemanda;
     if (idDemanda) {
       acciones.push({
@@ -76,10 +82,10 @@ const calcularAccionesIrl = (item, estUp) => {
   if (estUp.includes('ESPERA')) {
     acciones.push({
       tipo: 'navegacion',
-      label: item.tieneAudiencia ? 'VER AUDIENCIA' : 'REGISTRAR AUDIENCIA',
+      label: tieneAudienciaFlag ? 'VER AUDIENCIA' : 'REGISTRAR AUDIENCIA',
       ruta: `/sustantiva/audiencia-celebrada`,
     });
-    if (item.tieneAudiencia) {
+    if (tieneAudienciaFlag) {
       acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'DATOS AUDIENCIA' });
     }
     return acciones;
@@ -88,10 +94,14 @@ const calcularAccionesIrl = (item, estUp) => {
   if (estUp.includes('CELEBRADA')) {
     acciones.push({
       tipo: 'navegacion',
-      label: item.tieneSentencia ? 'VER SENTENCIA' : 'REGISTRAR SENTENCIA',
+      label: tieneSentenciaFlag ? 'VER SENTENCIA' : 'REGISTRAR SENTENCIA',
       ruta: `/sustantiva/sentencia-dictada`,
     });
-    if (item.tieneSentencia) {
+    // ✅ el modal de audiencia también se ofrece aquí — ya se registró en la etapa anterior
+    if (tieneAudienciaFlag) {
+      acciones.push({ tipo: 'modal', modalType: 'AUDIENCIA', label: 'DATOS AUDIENCIA' });
+    }
+    if (tieneSentenciaFlag) {
       acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'DATOS SENTENCIA' });
     }
     return acciones;
@@ -105,6 +115,10 @@ const calcularAccionesIrl = (item, estUp) => {
       label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'SENTENCIA EJECUTORIA',
       ruta: `/sustantiva/sentencia-ejecutoria`,
     });
+    // ✅ la sentencia ya está registrada en esta etapa — se puede consultar sin navegar
+    if (tieneSentenciaFlag) {
+      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA', label: 'DATOS SENTENCIA' });
+    }
     return acciones;
   }
 
@@ -114,6 +128,8 @@ const calcularAccionesIrl = (item, estUp) => {
       label: item.tieneEjecutoria ? 'VER EJECUTORIA' : 'REGISTRAR EJECUTORIA',
       ruta: `/sustantiva/sentencia-ejecutoria`,
     });
+    // ✅ el recurso ya está en curso en esta etapa — se puede consultar
+    acciones.push({ tipo: 'modal', modalType: 'RECURSO_REVISION', label: 'DATOS RECURSO' });
     return acciones;
   }
 
@@ -123,11 +139,17 @@ const calcularAccionesIrl = (item, estUp) => {
       label: item.tieneCumplimiento ? 'VER NOTIFICACIÓN' : 'NOTIFICAR CUMPLIMIENTO',
       ruta: `/sustantiva/notificacion-sentencia`,
     });
+    if (item.tieneEjecutoria) {
+      acciones.push({ tipo: 'modal', modalType: 'SENTENCIA_EJECUTADA', label: 'DATOS EJECUTORIA' });
+    }
     return acciones;
   }
 
   if (estUp.includes('CUMPLIMIENTO')) {
     acciones.push({ tipo: 'tab', label: 'PASAR A CONCLUIDO', tab: 'CONCLUIDO' });
+    if (item.tieneCumplimiento) {
+      acciones.push({ tipo: 'modal', modalType: 'CUMPLIMIENTO', label: 'DATOS CUMPLIMIENTO' });
+    }
     return acciones;
   }
 
@@ -154,8 +176,10 @@ export const TablaIrl = ({
   const [procesandoConcluir, setProcesandoConcluir] = useState(false);
   const [semaforos, setSemaforos]     = useState({});
   const [semaforoCargando, setSemaforoCargando] = useState(false);
-  const [detalleModal, setDetalleModal] = useState(null);
-  const [detalleTipo,  setDetalleTipo]  = useState(null);
+
+  // ✅ reemplaza detalleModal (item completo) + detalleTipo por { folio, etapa },
+  // que es justo lo que espera <ModalDetalleIrl folio etapa onClose />
+  const [modalDetalle, setModalDetalle] = useState(null); // { folio, etapa } | null
 
   const etapaActual    = etapaActiva    ?? estatusActivo    ?? "TODAS";
   const setEtapaActual = setEtapaActiva ?? setEstatusActivo ?? (() => {});
@@ -381,7 +405,10 @@ export const TablaIrl = ({
                           if (accion.tipo === "modal") {
                             return (
                               <button key={i} className="bdg-btn-action"
-                                onClick={() => { setDetalleModal(item); setDetalleTipo(accion.modalType); }}>
+                                onClick={() => setModalDetalle({
+                                  folio: item.folioGobierno ?? item.folio,
+                                  etapa: accion.modalType,
+                                })}>
                                 {accion.label}
                               </button>
                             );
@@ -441,63 +468,13 @@ export const TablaIrl = ({
         </div>
       )}
 
-      {/* ── Modal de detalle (DENTRO del return) ── */}
-      {detalleModal && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.4)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200,
-        }}>
-          <div style={{
-            width: 680, maxWidth: '94%', background: '#fff',
-            borderRadius: 8, padding: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between',
-              alignItems: 'center', marginBottom: 12 }}>
-              <div style={{ fontWeight: 800 }}>
-                {detalleTipo === 'AUDIENCIA' ? 'Datos de Audiencia' : 'Datos de Sentencia'}
-              </div>
-              <button className="bdg-btn-action"
-                onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>
-                Cerrar
-              </button>
-            </div>
-
-            <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
-              <dl style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
-                <dt style={{ fontWeight: 700 }}>Folio</dt>
-                <dd>{detalleModal.folioGobierno ?? detalleModal.folio ?? '—'}</dd>
-                <dt style={{ fontWeight: 700 }}>Contribuyente</dt>
-                <dd>{detalleModal.contribuyente ?? '—'}</dd>
-
-                {detalleTipo === 'AUDIENCIA' ? (
-                  <>
-                    <dt style={{ fontWeight: 700 }}>Fecha audiencia</dt>
-                    <dd>{formatearFecha(detalleModal.fechaAudiencia) ?? '—'}</dd>
-                    <dt style={{ fontWeight: 700 }}>Observaciones</dt>
-                    <dd>{detalleModal.observacionesAudiencia ?? detalleModal.lugarAudiencia ?? '—'}</dd>
-                  </>
-                ) : (
-                  <>
-                    <dt style={{ fontWeight: 700 }}>Fecha sentencia</dt>
-                    <dd>{formatearFecha(detalleModal.fechaSentencia) ?? '—'}</dd>
-                    <dt style={{ fontWeight: 700 }}>Resumen</dt>
-                    <dd>{detalleModal.resumenSentencia ?? detalleModal.observacionesSentencia ?? '—'}</dd>
-                  </>
-                )}
-
-                <dt style={{ fontWeight: 700 }}>Estatus</dt>
-                <dd>{detalleModal.estatus ?? '—'}</dd>
-              </dl>
-            </div>
-
-            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="bdg-btn-action"
-                onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ── Modal de detalle — ahora es el componente separado con fetch propio ── */}
+      {modalDetalle && (
+        <ModalDetalleIrl
+          folio={modalDetalle.folio}
+          etapa={modalDetalle.etapa}
+          onClose={() => setModalDetalle(null)}
+        />
       )}
     </div>
   );
