@@ -1,70 +1,50 @@
 import React, { useState } from 'react';
-import { SearchBar } from '../../../features/modulo-correspondencia/personal/components/SearchBar';
-import { PersonalTable } from '../../../features/modulo-correspondencia/personal/components/PersonalTable';
 import { usePersonal } from '../../../features/modulo-correspondencia/personal/hooks/usePersonal';
 import FormPersonal from '../../../features/modulo-correspondencia/personal/components/PersonalForm';
-import styles from '../../../features/modulo-correspondencia/personal/styles/personal.module.css';
-
+import { Search, UserPlus } from 'lucide-react'; // Asegúrate de tener lucide-react instalado
+import '../../../features/modulo-area-sustantiva/admin/styles/gestion-admin.css'; // Importamos el estilo del jefe
+import { Pencil, Trash2 } from 'lucide-react';
 
 const PersonalPage = () => {
-    const { personalList, handleDelete, handleSave, fetchPersonal, getPersonalDetail} = usePersonal();
-    const [isFormOpen, setIsFormOpen] = useState(false);
-
-    const [personalToEdit, setPersonalToEdit] = useState(null);
+    const { personalList, handleDelete, handleSave, getPersonalDetail } = usePersonal();
+    
+    // Estados para el Modal
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [personalEditar, setPersonalEditar] = useState(null);
 
     const handleEdit = async (p) => {
-    // 1. Llamamos a la API para traer el registro completo
-    const fullData = await getPersonalDetail(p.idPersonal);
-    
-        // 2. Si recibimos datos, los pasamos al formulario
+        const fullData = await getPersonalDetail(p.idPersonal);
         if (fullData) {
-            setPersonalToEdit(fullData); 
-            setIsFormOpen(true);
+            setPersonalEditar(fullData);
+            setModalAbierto(true);
         }
     };
-    
-    const handleSaveAndClose = async (data) => {
-        await handleSave(data);
-        setIsFormOpen(false); // Cierra el form tras guardar
-        setPersonalToEdit(null); // Limpiamos después de guardar
+
+    const handleGuardar = async (form) => {
+        await handleSave(form);
+        setModalAbierto(false);
+        setPersonalEditar(null);
     };
 
-    
-
-   return (
-        <div className="bandeja-wrapper">
-            <div className="bandeja-header">
-                <h1 className="bandeja-title">Gestión de Personal</h1>
-                <p className="bandeja-subtitle">Administración y control de registros de personal</p>
+    return (
+        <div className="gadmin-page">
+            {/* Encabezado */}
+            <div className="gadmin-header">
+                <div>
+                    <h1 className="gadmin-title">Gestión de Personal</h1>
+                    <p className="gadmin-subtitle">Administración y control de registros de personal.</p>
+                </div>
+                <div className="gadmin-actions">
+                    <button className="gadmin-btn gadmin-btn--alta" onClick={() => setModalAbierto(true)}>
+                        <UserPlus size={16} /> Registrar Personal
+                    </button>
+                </div>
             </div>
 
-            <div className="bandeja-card">
-                {/* Aquí podrías agregar un SearchBar si quieres usar el formato de pestañas */}
-                <div className="bandeja-content">
-                    {/* 3. Botón para abrir el formulario */}
-                    
-                    {!isFormOpen && (
-                        <button 
-                            className="btn-atender" 
-                            style={{ marginBottom: '1rem' }} 
-                            onClick={() => setIsFormOpen(true)}
-                        >
-                            + Registrar Personal
-                        </button>
-                    )}
-                    
-                    {/* 4. Renderizado condicional */}
-                    {isFormOpen ? (
-                        <FormPersonal 
-                            onSave={handleSaveAndClose}
-                            onCancel={() => {
-                                setIsFormOpen(false);
-                                setPersonalToEdit(null);
-                            }}
-                            personalData={personalToEdit} // Pasamos los datos al form
-                        />
-                    ) : (
-                    <table className="bandeja-table">
+            {/* Tabla */}
+            <div className="gadmin-card">
+                <div className="gadmin-table-wrap">
+                    <table className="gadmin-table">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
@@ -76,30 +56,46 @@ const PersonalPage = () => {
                         <tbody>
                             {personalList.map(p => (
                                 <tr key={p.idPersonal}>
-                                    <td className="folio-cell">{p.nombreCompleto}</td>
+                                    <td>{p.nombreCompleto}</td>
                                     <td>{p.curp}</td>
                                     <td>
-                                        <span className={`status-badge ${p.activo ? 'status-concluido' : 'status-pendiente'}`}>
+                                        <span className={`gadmin-badge ${p.activo ? 'gadmin-badge--activo' : 'gadmin-badge--inactivo'}`}>
                                             {p.activo ? 'Activo' : 'Inactivo'}
                                         </span>
                                     </td>
-                                    <td>
-                                        <button 
-                                        className="btn-atender" 
-                                        style={{ marginRight: '5px' }} 
-                                        onClick={() => handleEdit(p)} 
-                                        >
-                                            Editar
+                                    <td className="gadmin-row-actions">
+                                        <button className="gadmin-icon-btn" onClick={() => handleEdit(p)}>
+                                            <Pencil size={16} />
                                         </button>
-                                        <button className="btn-atender" onClick={() => handleDelete(p.idPersonal)}>Eliminar</button>
+                                        <button className="gadmin-icon-btn gadmin-icon-btn--danger" onClick={() => handleDelete(p.idPersonal)}>
+                                            <Trash2 size={16} />
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    )}
                 </div>
             </div>
+
+            {/* Modal - Adaptado al diseño del jefe */}
+            {modalAbierto && (
+                <div className="gadmin-overlay">
+                    <div className="gadmin-modal">
+                        <div className="gadmin-modal-header">
+                            <h2 className="gadmin-modal-title">{personalEditar ? 'Editar Personal' : 'Nuevo Registro'}</h2>
+                            <button className="gadmin-modal-close" onClick={() => { setModalAbierto(false); setPersonalEditar(null); }}>×</button>
+                        </div>
+                        <div className="gadmin-modal-body">
+                            <FormPersonal 
+                                onSave={handleGuardar}
+                                onCancel={() => { setModalAbierto(false); setPersonalEditar(null); }}
+                                personalData={personalEditar}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

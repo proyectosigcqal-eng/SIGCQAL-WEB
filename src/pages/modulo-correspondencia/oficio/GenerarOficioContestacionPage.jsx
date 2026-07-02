@@ -8,7 +8,7 @@ import { useCatalogos } from '../../../shared/hooks/useCatalogos';
 import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
 
-const FIRMANTE_FIJO = 5; // ana_admin fijo
+
 
 export const GenerarOficioContestacionPage = () => {
   const location  = useLocation();
@@ -24,11 +24,12 @@ export const GenerarOficioContestacionPage = () => {
   const idCorrespondenciaH =
     heredado.idCorrespondencia ?? fuente?.idCorrespondencia ?? fuente?.id ?? null;
 // Agrega este cálculo ANTES del handleGuardar, usando los catálogos ya disponibles
-const usuarioFirmante = catalogos.usuarios?.find(u => u.id === FIRMANTE_FIJO || u.idUsuario === FIRMANTE_FIJO);
-const areaFirmanteResuelta = usuarioFirmante?.nombreArea || usuarioFirmante?.area || 'Archivo';
-const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante?.username || 'ana_admin';
-  const firmanteH    = fuente?.firmante || fuente?.nombreFirmante || heredado.firmante || 'jperez';
-  const areaFirmanteH = fuente?.areaFirmante || fuente?.area || heredado.areaFirmante || 'Administración';
+  const token = localStorage.getItem('token');
+  const payloadToken = JSON.parse(window.atob(token.split('.')[1]));
+  const MI_ID_REAL = payloadToken.idUsuario
+  const usuarioLogueado = catalogos.usuarios?.find(u => u.id === MI_ID_REAL || u.idUsuario === MI_ID_REAL);
+  const areaFirmanteResuelta = usuarioLogueado?.nombreArea || usuarioLogueado?.area || 'Area no asignada';
+  const nombreFirmanteResuelto = usuarioLogueado?.nombreUsuario || usuarioLogueado?.username || 'Usuario';
   const textoSugeridoH = heredado.textoSugerido || fuente?.textoSugerido || fuente?.respuestaSeguimiento || '';
   const folioHeredado  = heredado.folioOficio || fuente?.folioOficio || fuente?.folioUnico || '';
 
@@ -52,14 +53,6 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const resolveIdUsuarioEmisor = () => {
-    const usuario = heredado?.usuario || heredado?.sessionUser || heredado?.user || null;
-    const id = usuario?.id ?? usuario?.idUsuario ?? heredado?.idUsuarioEmisor ?? heredado?.idUsuario ?? null;
-    if (id == null) return FIRMANTE_FIJO;
-    const n = Number(id);
-    return Number.isFinite(n) ? n : FIRMANTE_FIJO;
-  };
-
   const handleGuardar = async (e) => {
     e.preventDefault();
 
@@ -81,8 +74,8 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
     try {
       const payload = {
   idCorrespondencia:      heredado.idCorrespondencia,
-  idUsuarioFirmante:      FIRMANTE_FIJO,
-  idUsuarioEmisor:        FIRMANTE_FIJO,
+  idUsuarioFirmante:      MI_ID_REAL,
+  idUsuarioEmisor:        MI_ID_REAL,
   instruccionSeguimiento: instruccion,
   observaciones:          correspondencia?.asunto || instruccion,
   areaDestinatario:       correspondencia?.dependenciaRemitente || '',
@@ -223,7 +216,8 @@ const file    = new File(
           <form onSubmit={handleGuardar}>
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Firmante</label>
-              <input type="text" value={'ana_admin'} disabled className="input-readonly" />
+              {/* ✅ Ahora muestra el nombre real del usuario logueado */}
+              <input type="text" value={nombreFirmanteResuelto} disabled className="input-readonly" />
             </div>
 
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
@@ -265,8 +259,8 @@ const file    = new File(
     asuntoCorrespondencia:  correspondencia?.asunto || '',
     observaciones:          correspondencia?.asunto || '',
     instruccionSeguimiento: instruccion,
-    idUsuarioFirmante:      FIRMANTE_FIJO,
-    idUsuarioEmisor:        FIRMANTE_FIJO,
+    idUsuarioFirmante:      MI_ID_REAL,
+    idUsuarioEmisor:        MI_ID_REAL,
     // ✅ Pasar los datos ya resueltos para que la vista previa sea idéntica al PDF guardado
     nombreFirmante:         nombreFirmanteResuelto,
     areaFirmante:           areaFirmanteResuelta,

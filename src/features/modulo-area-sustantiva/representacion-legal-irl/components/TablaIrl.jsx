@@ -393,26 +393,31 @@ export const TablaIrl = ({
                             );
                           }
 
-                          if (accion.tipo === "descarga") {
-                            return (
-                              <button key={i} className="bdg-btn-action bdg-btn-action--secundario"
-                                onClick={() => descargarDesdeUrl(accion.url, accion.filename)}>
-                                📥 {accion.label}
-                              </button>
-                            );
-                          }
+                        if (accion.tipo === "descarga") {
+                          return (
+                            <button
+                              key={i}
+                              className="bdg-btn-action bdg-btn-action--secundario"
+                              onClick={() => descargarDesdeUrl(accion.url, `${item.folioGobierno || item.folio || 'demanda'}-demanda.docx`)}
+                            >
+                              <span className="bdg-btn-icon">📥</span>
+                              {accion.label}
+                            </button>
+                          );
+                            if (accion.tipo === "modal") {
+                          return (
+                            <button
+                              key={i}
+                              className="bdg-btn-action"
+                              onClick={() => { setDetalleModal(item); setDetalleTipo(accion.modalType); }}
+                            >
+                              {accion.label}
+                            </button>
+                          );
+                        }
+                        }
 
-                          if (accion.tipo === "modal") {
-                            return (
-                              <button key={i} className="bdg-btn-action"
-                                onClick={() => setModalDetalle({
-                                  folio: item.folioGobierno ?? item.folio,
-                                  etapa: accion.modalType,
-                                })}>
-                                {accion.label}
-                              </button>
-                            );
-                          }
+                      
 
                           if (accion.tipo === "tab") {
   return (
@@ -493,23 +498,52 @@ if (cierreExitoso) {
                       </div>
                     </td>
                   </tr>
+                  
                 );
               })}
             </tbody>
+
           </table>
+              {detalleModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1200 }}>
+          <div style={{ width: 680, maxWidth: '94%', background: '#fff', borderRadius: 8, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{ fontWeight: 800 }}>{detalleTipo === 'AUDIENCIA' ? 'Audiencia' : 'Sentencia'}</div>
+              <button className="bdg-btn-action" onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>Cerrar</button>
+            </div>
+
+            <div style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+              <dl style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 8 }}>
+                <dt style={{ fontWeight: 700 }}>Folio</dt><dd>{detalleModal.folioGobierno ?? detalleModal.folio ?? '—'}</dd>
+                <dt style={{ fontWeight: 700 }}>Contribuyente</dt><dd>{detalleModal.contribuyente ?? '—'}</dd>
+                {detalleTipo === 'AUDIENCIA' ? (
+                  <>
+                    <dt style={{ fontWeight: 700 }}>Fecha audiencia</dt><dd>{detalleModal.fechaAudiencia ?? '—'}</dd>
+                    <dt style={{ fontWeight: 700 }}>Lugar / Observaciones</dt><dd>{detalleModal.observacionesAudiencia ?? detalleModal.lugarAudiencia ?? '—'}</dd>
+                  </>
+                ) : (
+                  <>
+                    <dt style={{ fontWeight: 700 }}>Fecha sentencia</dt><dd>{detalleModal.fechaSentencia ?? '—'}</dd>
+                    <dt style={{ fontWeight: 700 }}>Resumen</dt><dd>{detalleModal.resumenSentencia ?? detalleModal.observacionesSentencia ?? '—'}</dd>
+                  </>
+                )}
+
+                <dt style={{ fontWeight: 700 }}>Estatus</dt><dd>{detalleModal.estatus ?? '—'}</dd>
+              </dl>
+            </div>
+
+            <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="bdg-btn-action" onClick={() => { setDetalleModal(null); setDetalleTipo(null); }}>Cerrar</button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* ── Modal de detalle — ahora es el componente separado con fetch propio ── */}
-      {modalDetalle && (
-        <ModalDetalleIrl
-          folio={modalDetalle.folio}
-          etapa={modalDetalle.etapa}
-          onClose={() => setModalDetalle(null)}
-        />
+           
+        </div>
       )}
     </div>
   );
 };
+
 
 export default TablaIrl;

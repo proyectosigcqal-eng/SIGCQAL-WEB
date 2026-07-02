@@ -4,21 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaMemorandumsPorArea = () => {
-  const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandumsPorArea();
+  const { memorandums, loading, error, recargar } = useListaMemorandumsPorArea();
   const navigate = useNavigate();
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
 
-  const obtenerNombreUsuario = (idUsuario) => {
-    // TODO: Integrar con catálogo de usuarios del sistema
-    // Por ahora se retorna el ID como identificador temporal
-    const usuariosMap = {
-      1: 'Usuario 1',
-      2: 'Usuario 2',
-      3: 'Usuario 3'
-    };
-    return usuariosMap[idUsuario] || `Usuario ${idUsuario}`;
+  const getUsuarioActualId = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    const payload = JSON.parse(window.atob(token.split('.')[1]));
+    return payload.idUsuario;
   };
+
+  const miId = getUsuarioActualId();  
 
   if (loading) {
     return (
@@ -47,7 +45,7 @@ export const ListaMemorandumsPorArea = () => {
       <div className="lista-header">
         <h2>Memorandum asignados</h2>
         <div className="header-info">
-          <span className="area-badge">Área: {areaForzada}</span>
+          <span className="area-badge">Área: Asignada </span>
           <button onClick={recargar} className="btn-actualizar">
             ↻ Actualizar
           </button>
