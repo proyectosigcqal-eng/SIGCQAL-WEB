@@ -182,7 +182,7 @@ export const useRegistroExpediente = () => {
 
     // NUEVO: Consultar el asesor automático antes de mostrar el modal
     try {
-      const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+      const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
       const res = await fetch(`${API_BASE}/api/v1/quejas/siguiente-asesor`);
       if (res.ok) {
         const data = await res.json();

@@ -4,7 +4,7 @@ import '@/features/modulo-correspondencia/acusecorrespondencia/styles/listaAcuse
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaAcusesCorrespondenciaPorArea = () => {
-  const { acuses, loading, error, recargar, areaForzada } = useListaAcusesCorrespondenciaPorArea();
+  const { acuses, loading, error, recargar, idArea, nombreArea } = useListaAcusesCorrespondenciaPorArea();
   const navigate = useNavigate();
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
@@ -36,7 +36,7 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
       <div className="lista-header">
         <h2>Correspondencia asignada</h2>
         <div className="header-info">
-          <span className="area-badge">Área: {areaForzada}</span>
+          <span className="area-badge">{nombreArea ?? (idArea ? `Área ${idArea}` : 'Sin área')}</span>
           <button onClick={recargar} className="btn-actualizar-acuse">
             ↻ Actualizar
           </button>

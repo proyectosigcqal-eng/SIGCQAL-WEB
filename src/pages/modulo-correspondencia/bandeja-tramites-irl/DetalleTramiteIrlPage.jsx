@@ -16,7 +16,7 @@ const normalizarTexto = (value) => {
     .replace(/\p{Diacritic}/gu, '');
 };
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const formatFecha = (value) => {
   if (!value) return '--';

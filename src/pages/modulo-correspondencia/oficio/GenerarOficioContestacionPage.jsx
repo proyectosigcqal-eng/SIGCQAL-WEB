@@ -5,15 +5,15 @@ import jsPDF from 'jspdf';
 import { generarOficio, finalizarAsignacion } from '../../../features/modulo-correspondencia/oficio/services/oficioService';
 import { obtenerCorrespondenciaPorId } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
-
-const FIRMANTE_FIJO = 5; // ana_admin fijo
 
 export const GenerarOficioContestacionPage = () => {
   const location  = useLocation();
   const navigate  = useNavigate();
   const catalogos = useCatalogos();
+  const { idUsuario, nombreUsuario, nombreArea } = useUsuarioSesion();
   const heredado  = location.state || {};
 
   const fuente =
@@ -23,10 +23,9 @@ export const GenerarOficioContestacionPage = () => {
 
   const idCorrespondenciaH =
     heredado.idCorrespondencia ?? fuente?.idCorrespondencia ?? fuente?.id ?? null;
-// Agrega este cálculo ANTES del handleGuardar, usando los catálogos ya disponibles
-const usuarioFirmante = catalogos.usuarios?.find(u => u.id === FIRMANTE_FIJO || u.idUsuario === FIRMANTE_FIJO);
-const areaFirmanteResuelta = usuarioFirmante?.nombreArea || usuarioFirmante?.area || 'Archivo';
-const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante?.username || 'ana_admin';
+
+  const areaFirmanteResuelta = nombreArea ?? heredado.areaFirmante ?? fuente?.areaFirmante ?? '';
+  const nombreFirmanteResuelto = nombreUsuario ?? heredado.firmante ?? fuente?.firmante ?? '';
   const firmanteH    = fuente?.firmante || fuente?.nombreFirmante || heredado.firmante || 'jperez';
   const areaFirmanteH = fuente?.areaFirmante || fuente?.area || heredado.areaFirmante || 'Administración';
   const textoSugeridoH = heredado.textoSugerido || fuente?.textoSugerido || fuente?.respuestaSeguimiento || '';
@@ -54,10 +53,10 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
 
   const resolveIdUsuarioEmisor = () => {
     const usuario = heredado?.usuario || heredado?.sessionUser || heredado?.user || null;
-    const id = usuario?.id ?? usuario?.idUsuario ?? heredado?.idUsuarioEmisor ?? heredado?.idUsuario ?? null;
-    if (id == null) return FIRMANTE_FIJO;
+    const id = usuario?.id ?? usuario?.idUsuario ?? heredado?.idUsuarioEmisor ?? heredado?.idUsuario ?? idUsuario ?? null;
+    if (id == null) return null;
     const n = Number(id);
-    return Number.isFinite(n) ? n : FIRMANTE_FIJO;
+    return Number.isFinite(n) ? n : null;
   };
 
   const handleGuardar = async (e) => {
@@ -75,14 +74,20 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
       return;
     }
 
+    if (!resolveIdUsuarioEmisor()) {
+      setError('No se encontró el usuario en sesión.');
+      return;
+    }
+
     setGuardando(true);
     setError(null);
 
     try {
+      const emisorId = resolveIdUsuarioEmisor();
       const payload = {
   idCorrespondencia:      heredado.idCorrespondencia,
-  idUsuarioFirmante:      FIRMANTE_FIJO,
-  idUsuarioEmisor:        FIRMANTE_FIJO,
+  idUsuarioFirmante:      emisorId,
+  idUsuarioEmisor:        emisorId,
   instruccionSeguimiento: instruccion,
   observaciones:          correspondencia?.asunto || instruccion,
   areaDestinatario:       correspondencia?.dependenciaRemitente || '',
@@ -265,8 +270,8 @@ const file    = new File(
     asuntoCorrespondencia:  correspondencia?.asunto || '',
     observaciones:          correspondencia?.asunto || '',
     instruccionSeguimiento: instruccion,
-    idUsuarioFirmante:      FIRMANTE_FIJO,
-    idUsuarioEmisor:        FIRMANTE_FIJO,
+    idUsuarioFirmante:      resolveIdUsuarioEmisor(),
+    idUsuarioEmisor:        resolveIdUsuarioEmisor(),
     // ✅ Pasar los datos ya resueltos para que la vista previa sea idéntica al PDF guardado
     nombreFirmante:         nombreFirmanteResuelto,
     areaFirmante:           areaFirmanteResuelta,

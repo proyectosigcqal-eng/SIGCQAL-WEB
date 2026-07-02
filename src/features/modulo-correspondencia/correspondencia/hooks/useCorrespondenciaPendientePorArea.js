@@ -1,22 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAreaSesion } from '@/shared/hooks/useAreaSesion';
 import { obtenerCorrespondenciaPendientePorArea } from '../services/correspondenciaService';
 
 export const useCorrespondenciaPendientePorArea = () => {
+  const { idArea, nombreArea, listo, error: areaError } = useAreaSesion();
   const [correspondencia, setCorrespondencia] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // TODO: Obtener el área del usuario logueado.
-  // Por ahora se fuerza un área para pruebas.
-  const AREA_FORZADA = 1;
-
-  const cargarCorrespondencia = async (idArea) => {
+  const cargarCorrespondencia = useCallback(async (areaId) => {
+    if (!areaId) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await obtenerCorrespondenciaPendientePorArea(idArea);
-      console.log('Correspondencia pendiente por área recibida:', data);
-      console.log('Primer elemento (keys):', data.length > 0 ? Object.keys(data[0]) : 'sin datos');
+      const data = await obtenerCorrespondenciaPendientePorArea(areaId);
       setCorrespondencia(data);
     } catch (err) {
       setError(err?.message || 'Error al obtener correspondencia pendiente por área');
@@ -24,21 +21,27 @@ export const useCorrespondenciaPendientePorArea = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    cargarCorrespondencia(AREA_FORZADA);
   }, []);
 
+  useEffect(() => {
+    if (!listo) return;
+    if (!idArea) {
+      setError(areaError);
+      return;
+    }
+    cargarCorrespondencia(idArea);
+  }, [idArea, listo, areaError, cargarCorrespondencia]);
+
   const recargar = () => {
-    cargarCorrespondencia(AREA_FORZADA);
+    if (idArea) cargarCorrespondencia(idArea);
   };
 
   return {
     correspondencia,
-    loading,
+    loading: loading || !listo,
     error,
     recargar,
-    areaForzada: AREA_FORZADA
+    idArea,
+    nombreArea,
   };
 };

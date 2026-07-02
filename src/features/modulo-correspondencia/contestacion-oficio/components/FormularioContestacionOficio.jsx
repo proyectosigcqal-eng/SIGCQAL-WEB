@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registrarSeguimiento } from '../../oficio/services/oficioService';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import '../styles/contestacion-oficio.css';
 
-const FIRMANTE_FIJO = 5; // ana_admin
-
 export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onError }) => {
+  const { idUsuario, nombreUsuario, nombreArea } = useUsuarioSesion();
   const navigate = useNavigate();
   const [respuesta, setRespuesta]                   = useState('');
   const [archivo, setArchivo]                       = useState(null);
@@ -30,6 +30,10 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
       onError && onError('El informe de atención es obligatorio.');
       return;
     }
+    if (!idUsuario) {
+      onError && onError('No se encontró el usuario en sesión.');
+      return;
+    }
     setGuardando(true);
     try {
       const idOficio = acuse?.idOficio || acuse?.id || acuse?.id_oficio;
@@ -38,7 +42,7 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
       const datos = {
         respuestaSeguimiento: respuesta,
         archivoAdjunto:       archivo || null,
-        idUsuario:            1, // ← fijo, sin depender de numeroUsuario
+        idUsuario,
         idEstatus:            5,
       };
 
@@ -62,11 +66,11 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia: Number(idCorrespondencia) || null,
-        idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
-        areaFirmante:      'Administración',
-        idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
+        idUsuarioFirmante: idUsuario,
+        firmante:          nombreUsuario,
+        areaFirmante:      nombreArea ?? '',
+        idUsuarioEmisor:   idUsuario,
+        nombreEmisor:      nombreUsuario,
         textoSugerido:     respuesta,
       }
     });

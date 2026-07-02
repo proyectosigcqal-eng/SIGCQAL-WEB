@@ -9,6 +9,7 @@ import {
 } from '../../../features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
 import { useOficio } from '@/features/modulo-correspondencia/oficio/hooks/useOficio';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import '@/features/modulo-correspondencia/oficio/styles/oficio.css';
 import '@/features/modulo-correspondencia/correspondencia/styles/correspondencia.css';
 
@@ -23,17 +24,7 @@ export const GenerarOficioInternoPage = () => {
   const [archivoPdfFinal, setArchivoPdfFinal] = useState(null);
   const [errorArchivo, setErrorArchivo] = useState(null);
   const catalogos = useCatalogos();
-
-  const getSessionUsername = () => {
-    try {
-      const raw = localStorage.getItem('user');
-      return raw ? JSON.parse(raw)?.username : null;
-    } catch {
-      return null;
-    }
-  };
-
-  const [idUsuarioEmisor, setIdUsuarioEmisor] = useState(null);
+  const { idUsuario } = useUsuarioSesion();
 
   useEffect(() => {
     if (!idCorrespondencia) {
@@ -53,26 +44,11 @@ export const GenerarOficioInternoPage = () => {
   const { formData, setFormData, handleChange } = useOficio(correspondencia, catalogos);
 
   useEffect(() => {
-    const usuarios = catalogos?.usuarios;
-    if (!usuarios?.length) return;
-    const username = getSessionUsername();
-    if (!username) return;
-
-    const found = usuarios.find((u) => u.usuarioLogin === username);
-    if (found) {
-      setIdUsuarioEmisor(found.id);
-      setFormData((prev) =>
-        prev.idUsuarioEmisor === found.id ? prev : { ...prev, idUsuarioEmisor: found.id }
-      );
-    } else {
-      console.warn('[GenerarOficioInterno] Usuario no encontrado en catálogo:', username);
-      const fallback = usuarios[0]?.id ?? null;
-      setIdUsuarioEmisor(fallback);
-      setFormData((prev) =>
-        prev.idUsuarioEmisor === fallback ? prev : { ...prev, idUsuarioEmisor: fallback }
-      );
-    }
-  }, [catalogos?.usuarios]);
+    if (!idUsuario) return;
+    setFormData((prev) =>
+      prev.idUsuarioEmisor === idUsuario ? prev : { ...prev, idUsuarioEmisor: idUsuario }
+    );
+  }, [idUsuario, setFormData]);
 
   const handleSubmitInterno = async (e) => {
     e.preventDefault();
@@ -84,7 +60,7 @@ export const GenerarOficioInternoPage = () => {
       return;
     }
     setErrorNumOficio(false);
-    if (!idUsuarioEmisor) {
+    if (!idUsuario) {
       setErrorGuardar(
         'No se pudo identificar el usuario logueado. Por favor, cierre sesión y vuelva a ingresar.'
       );
@@ -102,7 +78,7 @@ export const GenerarOficioInternoPage = () => {
     try {
       const dto = {
         idCorrespondencia: Number(idCorrespondencia),
-        idUsuarioEmisor: idUsuarioEmisor,
+        idUsuarioEmisor: idUsuario,
         numOficioSalida: formData.folioUnico.trim(),
         asuntoContestacion: formData.asuntoCorrespondencia || null,
         cuerpoOficioTexto: formData.instruccionSeguimiento || null,

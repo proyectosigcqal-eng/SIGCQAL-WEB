@@ -238,7 +238,7 @@ export const TablaCorrespondenciasInterna = ({
                           if (urlPdfFinal) {
                             return (
                               <a
-                                href={`http://localhost:8081/SIGCQAL_Prod${urlPdfFinal}`}
+                                href={`http://localhost:8081/SIGCQAL_dev${urlPdfFinal}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="btn-descargar-doc"
@@ -253,7 +253,7 @@ export const TablaCorrespondenciasInterna = ({
                           if (typeof urlArchivo === 'string' && urlArchivo.trim()) {
                             const nombre = archivoAdjunto?.nombreOriginal ?? 'Documento';
                             const esRelativa = urlArchivo.startsWith('/');
-                            const href = esRelativa ? `http://localhost:8081/SIGCQAL_Prod${urlArchivo}` : urlArchivo;
+                            const href = esRelativa ? `http://localhost:8081/SIGCQAL_dev${urlArchivo}` : urlArchivo;
                             return (
                               <a
                                 href={href}

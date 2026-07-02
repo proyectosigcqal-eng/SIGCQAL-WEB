@@ -1,45 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAreaSesion } from '@/shared/hooks/useAreaSesion';
 import { listarPorArea } from '../services/memorandumService';
 
 export const useListaMemorandums = () => {
+  const { idArea, nombreArea, listo, error: areaError } = useAreaSesion();
   const [memorandums, setMemorandums] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // TODO: Obtener el área del usuario logueado
-  // Por ahora se fuerza un área para pruebas
-  const AREA_FORZADA = 1;
-
-  const cargarMemorandums = async (idArea) => {
+  const cargarMemorandums = useCallback(async (areaId) => {
+    if (!areaId) return;
     setLoading(true);
     setError(null);
     try {
-      // Pedimos una página grande para obtener todos los registros de una sola vez
-      const data = await listarPorArea(idArea, { page: 0, size: 10000 });
-      console.log('Memorandums recibidos de la API:', data);
-      console.log(' Primer memo (keys):', data.length > 0 ? Object.keys(data[0]) : 'sin datos');
+      const data = await listarPorArea(areaId, { page: 0, size: 10000 });
       setMemorandums(data);
     } catch (err) {
       setError(err.message);
-      console.error("Error al cargar memorandums:", err);
+      console.error('Error al cargar memorandums:', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    cargarMemorandums(AREA_FORZADA);
   }, []);
 
+  useEffect(() => {
+    if (!listo) return;
+    if (!idArea) {
+      setError(areaError);
+      return;
+    }
+    cargarMemorandums(idArea);
+  }, [idArea, listo, areaError, cargarMemorandums]);
+
   const recargar = () => {
-    cargarMemorandums(AREA_FORZADA);
+    if (idArea) cargarMemorandums(idArea);
   };
 
   return {
     memorandums,
-    loading,
+    loading: loading || !listo,
     error,
     recargar,
-    areaForzada: AREA_FORZADA
+    idArea,
+    nombreArea,
   };
 };

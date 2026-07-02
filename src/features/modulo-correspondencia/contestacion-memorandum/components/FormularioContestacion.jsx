@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { guardarSeguimientoMemorandum, subirPdfFirmado, obtenerProximoFolio } from '../services/contestacionService'; // ← import agregado
+import { guardarSeguimientoConAdjunto, obtenerProximoFolio } from '../services/contestacionService';
 import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
-
-const FIRMANTE_FIJO = 5; // ana_admin
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 
 export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError }) => {
+  const { idUsuario, nombreUsuario, nombreArea } = useUsuarioSesion();
   const [folioGenerado, setFolioGenerado] = useState(null);
   const [folioPreview, setFolioPreview]   = useState(null); // ← agregado
   const [respuesta, setRespuesta]         = useState('');
@@ -38,6 +38,10 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
       onError('El informe de atención es obligatorio.');
       return;
     }
+    if (!idUsuario) {
+      onError('No se encontró el usuario en sesión.');
+      return;
+    }
     setGuardando(true);
     try {
       const payload = {
@@ -45,16 +49,12 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
         respuestaSeguimientoMemorandum: respuesta,
         fechaResolucion:                formatForBackend(new Date()),
         horaResolucion:                 formatTimeForBackend(new Date()),
-        archivoAdjunto:                 archivo?.name ?? null,
-        idUsuario:                      1,
+        archivoAdjunto:                 archivo ?? null,
+        idUsuario,
         idEstatus:                      5,
       };
 
-      const seguimientoGuardado = await guardarSeguimientoMemorandum(payload);
-
-      if (archivo && seguimientoGuardado?.idSeguimientoMemorandum) {
-        await subirPdfFirmado(seguimientoGuardado.idSeguimientoMemorandum, archivo);
-      }
+      const seguimientoGuardado = await guardarSeguimientoConAdjunto(payload);
 
       setFolioGenerado(seguimientoGuardado?.folioFormateado ?? folioPreview);
 
@@ -77,11 +77,11 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia: Number(resolvedIdCorrespondencia) || null,
-        idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
-        areaFirmante:      'Administración',
-        idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
+        idUsuarioFirmante: idUsuario,
+        firmante:          nombreUsuario,
+        areaFirmante:      nombreArea ?? '',
+        idUsuarioEmisor:   idUsuario,
+        nombreEmisor:      nombreUsuario,
         textoSugerido:     respuesta,
       }
     });

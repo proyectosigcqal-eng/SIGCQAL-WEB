@@ -4,21 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaMemorandumsPorArea = () => {
-  const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandumsPorArea();
+  const { memorandums, loading, error, recargar, idArea, nombreArea } = useListaMemorandumsPorArea();
   const navigate = useNavigate();
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
-
-  const obtenerNombreUsuario = (idUsuario) => {
-    // TODO: Integrar con catálogo de usuarios del sistema
-    // Por ahora se retorna el ID como identificador temporal
-    const usuariosMap = {
-      1: 'Usuario 1',
-      2: 'Usuario 2',
-      3: 'Usuario 3'
-    };
-    return usuariosMap[idUsuario] || `Usuario ${idUsuario}`;
-  };
 
   if (loading) {
     return (
@@ -47,7 +36,7 @@ export const ListaMemorandumsPorArea = () => {
       <div className="lista-header">
         <h2>Memorandum asignados</h2>
         <div className="header-info">
-          <span className="area-badge">Área: {areaForzada}</span>
+          <span className="area-badge">{nombreArea ?? (idArea ? `Área ${idArea}` : 'Sin área')}</span>
           <button onClick={recargar} className="btn-actualizar">
             ↻ Actualizar
           </button>
@@ -73,11 +62,7 @@ export const ListaMemorandumsPorArea = () => {
               </tr>
             </thead>
             <tbody>
-              {memorandums.map((memo, index) => {
-                // Aquí abrimos llaves `{}` correctamente para poder ejecutar el log antes del return
-                console.log('Memo:', memo); 
-                
-                return (
+              {memorandums.map((memo, index) => (
                   <tr key={memo.idAcuse || index}>
                     <td className="num-index">{index + 1}</td>
                     <td>{memo.folioUnicoCorrespondencia || memo.folioUnico || '-'}</td>
@@ -97,8 +82,7 @@ export const ListaMemorandumsPorArea = () => {
                       </button>
                     </td>
                   </tr>
-                );
-              })}
+              ))}
             </tbody>
           </table>
         </div>

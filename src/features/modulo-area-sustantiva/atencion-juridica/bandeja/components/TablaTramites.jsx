@@ -10,7 +10,7 @@ import { useBandejaIrl } from "@/features/modulo-area-sustantiva/representacion-
 import { TablaIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/TablaIrl";
 
 const API_BASE =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_Prod";
+  import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_dev";
 
 export const TIPO_TRAMITE_TABS = [
   { id: "ASESORIA_SIMPLIFICADA", label: "Asesoría Simplificada" },

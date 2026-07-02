@@ -11,7 +11,7 @@ import {
 } from '@/features/modulo-area-sustantiva/QuejasAri/services/quejasAriService';
 import '@/features/modulo-area-sustantiva/QuejasAri/styles/quejasAri.css';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const ESTADO_INICIAL = {
   idQueja: null,

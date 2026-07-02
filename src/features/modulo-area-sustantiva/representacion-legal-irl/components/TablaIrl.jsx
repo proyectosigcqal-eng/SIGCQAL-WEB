@@ -6,9 +6,8 @@ import { cerrarExpediente } from "@/features/modulo-area-sustantiva/notificacion
 // ✅ corregido: import NOMBRADO (tu archivo exporta `export const ModalDetalleIrl`, no default) + nombre bien escrito
 import { ModalDetalleIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/ModalDetalleIrl";
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const tabStyle = (active) => ({
   padding: "8px 20px",

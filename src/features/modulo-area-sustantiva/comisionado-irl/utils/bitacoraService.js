@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_BASE =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_Prod";
+  import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_dev";
 
 export async function obtenerBitacora(folio) {
   if (!folio) {

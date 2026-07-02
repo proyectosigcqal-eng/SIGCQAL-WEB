@@ -5,7 +5,7 @@ import { DetalleOficioModal } from './DetalleOficioModal';
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaOficios = () => {
-  const { oficios, loading, error, recargar, areaForzada } = useListaOficios();
+  const { oficios, loading, error, recargar, idArea, nombreArea } = useListaOficios();
   const [detalleId, setDetalleId] = useState(null);
 
   const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
@@ -37,7 +37,7 @@ export const ListaOficios = () => {
       <div className="lista-header">
         <h2>Oficios pendientes revisión</h2>
         <div className="header-info">
-          <span className="area-badge">Área: {areaForzada}</span>
+          <span className="area-badge">{nombreArea ?? (idArea ? `Área ${idArea}` : 'Sin área')}</span>
           <button onClick={recargar} className="btn-actualizar">
             ↻ Actualizar
           </button>

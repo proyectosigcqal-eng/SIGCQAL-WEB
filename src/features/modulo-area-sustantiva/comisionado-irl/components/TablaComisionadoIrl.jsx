@@ -13,7 +13,7 @@ import {
 import "./TablaComisionadoIrl.css";
 
 const API_BASE =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_Prod";
+  import.meta.env.VITE_API_URL ?? "http://localhost:8081/SIGCQAL_dev";
 
 const tabStyle = (active) => ({
   padding: "8px 20px",

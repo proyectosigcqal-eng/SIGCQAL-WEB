@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const ANIOS_DISPONIBLES = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023];
 

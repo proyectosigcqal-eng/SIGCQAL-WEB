@@ -5,7 +5,7 @@ import { DetalleMemorandumModal } from './DetalleMemorandumModal';
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaMemorandums = () => {
-  const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandums();
+  const { memorandums, loading, error, recargar, idArea, nombreArea } = useListaMemorandums();
   const [detalleId, setDetalleId] = useState(null);
 
   // Utiliza helpers compartidos para normalizar y mostrar fechas
@@ -38,7 +38,7 @@ export const ListaMemorandums = () => {
       <div className="lista-header">
         <h2>Memorandums pendientes revisión</h2>
         <div className="header-info">
-          <span className="area-badge">Área: {areaForzada}</span>
+          <span className="area-badge">{nombreArea ?? (idArea ? `Área ${idArea}` : 'Sin área')}</span>
           <button onClick={recargar} className="btn-actualizar">
             ↻ Actualizar
           </button>

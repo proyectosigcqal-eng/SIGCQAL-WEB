@@ -4,7 +4,7 @@ import { ContestacionAutoridadForm } from '@/features/modulo-area-sustantiva/ate
 import { EditorACCI } from '@/features/modulo-area-sustantiva/atencion-juridica/contestacion/components/EditorACCI';
 import '@/features/modulo-area-sustantiva/atencion-juridica/contestacion/styles/contestacion-autoridad.css';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 export const ContestacionAutoridadPage = () => {
   const { folio } = useParams();

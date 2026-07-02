@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import { generarMemorandum } from '../services/memorandumService';
 
-export const useMemorandum = (correspondencia, catalogos) => { // ← recibe catalogos como parámetro
+export const useMemorandum = (correspondencia, catalogos) => {
   const navigate = useNavigate();
+  const { idUsuario } = useUsuarioSesion();
 
   const [formData, setFormData] = useState({
     idCorrespondencia:      '',
@@ -23,10 +25,23 @@ export const useMemorandum = (correspondencia, catalogos) => { // ← recibe cat
     ...prev,
     idCorrespondencia:     correspondencia.id,
     asuntoCorrespondencia: correspondencia.asunto || '',
-    folioUnico:            '', // ← vacío, el backend lo genera
+    folioUnico:            '',
     idArea:                correspondencia.idArea || '',
   }));
 }, [correspondencia]);
+
+  useEffect(() => {
+    if (!idUsuario) return;
+    setFormData((prev) => {
+      if (prev.idUsuarioEmisor) return prev;
+      const usuario = catalogos?.usuarios?.find((u) => Number(u.id) === Number(idUsuario));
+      return {
+        ...prev,
+        idUsuarioEmisor: idUsuario,
+        idArea: usuario?.idArea ? Number(usuario.idArea) : prev.idArea,
+      };
+    });
+  }, [idUsuario, catalogos?.usuarios]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

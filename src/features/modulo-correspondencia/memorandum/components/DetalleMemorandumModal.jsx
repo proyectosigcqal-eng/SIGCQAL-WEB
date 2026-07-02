@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { obtenerMemorandumPorId } from '../services/memorandumService';
 import { responderAcuse } from '../../acuserecibointerno/services/acuserecibointernoService';
 import { formatForBackend, formatTimeForBackend, formatDateDisplay, formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import '../styles/detalleMemorandumModal.css';
 
 export const DetalleMemorandumModal = ({ idMemo, onClose, onActualizarLista }) => {
+  const { idUsuario } = useUsuarioSesion();
   const [memo, setMemo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,7 +64,7 @@ const horaStr = fecha
         esDelArea: true,
         fechaAceptacion: formatForBackend(now),
         horaAceptacion: formatTimeForBackend(now),
-        idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
+        idUsuarioRevisor: idUsuario ?? memo.idUsuarioRevisor,
         idMemorandum: memo.idMemorandum || memo.id,
         idCorrespondencia: memo.idCorrespondencia,
         numMemo: memo.numMemo || memo.folioUnico,
@@ -98,7 +100,7 @@ const horaStr = fecha
         esDelArea: false,
         fechaAceptacion: formatForBackend(now),
         horaAceptacion: formatTimeForBackend(now),
-        idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
+        idUsuarioRevisor: idUsuario ?? memo.idUsuarioRevisor,
         idMemorandum: memo.idMemorandum || memo.id,
         idCorrespondencia: memo.idCorrespondencia,
         numMemo: memo.numMemo || memo.folioUnico,

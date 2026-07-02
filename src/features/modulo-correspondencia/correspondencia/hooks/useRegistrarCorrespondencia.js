@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { registrarCorrespondencia } from '../services/correspondenciaService';
 import { formatForBackend } from '@/shared/utils/dateUtils';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 
 const FE_03 = 'Todos los campos obligatorios deben estar completos.';
 const FE_04 = 'La fecha de expedición no puede ser posterior a la fecha de recibido.';
@@ -24,6 +25,7 @@ const isAllowedFile = (file) => {
 };
 
 export const useRegistrarCorrespondencia = () => {
+  const { idUsuario } = useUsuarioSesion();
   const hoy = useMemo(() => formatForBackend(new Date()), []);
 
   const [formData, setFormData] = useState({
@@ -164,7 +166,7 @@ export const useRegistrarCorrespondencia = () => {
       fechaRecibido,
       idTipoCorrespondencia: formData.idTipoCorrespondencia ? Number(formData.idTipoCorrespondencia) : 1,
       idEstatus: 1,
-      idUsuarioCaptura: 1,
+      idUsuarioCaptura: idUsuario,
       idArea: null,
       observaciones: (formData.observaciones || '').trim() || null
     };

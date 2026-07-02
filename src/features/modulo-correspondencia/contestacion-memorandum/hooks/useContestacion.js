@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
+import { buildMemorandumPdfPath } from '@/shared/utils/documentoUtils';
 import { obtenerAcusePorId } from '../services/contestacionService';
 import { obtenerMemorandumPorId } from '../../memorandum/services/memorandumService';
+
+const enrichMemorandumUrls = (memoData, dataAcuse) => {
+  if (!memoData) return memoData;
+
+  const idMemorandum = memoData.idMemorandum ?? memoData.id ?? dataAcuse?.idMemorandum ?? null;
+  const urlMemorandumGenerado =
+    memoData.urlMemorandumGenerado ??
+    dataAcuse?.urlMemorandumGenerado ??
+    buildMemorandumPdfPath(idMemorandum);
+
+  return { ...memoData, urlMemorandumGenerado };
+};
 
 export const useContestacion = (idAcuse) => {
   const [acuse, setAcuse]           = useState(null);
@@ -21,18 +34,17 @@ export const useContestacion = (idAcuse) => {
         if (dataAcuse?.idMemorandum) {
           try {
             memoData = await obtenerMemorandumPorId(dataAcuse.idMemorandum);
-            setMemorandum(memoData);
+            setMemorandum(enrichMemorandumUrls(memoData, dataAcuse));
             // Si el acuse no trae idCorrespondencia, heredarlo del memorandum
             if (!dataAcuse?.idCorrespondencia && memoData?.idCorrespondencia) {
               setAcuse({ ...dataAcuse, idCorrespondencia: memoData.idCorrespondencia });
             }
           } catch (err) {
             // Si falla obtener el memorandum, usar el acuse como fallback
-            setMemorandum(dataAcuse);
+            setMemorandum(enrichMemorandumUrls(dataAcuse, dataAcuse));
           }
         } else {
-          // Si el acuse ya contiene los datos necesarios
-          setMemorandum(dataAcuse);
+          setMemorandum(enrichMemorandumUrls(dataAcuse, dataAcuse));
         }
       } catch (err) {
         setError(err.message || 'Error al cargar acuse de memorandum');

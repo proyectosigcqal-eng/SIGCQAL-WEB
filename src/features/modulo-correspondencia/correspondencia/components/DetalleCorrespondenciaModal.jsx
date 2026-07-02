@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { obtenerCorrespondenciaPorId } from '../services/correspondenciaService';
 import { crearAcuseCorrespondencia } from '../../acusecorrespondencia/services/acusecorrespondenciaService';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import '../styles/detalleCorrespondenciaModal.css';
 
 export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
+  const { idUsuario } = useUsuarioSesion();
   const [correspondencia, setCorrespondencia] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,7 +43,7 @@ export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
 
       const request = {
         idCorrespondencia: correspondencia.id,
-        idUsuarioRevisor: 1, // TODO: Obtener del usuario logueado
+        idUsuarioRevisor: idUsuario,
         esDelArea: true
       };
 
@@ -64,7 +66,7 @@ export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
 
       const request = {
         idCorrespondencia: correspondencia.id,
-        idUsuarioRevisor: 1, // TODO: Obtener del usuario logueado
+        idUsuarioRevisor: idUsuario,
         esDelArea: false
       };
 

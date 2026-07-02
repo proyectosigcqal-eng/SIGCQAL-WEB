@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CheckSquare, AlertTriangle, FileText, User, Shield } from 'lucide-react';
 import '../../../../features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/checklist.css';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const DOCUMENTOS = [
   {

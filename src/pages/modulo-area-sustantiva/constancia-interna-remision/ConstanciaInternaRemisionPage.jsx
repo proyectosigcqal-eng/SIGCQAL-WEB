@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { EditorCIR } from '../../../features/modulo-area-sustantiva/constancia-interna-remision/components/EditorCIR';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 export const ConstanciaInternaRemisionPage = () => {
   const { folio } = useParams();

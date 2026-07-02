@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = 'http://localhost:8081/SIGCQAL_Prod/api/v1/archivos';
+const API = 'http://localhost:8081/SIGCQAL_dev/api/v1/archivos';
 
 export const obtenerArchivoCorrespondencia = async (idCorrespondencia) => {
   try {

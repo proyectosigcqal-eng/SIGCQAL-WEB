@@ -1,6 +1,6 @@
 import axios from 'axios'; // O tu cliente HTTP de preferencia
 
-const API_URL = 'http://localhost:8081/SIGCQAL_Prod/api';
+const API_URL = 'http://localhost:8081/SIGCQAL_dev/api';
 
 export const cerrarExpediente = async (payload) => {
   const res = await fetch(`${API}/api/v1/cierre-expediente`, {

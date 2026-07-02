@@ -8,6 +8,7 @@ import {
 } from '@/features/modulo-correspondencia/correspondencia/services/oficioContestacionService';
 
 import { useCatalogos } from '@/shared/hooks/useCatalogos';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 
 import { VistaPreviaOficio } from '@/features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
 
@@ -19,17 +20,7 @@ export const GenerarOficioExternoPage = () => {
   const { idCorrespondencia } = useParams();
 
   const catalogos = useCatalogos();
-
-  const getSessionUsername = () => {
-    try {
-      const raw = localStorage.getItem('user');
-      return raw ? JSON.parse(raw)?.username : null;
-    } catch {
-      return null;
-    }
-  };
-
-  const [idUsuarioEmisor, setIdUsuarioEmisor] = useState(null);
+  const { idUsuario } = useUsuarioSesion();
 
   const heredado = location.state || {};
 
@@ -90,25 +81,11 @@ export const GenerarOficioExternoPage = () => {
   const [errorArchivo, setErrorArchivo] = useState(null);
 
   useEffect(() => {
-    const usuarios = catalogos?.usuarios;
-    if (!usuarios?.length) return;
-    const username = getSessionUsername();
-    if (!username) return;
-    const found = usuarios.find((u) => u.usuarioLogin === username);
-    if (found) {
-      setIdUsuarioEmisor(found.id);
-      setFormData((prev) =>
-        prev.idUsuarioEmisor === found.id ? prev : { ...prev, idUsuarioEmisor: found.id }
-      );
-    } else {
-      console.warn('[GenerarOficioExterno] Usuario no encontrado en catálogo:', username);
-      const fallback = usuarios[0]?.id ?? null;
-      setIdUsuarioEmisor(fallback);
-      setFormData((prev) =>
-        prev.idUsuarioEmisor === fallback ? prev : { ...prev, idUsuarioEmisor: fallback }
-      );
-    }
-  }, [catalogos?.usuarios]);
+    if (!idUsuario) return;
+    setFormData((prev) =>
+      prev.idUsuarioEmisor === idUsuario ? prev : { ...prev, idUsuarioEmisor: idUsuario }
+    );
+  }, [idUsuario]);
 
   useEffect(() => {
     if (!idCorrespondenciaH) return;
@@ -146,7 +123,7 @@ export const GenerarOficioExternoPage = () => {
     e.preventDefault();
     setErrorArchivo(null);
 
-    if (!idUsuarioEmisor) {
+    if (!idUsuario) {
       alert('No se pudo identificar el usuario emisor. Vuelva a iniciar sesión.');
       return;
     }
@@ -177,7 +154,7 @@ export const GenerarOficioExternoPage = () => {
     try {
       const dto = {
         idCorrespondencia: Number(idCorrespondenciaH),
-        idUsuarioEmisor: idUsuarioEmisor,
+        idUsuarioEmisor: idUsuario,
         numOficioSalida: formData.numOficioSalida.trim(),
         asuntoContestacion:
           formData.asuntoContestacion ||

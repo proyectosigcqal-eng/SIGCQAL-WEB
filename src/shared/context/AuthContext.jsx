@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react';
+import { normalizeLoginSession } from '@/shared/utils/sessionUtils';
 
 const AuthContext = createContext(null);
 
@@ -22,9 +23,10 @@ export const AuthProvider = ({ children }) => {
 
     const login = useCallback((loginResponse) => {
         const { token, ...resto } = loginResponse;
-        sessionStorage.setItem(TOKEN_KEY,   token);
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(resto));
-        setSession(resto);
+        const sessionNormalizada = normalizeLoginSession(resto);
+        sessionStorage.setItem(TOKEN_KEY, token);
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionNormalizada));
+        setSession(sessionNormalizada);
         setRolActivo(null);
     }, []);
 

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { guardarSeguimiento, obtenerProximoFolio } from '../services/seguimientoService';
-
-const FIRMANTE_FIJO = 5;
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 
 export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, onGuardado, onError }) => {
+  const { idUsuario, nombreUsuario, nombreArea } = useUsuarioSesion();
   const [folioGenerado, setFolioGenerado] = useState(null);
   const [folioPreview, setFolioPreview]   = useState(null);
   const [respuesta, setRespuesta]         = useState('');
@@ -36,6 +36,10 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
       onError && onError('El informe de atención es obligatorio.');
       return;
     }
+    if (!idUsuario) {
+      onError && onError('No se encontró el usuario en sesión.');
+      return;
+    }
     setGuardando(true);
     try {
       const payload = {
@@ -45,7 +49,7 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
         fechaResolucion:                     new Date().toISOString().split('T')[0],
         horaResolucion:                      new Date().toTimeString().split(' ')[0],
         archivoAdjunto:                      archivo ?? null,
-        idUsuario:                           5,
+        idUsuario,
         idEstatus:                           5,
         numeroOficioContestacion:            '',
       };
@@ -65,11 +69,11 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia: acuse?.idCorrespondencia || correspondencia?.id || null,
-        idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
-        areaFirmante:      'Administración',
-        idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
+        idUsuarioFirmante: idUsuario,
+        firmante:          nombreUsuario,
+        areaFirmante:      nombreArea ?? '',
+        idUsuarioEmisor:   idUsuario,
+        nombreEmisor:      nombreUsuario,
         textoSugerido:     respuesta,
       }
     });

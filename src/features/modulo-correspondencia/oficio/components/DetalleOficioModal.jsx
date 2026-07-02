@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { obtenerOficioPorId } from '../services/oficioService';
 import { crearAcuseOficio } from '../../acuseoficio/services/acuseoficioService';
+import { useUsuarioSesion } from '@/shared/hooks/useUsuarioSesion';
 import '../styles/detalleOficioModal.css';
 
 export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => {
+  const { idUsuario } = useUsuarioSesion();
   const [oficio, setOficio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -35,7 +37,7 @@ export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => 
       setRespondiendo(true);
       await crearAcuseOficio({
         idOficio:         oficio.idOficio || oficio.id,
-        idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
+        idUsuarioRevisor: idUsuario ?? oficio.idUsuarioRevisor,
         esDelArea:        true,
       });
       alert('Acuse de recibo confirmado correctamente');
@@ -55,7 +57,7 @@ export const DetalleOficioModal = ({ idOficio, onClose, onActualizarLista }) => 
       setRespondiendo(true);
       await crearAcuseOficio({
         idOficio:         oficio.idOficio || oficio.id,
-        idUsuarioRevisor: oficio.idUsuarioRevisor || 1,
+        idUsuarioRevisor: idUsuario ?? oficio.idUsuarioRevisor,
         esDelArea:        false,
       });
       alert('Se registró que no es del área.');

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, FileText } from 'lucide-react';
 
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 
 const Field = ({ label, value }) => (

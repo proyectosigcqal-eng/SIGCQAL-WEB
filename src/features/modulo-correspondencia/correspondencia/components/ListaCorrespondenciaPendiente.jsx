@@ -4,7 +4,7 @@ import { useState } from 'react';
 import '@/features/modulo-correspondencia/correspondencia/styles/correspondenciaPendiente.css';
 
 export const ListaCorrespondenciaPendiente = () => {
-  const { correspondencia, loading, error, recargar, areaForzada } = useCorrespondenciaPendientePorArea();
+  const { correspondencia, loading, error, recargar, idArea, nombreArea } = useCorrespondenciaPendientePorArea();
   const [detalleId, setDetalleId] = useState(null);
 
   const verDetalles = (item) => {
@@ -20,7 +20,7 @@ export const ListaCorrespondenciaPendiente = () => {
 
         <div className="header-info">
           <span className="area-badge">
-            Área: {areaForzada}
+            {nombreArea ?? (idArea ? `Área ${idArea}` : 'Sin área')}
           </span>
 
           <button className="btn-actualizar" onClick={recargar}>

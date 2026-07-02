@@ -1,21 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAreaSesion } from '@/shared/hooks/useAreaSesion';
 import { listarAcusesPorArea } from '../services/acuseoficioService';
 
-
 export const useListaAcusesOficioPorArea = () => {
+  const { idArea, nombreArea, listo, error: areaError } = useAreaSesion();
   const [acuses, setAcuses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // TODO: Obtener el área del usuario logueado
-  const AREA_FORZADA = 1;
-
-  const cargarAcuses = async (idArea) => {
+  const cargarAcuses = useCallback(async (areaId) => {
+    if (!areaId) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await listarAcusesPorArea(idArea);
-      console.log('Acuses de oficio por área recibidos de la API:', data);
+      const data = await listarAcusesPorArea(areaId);
       setAcuses(data);
     } catch (err) {
       setError(err.message);
@@ -23,21 +21,27 @@ export const useListaAcusesOficioPorArea = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    cargarAcuses(AREA_FORZADA);
   }, []);
 
+  useEffect(() => {
+    if (!listo) return;
+    if (!idArea) {
+      setError(areaError);
+      return;
+    }
+    cargarAcuses(idArea);
+  }, [idArea, listo, areaError, cargarAcuses]);
+
   const recargar = () => {
-    cargarAcuses(AREA_FORZADA);
+    if (idArea) cargarAcuses(idArea);
   };
 
   return {
     acuses,
-    loading,
+    loading: loading || !listo,
     error,
     recargar,
-    areaForzada: AREA_FORZADA
+    idArea,
+    nombreArea,
   };
 };
