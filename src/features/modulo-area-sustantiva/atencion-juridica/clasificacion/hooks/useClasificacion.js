@@ -42,13 +42,12 @@ export const useClasificacion = (idExpediente) => {
       return { ok: false, message: msg };
     }
 
-    const idExpedienteNum = Number(idExpediente);
-    if (!Number.isFinite(idExpedienteNum) || idExpedienteNum <= 0) {
-      const msg = 'No se encontro el identificador del expediente.';
-      setMensaje(msg);
-      setError(msg);
-      return { ok: false, message: msg };
-    }
+    if (!idExpediente) {
+  const msg = 'No se encontro el identificador del expediente.';
+  setMensaje(msg);
+  setError(msg);
+  return { ok: false, message: msg };
+}
 
     setGuardando(true);
     setError(null);

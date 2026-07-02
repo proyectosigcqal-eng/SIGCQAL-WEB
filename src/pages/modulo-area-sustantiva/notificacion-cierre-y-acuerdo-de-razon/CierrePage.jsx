@@ -9,14 +9,15 @@ import './CierrePage.css';
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 const getStoredUser = () => {
-  const raw = localStorage.getItem('user') || localStorage.getItem('usuario');
+  // AuthContext guarda en sessionStorage con esta clave
+  const raw = sessionStorage.getItem('sigcqal_session');
   if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return raw; }
+  try { return JSON.parse(raw); } catch { return null; }
 };
 
 const resolveUserId = (user) => {
-  if (!user) return 12;
-  return user.id || user.idUsuario || user.usuarioId || 12;
+  if (!user) return null; // ← no hardcodear 12
+  return user.idUsuario ?? user.id ?? user.usuarioId ?? null;
 };
 
 const CierrePage = () => {
@@ -38,10 +39,15 @@ const CierrePage = () => {
   const [medioNotificacion, setMedioNotificacion] = useState('Correo Electrónico');
 
   // ── Cargar datos del expediente por folio ──────────────────────────────────
-  useEffect(() => {
-    const storedUser = getStoredUser();
-    setIdUsuarioCierre(resolveUserId(storedUser));
-  }, []);
+useEffect(() => {
+  const storedUser = getStoredUser();
+  const id = resolveUserId(storedUser);
+  if (id) {
+    setIdUsuarioCierre(id);
+  } else {
+    setErrorMessage('No se encontró sesión de usuario. Por favor inicia sesión nuevamente.');
+  }
+}, []);
 
   useEffect(() => {
     if (!folio) return;

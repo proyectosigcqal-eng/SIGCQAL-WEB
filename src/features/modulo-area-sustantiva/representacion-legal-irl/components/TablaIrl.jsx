@@ -415,41 +415,73 @@ export const TablaIrl = ({
                           }
 
                           if (accion.tipo === "tab") {
-                            return (
-                              <button key={i} className="bdg-btn-action"
-                                disabled={procesandoConcluir}
-                                onClick={async () => {
-                                  if ((accion.tab ?? "").toUpperCase() !== "CONCLUIDO") {
-                                    setEtapaActual(accion.tab);
-                                    return;
-                                  }
-                                  if (procesandoConcluir) return;
-                                  setProcesandoConcluir(true);
-                                  try {
-                                    const idExp = Number(item.idExpediente ?? item.id);
-                                    const rawUser = localStorage.getItem('user') || localStorage.getItem('usuario');
-                                    let userId = 12;
-                                    try { userId = JSON.parse(rawUser)?.id ?? userId; } catch {}
-                                    const folioVal = item.folioGobierno ?? item.folio ?? idExp;
-                                    await cerrarExpediente({
-                                      idExpediente: idExp || null,
-                                      medioNotificacion: 'CORREO ELECTRONICO',
-                                      rutaArchivoAcuerdo: `/almacen/acuerdos/EXPEDIENTE_${folioVal}.pdf`,
-                                      idUsuarioCierre: Number(userId),
-                                    });
-                                    setEtapaActual('CONCLUIDO');
-                                    if (typeof recargar === 'function') await recargar().catch(() => {});
-                                  } catch (e) {
-                                    console.error('Error al concluir:', e);
-                                    window.alert('No fue posible concluir el expediente.');
-                                  } finally {
-                                    setProcesandoConcluir(false);
-                                  }
-                                }}>
-                                {procesandoConcluir ? 'Procesando...' : accion.label}
-                              </button>
-                            );
-                          }
+  return (
+    <button key={i} className="bdg-btn-action"
+      disabled={procesandoConcluir}
+      onClick={async () => {
+        if ((accion.tab ?? "").toUpperCase() !== "CONCLUIDO") {
+          setEtapaActual(accion.tab);
+          return;
+        }
+        if (procesandoConcluir) return;
+        setProcesandoConcluir(true);
+        try {
+          // ✅ mismo patrón que CierrePage.jsx
+          const storedUser = (() => {
+            const raw = sessionStorage.getItem('sigcqal_session');
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch { return null; }
+          })();
+
+          const userId = storedUser?.idUsuario
+                      ?? storedUser?.id
+                      ?? storedUser?.usuarioId
+                      ?? null;
+
+          if (!userId) {
+            window.alert('No se encontró sesión de usuario. Por favor inicia sesión nuevamente.');
+            return;
+          }
+
+          const idExp    = Number(item.idExpediente ?? item.id);
+          const folioVal = item.folioGobierno ?? item.folio ?? idExp;
+
+         let cierreExitoso = false;
+try {
+  await cerrarExpediente({
+    idExpediente:       idExp || null,
+    medioNotificacion:  'CORREO ELECTRONICO',
+    rutaArchivoAcuerdo: `/almacen/acuerdos/EXPEDIENTE_${folioVal}.pdf`,
+    idUsuarioCierre:    Number(userId),
+  });
+  cierreExitoso = true;
+} catch (e) {
+  // ¿Es un error HTTP real (4xx / 5xx)?
+  const esErrorServidor = /\b[45]\d{2}\b/.test(e?.message ?? '');
+  if (esErrorServidor) {
+    window.alert('No fue posible concluir el expediente: ' + e.message);
+    return;
+  }
+  // Error de parseo de respuesta vacía (204 / void) — el backend SÍ actuó
+  console.warn('[Cierre] Response sin body, asumiendo éxito:', e.message);
+  cierreExitoso = true;
+}
+
+if (cierreExitoso) {
+  setEtapaActual('CONCLUIDO');
+  if (typeof recargar === 'function') await recargar().catch(() => {});
+}if (typeof recargar === 'function') await recargar().catch(() => {});
+        } catch (e) {
+          console.error('Error al concluir:', e);
+          window.alert('No fue posible concluir el expediente.');
+        } finally {
+          setProcesandoConcluir(false);
+        }
+      }}>
+      {procesandoConcluir ? 'Procesando...' : accion.label}
+    </button>
+  );
+}
 
                           return (
                             <button key={i} className="bdg-btn-action"
