@@ -5,11 +5,22 @@ import { generarOficio } from '../services/oficioService';
 export const useOficio = (correspondencia, catalogos) => { // ← recibe catalogos como parámetro
   const navigate = useNavigate();
 
+  const getIdUsuarioLogueado = () => {
+      const token = localStorage.getItem('token');
+      if (!token) return '';
+      try {
+          const payload = JSON.parse(window.atob(token.split('.')[1]));
+          return payload.idUsuario; // Esto extrae tu ID real (ej. 14)
+      } catch (e) {
+          return '';
+      }
+  };
+
   const [formData, setFormData] = useState({
     idCorrespondencia:      '',
     instruccionSeguimiento: '',
-    idUsuarioEmisor:        '',
-    idUsuarioFirmante:      '',
+    idUsuarioEmisor:        getIdUsuarioLogueado(), // ← obtiene el ID del usuario logueado
+    idUsuarioFirmante:      getIdUsuarioLogueado(), // ← obtiene el ID del usuario logueado
     idPlantilla:            '',
     idArea:                 '',
     observaciones:          '',
@@ -36,7 +47,14 @@ export const useOficio = (correspondencia, catalogos) => { // ← recibe catalog
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const token = localStorage.getItem('token');
+    const payloadToken = JSON.parse(window.atob(token.split('.')[1]));
+    const idUsuarioLogueado = payloadToken.idUsuario; // Asegúrate de que este sea el ID correcto
+
     try {
+
+      const idReal = getIdUsuarioLogueado();
         const firmante = catalogos?.usuarios?.find(
             u => u.id === Number(formData.idUsuarioFirmante)
         );
@@ -49,11 +67,14 @@ export const useOficio = (correspondencia, catalogos) => { // ← recibe catalog
 
         const payload = {
             ...formData,
+            idUsuarioEmisor: idReal,
+            idUsuarioFirmante: idReal,
             areaDestinatario: areaDestino?.nombre || areaDestino?.nombreArea || '',
             nombreFirmante:   firmante?.usuarioLogin || '',
             areaFirmante:     firmante?.nombreArea   || getAreaUsuario(formData.idUsuarioFirmante, catalogos?.usuarios) || '',
             nombreEmisor:     emisor?.usuarioLogin   || '', // ← agregar
         };
+        console.log("VALOR QUE ENVÍO AL BACKEND:", payload.idUsuarioEmisor);
 
         const resultado = await generarOficio(payload);
         if (resultado?.id) {

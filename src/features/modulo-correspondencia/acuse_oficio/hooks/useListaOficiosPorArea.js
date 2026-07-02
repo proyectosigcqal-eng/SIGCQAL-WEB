@@ -8,24 +8,47 @@ export const useListaOficiosPorArea = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const AREA_FORZADA = 1; 
+  // 1. Función para extraer el área del token de forma dinámica
+  const getAreaDesdeToken = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(window.atob(token.split('.')[1]));
+      return payload.idArea; // Extrae el campo 'idArea' de tu token
+    } catch (e) {
+      console.error("Error al obtener idArea del token:", e);
+      return null;
+    }
+  };
 
-  const cargarOficios = async (idArea) => {
+ const cargarOficios = async () => {
+    const idArea = getAreaDesdeToken();
+    
+    if (!idArea) {
+      setError("No se pudo determinar el área del usuario.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const res = await axios.get(`${API}/acuse-oficio/area/${idArea}`);
       setOficios(res.data);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || 'Error al cargar oficios por área');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    cargarOficios(AREA_FORZADA);
+    cargarOficios();
   }, []);
 
-  return { oficios, loading, error, recargar: () => cargarOficios(AREA_FORZADA), areaForzada: AREA_FORZADA };
+  return { 
+    oficios, 
+    loading, 
+    error, 
+    recargar // Ahora recargar usa la lógica dinámica
+  };
 };

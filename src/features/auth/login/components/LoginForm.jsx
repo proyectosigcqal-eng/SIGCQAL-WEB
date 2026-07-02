@@ -41,6 +41,10 @@ export const LoginForm = () => {
 
             const data = await res.json();
 
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                }
+
             auth.login(data);
             setAlerta({ type: 'success', message: 'Inicio de sesión correcto. Redirigiendo...' });
 

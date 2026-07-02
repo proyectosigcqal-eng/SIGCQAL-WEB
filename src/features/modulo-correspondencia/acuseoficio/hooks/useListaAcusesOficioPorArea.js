@@ -7,15 +7,30 @@ export const useListaAcusesOficioPorArea = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // TODO: Obtener el área del usuario logueado
-  const AREA_FORZADA = 1;
+const getIdAreaLogueado = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(window.atob(token.split('.')[1]));
+      return payload.idArea; // Extrae el idArea real del token
+    } catch (e) {
+      console.error("Error al extraer idArea del token:", e);
+      return null;
+    }
+  };
 
-  const cargarAcuses = async (idArea) => {
+  const cargarAcuses = async () => {
+    const idArea = getIdAreaLogueado();
+    
+    if (!idArea) {
+      setError("No se pudo determinar el área del usuario.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const data = await listarAcusesPorArea(idArea);
-      console.log('Acuses de oficio por área recibidos de la API:', data);
       setAcuses(data);
     } catch (err) {
       setError(err.message);
@@ -26,18 +41,13 @@ export const useListaAcusesOficioPorArea = () => {
   };
 
   useEffect(() => {
-    cargarAcuses(AREA_FORZADA);
+    cargarAcuses();
   }, []);
-
-  const recargar = () => {
-    cargarAcuses(AREA_FORZADA);
-  };
 
   return {
     acuses,
     loading,
     error,
-    recargar,
-    areaForzada: AREA_FORZADA
+    recargar: cargarAcuses // Ahora recargar usa la lógica dinámica
   };
 };
