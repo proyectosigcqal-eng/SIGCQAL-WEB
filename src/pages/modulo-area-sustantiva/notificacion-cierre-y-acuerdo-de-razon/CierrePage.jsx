@@ -6,6 +6,9 @@ import ConfirmModal from '../../../features/modulo-area-sustantiva/notificacion-
 import ExpedienteStatusHeader from '../../../features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/components/ExpedienteStatusHeader';
 import './CierrePage.css';
 
+
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
+
 const defaultDatos = {
   folio: 'PRUEBA-001',
   expediente: 'EXP-PRUEBA-001',
@@ -14,19 +17,18 @@ const defaultDatos = {
   acuerdoFileName: '',
 };
 
+
 const getStoredUser = () => {
-  const raw = localStorage.getItem('user') || localStorage.getItem('usuario');
+  // AuthContext guarda en sessionStorage con esta clave
+  const raw = sessionStorage.getItem('sigcqal_session');
   if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return raw;
-  }
+  try { return JSON.parse(raw); } catch { return null; }
 };
 
 const resolveUserId = (user) => {
-  if (!user) return 12; // valor de prueba
-  return user.id || user.idUsuario || user.usuarioId || 12;
+  if (!user) return null; // ← no hardcodear 12
+  return user.idUsuario ?? user.id ?? user.usuarioId ?? null;
+
 };
 
 const CierrePage = () => {
@@ -38,10 +40,26 @@ const CierrePage = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const { idExpediente } = useParams();
 
-  useEffect(() => {
-    const storedUser = getStoredUser();
-    setIdUsuarioCierre(resolveUserId(storedUser));
-  }, []);
+
+  // Datos reales del expediente cargados desde la API
+  const [expediente,     setExpediente]     = useState(null);  // { idExpediente, folioGobierno, quejoso, ... }
+  const [cargando,       setCargando]       = useState(false);
+  const [errorCarga,     setErrorCarga]     = useState('');
+
+  // Medio de notificación (controlado localmente)
+  const [medioNotificacion, setMedioNotificacion] = useState('Correo Electrónico');
+
+  // ── Cargar datos del expediente por folio ──────────────────────────────────
+useEffect(() => {
+  const storedUser = getStoredUser();
+  const id = resolveUserId(storedUser);
+  if (id) {
+    setIdUsuarioCierre(id);
+  } else {
+    setErrorMessage('No se encontró sesión de usuario. Por favor inicia sesión nuevamente.');
+  }
+}, []);
+
 
   useEffect(() => {
     if (idExpediente) {

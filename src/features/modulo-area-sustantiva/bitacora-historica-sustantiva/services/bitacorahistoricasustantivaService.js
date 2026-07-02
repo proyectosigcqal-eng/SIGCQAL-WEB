@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Usamos la URL base que confirmaste anteriormente
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api';
+const API_URL = 'http://localhost:8081/SIGCQAL_Prod/api';
 
 /**
  * Obtiene la bitácora completa de un expediente/queja por su ID

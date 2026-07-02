@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { EditorOficioNotificacion } from '../../../features/modulo-area-sustantiva/atencion-juridica/oficio-notificacion/components/EditorOficioNotificacion';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 export const OficioNotificacionPage = () => {
   const { folio } = useParams();

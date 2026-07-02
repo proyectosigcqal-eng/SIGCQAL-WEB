@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/acuse-interno';
+const API_URL = 'http://localhost:8081/SIGCQAL_Prod/api/v1/acuse-interno';
 
 /**
  * Lista los acuses de recibo interno por usuario

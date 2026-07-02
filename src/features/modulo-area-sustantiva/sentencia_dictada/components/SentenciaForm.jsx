@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../../../features/modulo-area-sustantiva/sentencia_dictada/styles/SentenciaForm.css';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 const ESTADO_INICIAL = {
   idAudienciaCelebrada:       '',

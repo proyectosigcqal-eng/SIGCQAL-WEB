@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/correspondencias/entrada';
+const API_URL = 'http://localhost:8081/SIGCQAL_Prod/api/v1/correspondencias/entrada';
 
 export const registrarCorrespondencia = async (dto) => {
   const response = await axios.post(API_URL, dto);
