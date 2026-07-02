@@ -19,27 +19,31 @@ export const VistaPreviaQuejaAri = ({ formData, usuarios = [], areaDestino, down
     return `${parseInt(day, 10)} de ${meses[parseInt(month, 10) - 1]} de ${year}`;
   };
 
- // ── Variables dinámicas — TODAS aquí ────────────────────────────
-const folioGobierno              = formData.folioGobierno              || '';
-const nombreContribuyente        = formData.nombreContribuyente        || '';
-const expediente                 = formData.numExpedienteOficial       || '';
-const fechaAcuerdo               = formatearFecha(formData.fechaAcuerdo);
-const actosOmisiones             = formData.sintesisActosOmisiones     || '';
-const encargadoFirma             = formData.nombreEncargadoFirma       || '_________________________';
-const multasReq                  = formData.multasRequerimientos       || '';
-const multasCred                 = formData.multasCredito              || '';
-const instituto                  = formData.instituto                  || '';
-const abreviaturaEncargado       = formData.abreviaturaEncargado       || '';
-const areaDestinatario           = formData.idArea
-  ? (areaDestino?.nombre || areaDestino?.nombreArea || null)
-  : null;
-const nombreAsesor               = formData.nombreAsesor               || '';
-const rfcAsesor                  = formData.rfcAsesor                  || '';
-const nombreRepresentante        = formData.nombreRepresentante        || '';
-const identificacionContribuyente = formData.identificacionContribuyente || '';
-const fechaSolicitud             = formData.fechaSolicitud
-  ? formatearFecha(formData.fechaSolicitud)
-  : '[fecha pendiente]';
+  // Valores dinámicos mapeados
+  const expediente          = formData.numExpedienteOficial || '{{EXPEDIENTE}}';
+  const fechaAcuerdo        = formatearFecha(formData.fechaAcuerdo);
+  const actosOmisiones      = formData.sintesisActosOmisiones || '';
+  const encargadoFirma      = formData.nombreEncargadoFirma || '_________________________';
+  const multasReq           = formData.multasRequerimientos || '';
+  const multasCred          = formData.multasCredito || '';
+  const areaDestinatario    = formData.idArea 
+    ? (areaDestino?.nombre || areaDestino?.nombreArea || null)
+    : null;
+
+  const instituto = formData.instituto || '';
+  const abreviaturaEncargado = formData.abreviaturaEncargado || '';
+
+  // NUEVOS: Extracción de variables enriquecidas relacionales
+  const folioGobierno       = formData.folioGobierno || '{{FOLIO_GOBIERNO}}';
+  const nombreAsesor        = formData.nombreAsesor || '{{NOMBRE_ASESOR}}';
+  const rfcAsesor           = formData.rfcAsesor || '{{RFC_ASESOR}}';
+  const nombreRepresentante = formData.nombreRepresentante || '{{NOMBRE_REPRESENTANTE}}';
+  const nombreContribuyente = formData.nombreContribuyente || '{{NOMBRE_CONTRIBUYENTE}}';
+  const identificacionContribuyente = formData.identificacionContribuyente || '{{IDENTIFICACION_CONTRIBUYENTE}}';
+  const fechaSolicitud = formData.fechaSolicitud 
+  ? formatearFecha(formData.fechaSolicitud) 
+  : '{{FECHA_SOLICITUD}}';
+
   // Estilo común para inyectar el fondo dinámicamente sin fallos de compilación de assets
   const estiloHojaFondo = { backgroundImage: `url(${membreteImg})` };
 

@@ -17,7 +17,6 @@ export const useRegistroExpediente = () => {
 
   const [formData, setFormData] = useState({
     // Control Operativo
-    folioGobierno: '',
     fechaSolicitud: hoy,
     idMunicipio: '',
     idAsesorResponsable: '',
@@ -125,7 +124,6 @@ export const useRegistroExpediente = () => {
     const errores = {};
 
     // Validar Control Operativo
-    if (!formData.folioGobierno) errores.folioGobierno = 'El folio de gobierno es obligatorio.';
     if (!formData.fechaSolicitud) errores.fechaSolicitud = 'La fecha de solicitud es obligatoria.';
     if (!formData.idMunicipio) errores.idMunicipio = 'El municipio es obligatorio.';
 
@@ -251,13 +249,7 @@ export const useRegistroExpediente = () => {
       }
 
     } catch (err) {
-      const status = err?.response?.status || err?.status;
-      const detail = err?.response?.data?.detail || err?.detail;
-      if (status === 409 && detail) {
-        setError(detail);
-      } else {
-        setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
-      }
+      setError(err?.message || 'Error al guardar el expediente. Intenta de nuevo.');
       setMostrarModalGuardar(false);
     } finally {
       setIsLoading(false);

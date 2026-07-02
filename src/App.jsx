@@ -632,7 +632,7 @@ function App() {
 
           {/* Ruta de prueba para Cierre */}
           <Route
-            path="/area-sustantiva/cierre-test/:folio"
+            path="area-sustantiva/cierre-test/:idExpediente?"
             element={<CierrePage />}
           />
 

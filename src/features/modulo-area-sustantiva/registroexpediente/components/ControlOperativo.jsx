@@ -22,19 +22,10 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
       <div className="section-body">
         <div className="form-grid">
           <div className="form-group">
-            <label htmlFor="folioGobierno">Folio de Gobierno *</label>
-            <input
-              id="folioGobierno"
-              name="folioGobierno"
-              type="text"
-              value={formData.folioGobierno || ''}
-              onChange={handleChange}
-              placeholder="Ej: 2406-00125"
-              className={erroresCampo.folioGobierno ? 'campo-con-error' : ''}
-            />
-            {erroresCampo.folioGobierno && (
-              <span className="error-text">{erroresCampo.folioGobierno}</span>
-            )}
+            <label>Folio de Gobierno</label>
+            <p style={{ margin: 0, color: '#333', fontSize: '0.95rem' }}>
+              El folio se generará automáticamente.
+            </p>
           </div>
 
           <div className="form-group">
