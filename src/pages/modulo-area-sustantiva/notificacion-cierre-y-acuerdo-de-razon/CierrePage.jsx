@@ -6,84 +6,101 @@ import ConfirmModal from '../../../features/modulo-area-sustantiva/notificacion-
 import ExpedienteStatusHeader from '../../../features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/components/ExpedienteStatusHeader';
 import './CierrePage.css';
 
-const defaultDatos = {
-  folio: 'PRUEBA-001',
-  expediente: 'EXP-PRUEBA-001',
-  quejoso: 'Nombre del solicitante',
-  medioNotificacion: 'Correo Electrónico',
-  acuerdoFileName: '',
-};
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
 
 const getStoredUser = () => {
   const raw = localStorage.getItem('user') || localStorage.getItem('usuario');
   if (!raw) return null;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return raw;
-  }
+  try { return JSON.parse(raw); } catch { return raw; }
 };
 
 const resolveUserId = (user) => {
-  if (!user) return 12; // valor de prueba
+  if (!user) return 12;
   return user.id || user.idUsuario || user.usuarioId || 12;
 };
 
 const CierrePage = () => {
-  const { ejecutarCierre, isLocked, isLoading } = useCierreExpediente();
-  const [showModal, setShowModal] = useState(false);
-  const [datosDelExpediente, setDatosDelExpediente] = useState(defaultDatos);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [idUsuarioCierre, setIdUsuarioCierre] = useState(12);
-  const [errorMessage, setErrorMessage] = useState('');
-  const { idExpediente } = useParams();
+  const { folio } = useParams(); // ← renombrado: el parámetro de ruta ES el folio
 
+  const { ejecutarCierre, isLocked, isLoading } = useCierreExpediente();
+
+  const [showModal,      setShowModal]      = useState(false);
+  const [errorMessage,   setErrorMessage]   = useState('');
+  const [selectedFile,   setSelectedFile]   = useState(null);
+  const [idUsuarioCierre, setIdUsuarioCierre] = useState(12);
+
+  // Datos reales del expediente cargados desde la API
+  const [expediente,     setExpediente]     = useState(null);  // { idExpediente, folioGobierno, quejoso, ... }
+  const [cargando,       setCargando]       = useState(false);
+  const [errorCarga,     setErrorCarga]     = useState('');
+
+  // Medio de notificación (controlado localmente)
+  const [medioNotificacion, setMedioNotificacion] = useState('Correo Electrónico');
+
+  // ── Cargar datos del expediente por folio ──────────────────────────────────
   useEffect(() => {
     const storedUser = getStoredUser();
     setIdUsuarioCierre(resolveUserId(storedUser));
   }, []);
 
   useEffect(() => {
-    if (idExpediente) {
-      setDatosDelExpediente((prev) => ({
-        ...prev,
-        folio: `FOLIO-${idExpediente}`,
-        expediente: `EXP-${idExpediente}`,
-        quejoso: 'Asesoría de prueba',
-      }));
-    }
-  }, [idExpediente]);
+    if (!folio) return;
 
-  const handleMedioChange = (event) => {
-    setDatosDelExpediente((prev) => ({
-      ...prev,
-      medioNotificacion: event.target.value,
-    }));
+    setCargando(true);
+    setErrorCarga('');
+
+    // Ajusta la URL al endpoint de tu backend que devuelve expediente por folio.
+    // Ejemplos comunes:
+    //   GET /api/v1/expedientes/folio/{folio}
+    //   GET /catalogos/expedientes?folio={folio}
+fetch(`${API}/api/v1/expedientes/${folio}`)
+  .then(r => {
+    if (!r.ok) throw new Error(`Error ${r.status}`);
+    return r.json();
+  })
+  .then(data => {
+    setExpediente({
+      idExpediente:  data.idExpediente ?? data.id_expediente,
+      folioGobierno: data.folioGobierno ?? data.folio ?? folio,
+      quejoso:       data.nombreContribuyente ?? data.contribuyente ?? data.quejoso ?? '—',
+    });
+  })
+      .catch(e => {
+        setErrorCarga('No se pudo cargar la información del expediente: ' + e.message);
+      })
+      .finally(() => setCargando(false));
+  }, [folio]);
+
+  // ── Datos que pasan al CierreForm ──────────────────────────────────────────
+  const datosDelExpediente = {
+    folio:              expediente ? `FOLIO-${expediente.folioGobierno}` : `FOLIO-${folio ?? ''}`,
+    expediente:         expediente ? `EXP-${expediente.folioGobierno}`  : `EXP-${folio ?? ''}`,
+    quejoso:            expediente?.quejoso ?? (cargando ? 'Cargando...' : '—'),
+    medioNotificacion,
+    acuerdoFileName:    selectedFile?.name ?? '',
   };
 
-  const handleFileChange = (file) => {
-    setSelectedFile(file);
-    setDatosDelExpediente((prev) => ({
-      ...prev,
-      acuerdoFileName: file ? file.name : '',
-    }));
-  };
+  // ── Handlers ───────────────────────────────────────────────────────────────
+  const handleMedioChange  = (e) => setMedioNotificacion(e.target.value);
+
+  const handleFileChange   = (file) => setSelectedFile(file);
 
   const handleConfirmar = async () => {
-    if (!idExpediente) {
-      setErrorMessage('Debes abrir esta página con un idExpediente válido en la ruta. Ejemplo: /area-sustantiva/cierre-test/123');
+    if (!expediente?.idExpediente) {
+      setErrorMessage('No se pudo obtener el ID del expediente. Intenta recargar la página.');
       setShowModal(false);
       return;
     }
 
     const payload = {
-      idExpediente: Number(idExpediente),
-      medioNotificacion: datosDelExpediente.medioNotificacion === 'Correo Electrónico'
+      // ★ FIX: se manda el id_expediente numérico real, no el folio
+      idExpediente: expediente.idExpediente,
+      medioNotificacion: medioNotificacion === 'Correo Electrónico'
         ? 'CORREO ELECTRONICO'
         : 'TELEFONO / MENSAJERIA',
       rutaArchivoAcuerdo: selectedFile
         ? `/almacen/acuerdos/${selectedFile.name}`
-        : `/almacen/acuerdos/EXPEDIENTE_${idExpediente}.pdf`,
+        : `/almacen/acuerdos/EXPEDIENTE_${expediente.folioGobierno}.pdf`,
       idUsuarioCierre,
     };
 
@@ -91,11 +108,12 @@ const CierrePage = () => {
     if (result.success) {
       setErrorMessage('');
     } else {
-      setErrorMessage('Error al cerrar el expediente. Verifica el idExpediente de prueba y el estado actual del expediente.');
+      setErrorMessage('Error al cerrar el expediente. Verifica el estado actual del expediente.');
     }
     setShowModal(false);
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="cierre-page">
       {isLocked ? (
@@ -119,28 +137,35 @@ const CierrePage = () => {
             <div className="page-label">Área sustantiva · Cierre</div>
             <h1 className="page-title">Cerrar expediente con seguridad</h1>
             <p className="page-description">
-              Completa los datos de notificación y adjunta el acuerdo de razón para finalizar el proceso de cierre administrativo.
-              Una vez confirmado, el expediente quedará bloqueado definitivamente.
+              Completa los datos de notificación y adjunta el acuerdo de razón para finalizar
+              el proceso de cierre administrativo. Una vez confirmado, el expediente quedará
+              bloqueado definitivamente.
             </p>
           </div>
 
-          {!idExpediente && (
+          {!folio && (
             <div className="page-alert warning">
-              <strong>Ruta de prueba:</strong> Abre esta página con un <code>idExpediente</code> válido.
-              <br />Ejemplo: <code>/area-sustantiva/cierre-test/123</code>
+              <strong>Ruta incorrecta:</strong> Abre esta página con un folio válido.
+              <br />Ejemplo: <code>/area-sustantiva/cierre-test/260600026</code>
             </div>
+          )}
+
+          {cargando && (
+            <div className="page-alert">Cargando datos del expediente...</div>
+          )}
+
+          {errorCarga && (
+            <div className="page-alert error">{errorCarga}</div>
           )}
 
           {errorMessage && (
-            <div className="page-alert error">
-              {errorMessage}
-            </div>
+            <div className="page-alert error">{errorMessage}</div>
           )}
 
-          <CierreForm 
-            data={datosDelExpediente} 
-            disabled={isLocked || !idExpediente} 
-            onOpenModal={() => setShowModal(true)} 
+          <CierreForm
+            data={datosDelExpediente}
+            disabled={isLocked || !folio || cargando || !!errorCarga}
+            onOpenModal={() => setShowModal(true)}
             onMedioChange={handleMedioChange}
             onFileChange={handleFileChange}
             isLoading={isLoading}
@@ -149,9 +174,9 @@ const CierrePage = () => {
       )}
 
       {showModal && (
-        <ConfirmModal 
-          onConfirm={handleConfirmar} 
-          onCancel={() => setShowModal(false)} 
+        <ConfirmModal
+          onConfirm={handleConfirmar}
+          onCancel={() => setShowModal(false)}
         />
       )}
     </div>
