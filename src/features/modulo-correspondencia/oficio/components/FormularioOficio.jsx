@@ -86,7 +86,7 @@ export const FormularioOficio = ({
         />
       </div>
 
-      {FileSystemWritableFileStream ? (
+      {showEmisorFirmantePlantilla ? (
         <>
           <div className="form-row">
             <div className="form-group">

@@ -32,7 +32,7 @@ export const MainLayout = () => {
             icon: <Briefcase size={20} />,
             roles: ['Administrador'],
             items: [
-                { label: 'Gestión de Empleados', to: '/correspondencia/personal', icon: <User size={18} /> },
+                { label: 'Gestión de Asesores', to: '/admin/asesores', icon: <User size={18} /> },
             ],
         },
         correspondencia: {
