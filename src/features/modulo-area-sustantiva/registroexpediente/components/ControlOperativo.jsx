@@ -19,10 +19,9 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
       <div className="section-header">
         <h3 className="section-title">Control Operativo</h3>
       </div>
-      <div className="section-body">
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="folioGobierno">Folio de Gobierno *</label>
+
+
+      <label htmlFor="folioGobierno">Folio de Gobierno *</label>
             <input
               id="folioGobierno"
               name="folioGobierno"
@@ -35,91 +34,94 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
             {erroresCampo.folioGobierno && (
               <span className="error-text">{erroresCampo.folioGobierno}</span>
             )}
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="fechaSolicitud">Fecha de Solicitud *</label>
-            <input
-              id="fechaSolicitud"
-              name="fechaSolicitud"
-              type="date"
-              value={formData.fechaSolicitud}
-              onChange={handleChange}
-              disabled
-              className={erroresCampo.fechaSolicitud ? 'campo-con-error' : ''}
-            />
-            {erroresCampo.fechaSolicitud && <span className="error-text">{erroresCampo.fechaSolicitud}</span>}
-          </div>
+      <div className="form-group">
+        <label htmlFor="fechaSolicitud">Fecha de Solicitud *</label>
+        <input
+          id="fechaSolicitud"
+          name="fechaSolicitud"
+          type="date"
+          value={formData.fechaSolicitud}
+          onChange={handleChange}
+          disabled
+          className={erroresCampo.fechaSolicitud ? 'campo-con-error' : ''}
+        />
+        {erroresCampo.fechaSolicitud && (
+          <span className="error-text">{erroresCampo.fechaSolicitud}</span>
+        )}
+      </div>
 
-          <div className="form-group">
-            <label htmlFor="idEstado">Estado *</label>
-            <span 
-              id="idLocalidad" 
-              style={{ display: 'block', paddingTop: '12px', color: '#333', marginLeft:'4px' }}
-            >
-              Zacatecas
-            </span>
-          </div>
+      <div className="form-group">
+        <label htmlFor="idEstado">Estado *</label>
+        <span 
+          id="idLocalidad" 
+          style={{ display: 'block', paddingTop: '12px', color: '#333', marginLeft: '4px' }}
+        >
+          Zacatecas
+        </span>
+      </div>
 
-          <div className="form-group">
-            <label htmlFor="idMunicipio">Municipio *</label>
-            <select
-              id="idMunicipio"
-              name="idMunicipio"
-              value={formData.idMunicipio}
-              onChange={handleChange}
-              className={erroresCampo.idMunicipio ? 'campo-con-error' : ''}
-            >
-              <option value="">Seleccionar municipio...</option>
-              {Array.isArray(municipios) && municipios.length > 0 ? (
-                municipios.map((m, index) => {
-                  const municipioId = extractId(m);
-                  // El value toma el ID real de la base de datos (Ej: "1", "2")
-                  const optionValue = municipioId || "";
-                  const reactKey = municipioId ? `mun-${municipioId}` : `mun-index-${index}`;
+      <div className="form-group">
+        <label htmlFor="idMunicipio">Municipio *</label>
+        <select
+          id="idMunicipio"
+          name="idMunicipio"
+          value={formData.idMunicipio}
+          onChange={handleChange}
+          className={erroresCampo.idMunicipio ? 'campo-con-error' : ''}
+        >
+          <option value="">Seleccionar municipio...</option>
+          {Array.isArray(municipios) && municipios.length > 0 ? (
+            municipios.map((m, index) => {
+              const municipioId = extractId(m);
+              // El value toma el ID real de la base de datos (Ej: "1", "2")
+              const optionValue = municipioId || "";
+              const reactKey = municipioId ? `mun-${municipioId}` : `mun-index-${index}`;
 
-                  return (
-                    <option key={reactKey} value={optionValue}>
-                      {getMunicipioNombre(m)}
-                    </option>
-                  );
-                })
-              ) : (
-                <option disabled>No hay municipios disponibles</option>
-              )}
-            </select>
-            {erroresCampo.idMunicipio && <span className="error-text">{erroresCampo.idMunicipio}</span>}
-          </div>
+              return (
+                <option key={reactKey} value={optionValue}>
+                  {getMunicipioNombre(m)}
+                </option>
+              );
+            })
+          ) : (
+            <option disabled>No hay municipios disponibles</option>
+          )}
+        </select>
+        {erroresCampo.idMunicipio && (
+          <span className="error-text">{erroresCampo.idMunicipio}</span>
+        )}
+      </div>
 
-          <div className="form-group">
-            <label htmlFor="idAsesorResponsable">Asesor Responsable *</label>
-            <select
-              id="idAsesorResponsable"
-              name="idAsesorResponsable"
-              value={formData.idAsesorResponsable}
-              onChange={handleChange}
-              className={erroresCampo.idAsesorResponsable ? 'campo-con-error' : ''}
-            >
-              <option value="">Seleccionar asesor...</option>
-              {Array.isArray(asesores) && asesores.length > 0 ? (
-                asesores.map((a, index) => {
-                  const asesorId = extractId(a);
-                  const optionValue = asesorId || "";
-                  const reactKey = asesorId ? `ase-${asesorId}` : `ase-index-${index}`;
+      <div className="form-group">
+        <label htmlFor="idAsesorResponsable">Asesor Responsable *</label>
+        <select
+          id="idAsesorResponsable"
+          name="idAsesorResponsable"
+          value={formData.idAsesorResponsable}
+          onChange={handleChange}
+          className={erroresCampo.idAsesorResponsable ? 'campo-con-error' : ''}
+        >
+          <option value="">Seleccionar asesor...</option>
+          {Array.isArray(asesores) && asesores.length > 0 ? (
+            asesores.map((a, index) => {
+              const asesorId = extractId(a);
+              const optionValue = asesorId || "";
+              const reactKey = asesorId ? `ase-${asesorId}` : `ase-index-${index}`;
 
-                  return (
-                    <option key={reactKey} value={optionValue}>
-                      {getAsesorNombre(a)}
-                    </option>
-                  );
-                })
-              ) : (
-                <option disabled>No hay asesores disponibles</option>
-              )}
-            </select>
-            {erroresCampo.idAsesorResponsable && <span className="error-text">{erroresCampo.idAsesorResponsable}</span>}
-          </div>
-        </div>
+              return (
+                <option key={reactKey} value={optionValue}>
+                  {getAsesorNombre(a)}
+                </option>
+              );
+            })
+          ) : (
+            <option disabled>No hay asesores disponibles</option>
+          )}
+        </select>
+        {erroresCampo.idAsesorResponsable && (
+          <span className="error-text">{erroresCampo.idAsesorResponsable}</span>
+        )}
       </div>
     </section>
   );

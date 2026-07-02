@@ -10,15 +10,6 @@ import './CierrePage.css';
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
-const defaultDatos = {
-  folio: 'PRUEBA-001',
-  expediente: 'EXP-PRUEBA-001',
-  quejoso: 'Nombre del solicitante',
-  medioNotificacion: 'Correo Electrónico',
-  acuerdoFileName: '',
-};
-
-
 
 const getStoredUser = () => {
   // AuthContext guarda en sessionStorage con esta clave
@@ -68,6 +59,7 @@ useEffect(() => {
 
 
 
+
   useEffect(() => {
     if (!folio) return;
 
@@ -78,7 +70,7 @@ useEffect(() => {
     // Ejemplos comunes:
     //   GET /api/v1/expedientes/folio/{folio}
     //   GET /catalogos/expedientes?folio={folio}
-fetch(`${API}/api/v1/expedientes/${folio}`)
+fetch(`${API}/api/v1/expedientes/${folio}/detalle-asesoria`)
   .then(r => {
     if (!r.ok) throw new Error(`Error ${r.status}`);
     return r.json();
