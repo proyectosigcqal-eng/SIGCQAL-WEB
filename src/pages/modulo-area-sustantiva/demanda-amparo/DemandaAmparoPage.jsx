@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { FormularioDemandaAmparo } from '../../../features/modulo-area-sustantiva/demanda-amparo/components/FormularioDemandaAmparo';
 import { SemaforoJudicial } from '../../../features/modulo-area-sustantiva/demanda-amparo/components/SemaforoJudicial';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 export const DemandaAmparoPage = () => {
   const { folio } = useParams();

@@ -6,7 +6,7 @@ import ConfirmModal from '../../../features/modulo-area-sustantiva/notificacion-
 import ExpedienteStatusHeader from '../../../features/modulo-area-sustantiva/notificacion-cierre-y-acuerdo-de-razon/components/ExpedienteStatusHeader';
 import './CierrePage.css';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 const getStoredUser = () => {
   const raw = localStorage.getItem('user') || localStorage.getItem('usuario');

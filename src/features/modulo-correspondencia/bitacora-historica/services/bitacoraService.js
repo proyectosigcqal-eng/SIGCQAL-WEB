@@ -1,7 +1,7 @@
 
 import axios from 'axios'; 
 
-const API_URL = 'http://localhost:8081/SIGCQAL_dev/api/v1/correspondencia/bitacora';
+const API_URL = 'http://localhost:8081/SIGCQAL_Prod/api/v1/correspondencia/bitacora';
 
 export const obtenerBitacoraPorCorrespondencia = async (idCorrespondencia) => {
   try {

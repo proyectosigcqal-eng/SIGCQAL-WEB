@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API = 'http://localhost:8081/SIGCQAL_dev/api/v1';
+const API = 'http://localhost:8081/SIGCQAL_Prod/api/v1';
 
 export const useListaOficiosPorArea = () => {
   const [oficios, setOficios] = useState([]);

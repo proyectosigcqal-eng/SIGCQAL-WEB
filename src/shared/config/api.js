@@ -1,5 +1,5 @@
 // Central API base URL. Uses Vite env var if provided, fallback to localhost.
-export const API_BASE_URL = import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:8081/SIGCQAL_dev/api/v1';
+export const API_BASE_URL = import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:8081/SIGCQAL_Prod/api/v1';
 
 export default API_BASE_URL;
 
@@ -10,7 +10,7 @@ export function endpoint(path) {
 }
 
 // Host root without the trailing /api/v1 — useful for constructing file links
-export const API_HOST = import.meta?.env?.VITE_API_HOST || 'http://localhost:8081/SIGCQAL_dev';
+export const API_HOST = import.meta?.env?.VITE_API_HOST || 'http://localhost:8081/SIGCQAL_Prod';
 
 export function endpointApi(path) {
   if (!path) return `${API_HOST}/api`;

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { EditorResolucionFinal } from '../../../features/modulo-area-sustantiva/resolucion-final/components/EditorResolucionFinal';
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 export const ResolucionFinalPage = () => {
   const { folio } = useParams();

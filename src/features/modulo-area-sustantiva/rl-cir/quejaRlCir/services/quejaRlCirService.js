@@ -4,7 +4,7 @@ import API_BASE_URL from '@/shared/config/api';
 const API_URL = `${API_BASE_URL}/queja-rl-cir`;
 
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 const API_RESOLUCION_FINAL = `${API}/api/modulo-area-sustantiva/resolucion-final`;
 
 /**

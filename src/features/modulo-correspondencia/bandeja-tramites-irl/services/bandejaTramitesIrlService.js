@@ -1,6 +1,6 @@
 // features/modulo-correspondencia/bandeja-tramites-irl/services/bandejaTramitesIrlService.js
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 // Adapta el JSON del backend al shape que usa BandejaTramitesIrlPage
 const adaptarItem = (item) => ({
