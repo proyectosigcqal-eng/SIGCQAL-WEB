@@ -58,7 +58,7 @@ const ETAPAS = [
 ];
 
 // Etapas que requieren enriquecimiento con semáforo de plazos
-const ETAPAS_CON_SEMAFORO = ["ASIGNADA_ASESOR", "VALIDACION"];
+const ETAPAS_CON_SEMAFORO = ["TODAS", "ASIGNADA_ASESOR", "VALIDACION"];
 
 const extractAsesorId = (item) => {
   if (!item || typeof item !== "object") return "";
@@ -145,6 +145,7 @@ const obtenerSemaforo = async (folio) => {
 const filtrarPorEtapa = (tramites, etapaActiva) => {
   return tramites.filter((t) => {
     if (etapaActiva === "CERRADA") return t.bloqueado === true;
+    if (etapaActiva === "TODAS") return true;
     return !t.bloqueado;
   });
 };
@@ -176,7 +177,7 @@ export const useBandejaGestion = ({
   tipoTramite = "QUEJAS_Y_RECLAMACIONES",
 } = {}) => {
   const [busqueda, setBusqueda] = useState("");
-  const [etapaActiva, setEtapaActiva] = useState("ASIGNADA_ASESOR");
+  const [etapaActiva, setEtapaActiva] = useState("TODAS");
   const [asesorSeleccionado, setAsesorSeleccionado] = useState("");
   const [asesores, setAsesores] = useState([]);
   const [tramitesBase, setTramitesBase] = useState([]);

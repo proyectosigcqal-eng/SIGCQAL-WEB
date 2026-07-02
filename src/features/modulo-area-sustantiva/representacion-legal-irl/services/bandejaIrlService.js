@@ -54,18 +54,6 @@ const adaptarItem = (item) => {
   ]);
   const demandaId = idDemandaAmparo;
 
-  // ← NUEVO: sin esto TablaIrl.jsx nunca ve idRlCir/idQuejaRlCir y el botón
-  // DESCARGAR CIR / DESCARGAR CIR QUEJA no aparece aunque el backend lo mande.
-  const idRlCir = obtenerValor(item, [
-    'idRlCir',
-    'id_rl_cir',
-  ]);
-
-  const idQuejaRlCir = obtenerValor(item, [
-    'idQuejaRlCir',
-    'id_queja_rl_cir',
-  ]);
-
   const folio = obtenerValor(item, [
     'folio',
     'folioGobierno',
@@ -102,8 +90,6 @@ const adaptarItem = (item) => {
     idRepresentacionLegal,
     idDemandaAmparo: demandaId,
     idExpediente,
-    idRlCir,
-    idQuejaRlCir,
     folio: folio ?? '',
     folioGobierno: folio ?? '',
 
