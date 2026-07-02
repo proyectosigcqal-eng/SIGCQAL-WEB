@@ -92,8 +92,8 @@ export const registrarSeguimiento = async (idOficio, datos) => {
     const formData = new FormData();
     formData.append('idOficio',                    idOficio);
     formData.append('respuestasSeguimientoOficio', datos.respuestaSeguimiento);
-    formData.append('idEstatus',                   datos.idEstatus || 5);
-    formData.append('idUsuario',                   datos.idUsuario || 1);
+    formData.append('idEstatus', datos.idEstatus); 
+    formData.append('idUsuario', datos.idUsuario);
     formData.append('fechaResolucion', formatForBackend(new Date()));
     formData.append('horaResolucion',  formatTimeForBackend(new Date()));
 
