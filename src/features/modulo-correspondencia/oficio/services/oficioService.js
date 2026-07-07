@@ -116,3 +116,13 @@ export const crearAcuseOficio = async ({ idOficio, idUsuarioRevisor, esDelArea }
         throw error;
     }
 };
+
+export const listarTodos = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/todos`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al listar todos los acuses:", error.response?.data || error.message);
+        throw error;
+    }
+};
