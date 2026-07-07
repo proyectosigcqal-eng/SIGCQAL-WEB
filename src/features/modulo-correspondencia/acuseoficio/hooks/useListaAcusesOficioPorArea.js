@@ -1,45 +1,39 @@
 import { useState, useEffect } from 'react';
-import { listarAcusesPorArea } from '../services/acuseoficioService';
-import { useAreaUsuario } from '@/shared/hooks/useAreaUsuario';
-
-
+import axios from 'axios';
+import { listarAcusesPorArea, listarTodos } from '../services/acuseoficioService';
+import { useAreaUsuario, TODAS_LAS_AREAS } from '@/shared/hooks/useAreaUsuario';
+ 
+const API = 'http://localhost:8081/SIGCQAL_Prod/api/v1';
+ 
 export const useListaAcusesOficioPorArea = () => {
-  const [acuses, setAcuses] = useState([]);
+  const [oficios, setOficios] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // TODO: Obtener el área del usuario logueado
+  const [error, setError]     = useState(null);
+ 
   const idArea = useAreaUsuario();
-
-  const cargarAcuses = async (idArea) => {
+ 
+  const cargarOficios = async () => {
     if (!idArea) return;
+    if (idArea === null) return;
+ 
     setLoading(true);
     setError(null);
     try {
-      const data = await listarAcusesPorArea(idArea);
-      console.log('Acuses de oficio por área recibidos de la API:', data);
-      setAcuses(data);
+      // Admin → endpoint sin filtro de área (ajusta la URL si tu backend la tiene)
+       const data = idArea === TODAS_LAS_AREAS
+                    ? await listarTodos()
+                    : await listarPorArea(idArea);
+      setOficios(data);
     } catch (err) {
       setError(err.message);
-      console.error('Error al cargar acuses de oficio por área:', err);
     } finally {
       setLoading(false);
     }
   };
-
+ 
   useEffect(() => {
-    cargarAcuses(idArea);
+    if (idArea !== null) cargarOficios();
   }, [idArea]);
-
-  const recargar = () => {
-    cargarAcuses(idArea);
-  };
-
-  return {
-    acuses,
-    loading,
-    error,
-    recargar,
-    areaForzada: idArea
-  };
+ 
+  return { oficios, loading, error, recargar: cargarOficios, areaForzada: idArea };
 };

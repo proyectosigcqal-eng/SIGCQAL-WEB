@@ -74,7 +74,11 @@ export const ListaOficios = () => {
                   <td>
                     <button 
                       className="btn-ver-detalle"
-                      onClick={() => setDetalleId(of.id)}
+                      onClick={() => {
+                            const id = of.id ?? of.idOficio ?? of.id_oficio;
+                            console.log('[Ver Detalle] id resuelto:', id, 'item:', of);
+                            setDetalleId(id);
+                          }}
                     >
                       Ver Detalle
                     </button>

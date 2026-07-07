@@ -1,7 +1,7 @@
 // useListaAcusesCorrespondenciaPorArea.js
 import { useState, useEffect } from 'react';
-import { listarAcusesPorArea } from '../services/acusecorrespondenciaService';
-import { useAreaUsuario } from '@/shared/hooks/useAreaUsuario';
+import { listarAcusesPorArea, listarTodos } from '../services/acusecorrespondenciaService';
+import { useAreaUsuario, TODAS_LAS_AREAS } from '@/shared/hooks/useAreaUsuario';
 
 export const useListaAcusesCorrespondenciaPorArea = () => {
   const [acuses, setAcuses]   = useState([]);
@@ -15,7 +15,9 @@ export const useListaAcusesCorrespondenciaPorArea = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listarAcusesPorArea(idArea);
+      const data = idArea === TODAS_LAS_AREAS
+              ? await listarTodos()
+              : await listarPorArea(idArea);
       setAcuses(data);
     } catch (err) {
       setError(err.message);
@@ -26,7 +28,7 @@ export const useListaAcusesCorrespondenciaPorArea = () => {
   };
 
   useEffect(() => {
-    cargarAcuses();
+    if (idArea !== null) cargarAcuses();
   }, [idArea]);
 
   return { acuses, loading, error, recargar: cargarAcuses, areaForzada: idArea };

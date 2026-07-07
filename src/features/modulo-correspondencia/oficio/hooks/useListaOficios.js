@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { listarPorArea } from '../services/oficioService';
-import { useAreaUsuario } from '@/shared/hooks/useAreaUsuario';
+import { listarAcusesPorArea, listarTodos } from '../../acuseoficio/services/acuseoficioService';
+import { useAreaUsuario, TODAS_LAS_AREAS } from '@/shared/hooks/useAreaUsuario';
 
 export const useListaOficios = () => {
   const [oficios, setOficios] = useState([]);
@@ -15,8 +15,9 @@ export const useListaOficios = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await listarPorArea(idArea, { page: 0, size: 10000 });
-      console.log('Oficios recibidos de la API:', data);
+       const data = idArea === TODAS_LAS_AREAS
+                          ? await listarTodos()
+                          : await listarPorArea(idArea);
       setOficios(data);
     } catch (err) {
       setError(err.message);
