@@ -8,7 +8,7 @@ export const DatosContribuyente = ({
   handleChangeNested,
   handleTipoPersonaChange,
   estados = [],
-  readonly = false // NUEVO: true cuando los datos vienen de un contribuyente ya existente
+  readonly = false
 }) => {
   const extractId = (item) => {
     if (!item || typeof item !== 'object') return '';
@@ -44,15 +44,28 @@ export const DatosContribuyente = ({
       <div className="section-header">
         <h3 className="section-title">Datos del Contribuyente</h3>
         {readonly && (
-          <span className="badge-contribuyente-existente">
-            Contribuyente ya registrado — datos no editables
-          </span>
+          <div style={{
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: 6,
+            padding: '8px 12px',
+            marginBottom: '0.5rem',
+            fontSize: 13,
+            color: '#1e40af',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}>
+            ℹ️ Nombre, apellidos e identificación están bloqueados porque el contribuyente ya existe en el sistema.
+            Puedes actualizar los datos de contacto.
+          </div>
         )}
       </div>
       <div className="section-body">
         <div className="toggle-container">
           <label>Tipo de Persona *</label>
           <div className="toggle-group">
+            {/* Tipo de persona siempre bloqueado si es existente — no puede cambiar de física a moral */}
             <button type="button" disabled={readonly} className={`toggle-btn ${formData.tipoPersona === 'fisica' ? 'active' : ''}`} onClick={() => handleTipoPersonaChange('fisica')}>
               Persona Física
             </button>
@@ -62,23 +75,25 @@ export const DatosContribuyente = ({
           </div>
         </div>
  
-        {/* Renderizado condicional según el tipo de persona */}
         {formData.tipoPersona === 'fisica' ? (
           <div className="name-row-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '1.5rem' }}>
             <div className="form-group">
               <label htmlFor="nombre">Nombre *</label>
+              {/* ← BLOQUEADO: identidad */}
               <input id="nombre" name="nombre" type="text" value={formData.nombre} onChange={handleChange} placeholder="Ingrese el nombre" disabled={readonly} className={erroresCampo.nombre ? 'campo-con-error' : ''} />
               {erroresCampo.nombre && <span className="error-text">{erroresCampo.nombre}</span>}
             </div>
  
             <div className="form-group">
               <label htmlFor="apellidoPaterno">Apellido Paterno *</label>
+              {/* ← BLOQUEADO: identidad */}
               <input id="apellidoPaterno" name="apellidoPaterno" type="text" value={formData.apellidoPaterno} onChange={handleChange} placeholder="Ingrese el apellido paterno" disabled={readonly} className={erroresCampo.apellidoPaterno ? 'campo-con-error' : ''} />
               {erroresCampo.apellidoPaterno && <span className="error-text">{erroresCampo.apellidoPaterno}</span>}
             </div>
  
             <div className="form-group">
               <label htmlFor="apellidoMaterno">Apellido Materno *</label>
+              {/* ← BLOQUEADO: identidad */}
               <input id="apellidoMaterno" name="apellidoMaterno" type="text" value={formData.apellidoMaterno} onChange={handleChange} placeholder="Ingrese el apellido materno" disabled={readonly} className={erroresCampo.apellidoMaterno ? 'campo-con-error' : ''} />
               {erroresCampo.apellidoMaterno && <span className="error-text">{erroresCampo.apellidoMaterno}</span>}
             </div>
@@ -87,13 +102,14 @@ export const DatosContribuyente = ({
           <div className="form-grid" style={{ marginBottom: '1.5rem' }}>
             <div className="form-group full-width">
               <label htmlFor="nombre">Razón Social *</label>
+              {/* ← BLOQUEADO: identidad */}
               <input id="nombre" name="nombre" type="text" value={formData.nombre} onChange={handleChange} placeholder="Ingrese la razón social" disabled={readonly} className={erroresCampo.nombre ? 'campo-con-error' : ''} />
               {erroresCampo.nombre && <span className="error-text">{erroresCampo.nombre}</span>}
             </div>
           </div>
         )}
  
-        {/* El documento de personalidad SIEMPRE se captura, sea contribuyente nuevo o existente */}
+        {/* Documento de personalidad — siempre editable */}
         <section className="form-section section-card file-document-section">
           <div className="section-header">
             <h4 className="section-title">Documento de personalidad</h4>
@@ -133,56 +149,53 @@ export const DatosContribuyente = ({
           </div>
         </section>
  
-        {/* Contenedor principal para los datos generales del contribuyente */}
         <div className="form-grid">
           <div className="form-group">
             <label htmlFor="rfc">RFC (Opcional)</label>
-            <input
-              id="rfc"
-              name="rfc"
-              type="text"
-              value={formData.rfc}
-              onChange={handleChange}
-              placeholder="Ej. ABC123456XYZ"
-              maxLength="13"
-              disabled={readonly}
-            />
+            {/* ← BLOQUEADO: identidad fiscal */}
+            <input id="rfc" name="rfc" type="text" value={formData.rfc} onChange={handleChange} placeholder="Ej. ABC123456XYZ" maxLength="13" disabled={readonly} />
           </div>
  
           <div className="form-group">
             <label htmlFor="rec">REC (Opcional)</label>
-            <input id="rec" name="rec" type="text" value={formData.rec} onChange={handleChange} placeholder="Registro de Economista" disabled={readonly} />
+            {/* ← EDITABLE: dato complementario */}
+            <input id="rec" name="rec" type="text" value={formData.rec} onChange={handleChange} placeholder="Registro de Economista" />
           </div>
  
           <div className="form-group">
             <label htmlFor="identificacionTipo">Tipo de Identificación *</label>
+            {/* ← BLOQUEADO: identidad */}
             <input id="identificacionTipo" name="identificacionTipo" type="text" value={formData.identificacionTipo} onChange={handleChange} placeholder="Ej. INE, Pasaporte, CURP" disabled={readonly} className={erroresCampo.identificacionTipo ? 'campo-con-error' : ''} />
             {erroresCampo.identificacionTipo && <span className="error-text">{erroresCampo.identificacionTipo}</span>}
           </div>
  
           <div className="form-group">
             <label htmlFor="identificacionNumero">Número / Folio de Identificación *</label>
+            {/* ← BLOQUEADO: identidad */}
             <input id="identificacionNumero" name="identificacionNumero" type="text" value={formData.identificacionNumero} onChange={handleChange} placeholder="Número o folio" disabled={readonly} className={erroresCampo.identificacionNumero ? 'campo-con-error' : ''} />
             {erroresCampo.identificacionNumero && <span className="error-text">{erroresCampo.identificacionNumero}</span>}
           </div>
  
           <div className="form-group">
             <label htmlFor="correoElectronico">Correo Electrónico</label>
-            <input id="correoElectronico" name="correoElectronico" type="email" value={formData.correoElectronico} onChange={handleChange} placeholder="correo@ejemplo.com" disabled={readonly} />
+            {/* ← EDITABLE: contacto puede cambiar */}
+            <input id="correoElectronico" name="correoElectronico" type="email" value={formData.correoElectronico} onChange={handleChange} placeholder="correo@ejemplo.com" />
           </div>
  
           <div className="form-group">
             <label htmlFor="telefono">Teléfono</label>
-            <input id="telefono" name="telefono" type="text" value={formData.telefono} onChange={handleChange} placeholder="(xxx) xxx-xxxx" disabled={readonly} />
+            {/* ← EDITABLE: contacto puede cambiar */}
+            <input id="telefono" name="telefono" type="text" value={formData.telefono} onChange={handleChange} placeholder="(xxx) xxx-xxxx" />
           </div>
+
           <div className="form-group">
             <label htmlFor="telefonoFijo">Teléfono Fijo</label>
-            <input id="telefonoFijo" name="telefonoFijo" type="text" value={formData.telefonoFijo} onChange={handleChange} placeholder="(xxx) xxx-xxxx" disabled={readonly} />
+            {/* ← EDITABLE: contacto puede cambiar */}
+            <input id="telefonoFijo" name="telefonoFijo" type="text" value={formData.telefonoFijo} onChange={handleChange} placeholder="(xxx) xxx-xxxx" />
           </div>
         </div>
  
-        {/* NUEVO: el domicilio fiscal solo se captura para contribuyentes nuevos.
-            Si es un contribuyente existente, ya tiene domicilio registrado y no se vuelve a pedir aquí. */}
+        {/* Domicilio fiscal: solo para contribuyentes nuevos */}
         {!readonly && (
           <div className="domicilio-section">
             <h4 className="domicilio-title">Desglose de Domicilio Fiscal</h4>
