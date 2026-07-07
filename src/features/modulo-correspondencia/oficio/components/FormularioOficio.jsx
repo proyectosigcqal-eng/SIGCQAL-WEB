@@ -26,6 +26,15 @@ export const FormularioOficio = ({
     return usuario?.nombreArea || "Sin asignar";
   };
 
+  const getNombreUsuario = (u) => {
+    const nombre =
+      u?.nombreCompleto ??
+      u?.nombre_completo ??
+      [u?.nombre, u?.apellidoPaterno, u?.apellidoMaterno].filter(Boolean).join(' ');
+
+    return (nombre || u?.usuarioLogin || '').trim();
+  };
+
   const handleEmisorChange = (e) => {
     const userId = e.target.value;
     const usuarioSeleccionado = usuarios.find(u => u.id === Number(userId));
@@ -95,7 +104,7 @@ export const FormularioOficio = ({
                 <option value="">Seleccione...</option>
                 {usuarios.map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.usuarioLogin}
+                    {getNombreUsuario(u)}
                   </option>
                 ))}
               </select>
@@ -119,7 +128,7 @@ export const FormularioOficio = ({
                 <option value="">Seleccione...</option>
                 {usuarios.map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.usuarioLogin}
+                    {getNombreUsuario(u)}
                   </option>
                 ))}
               </select>

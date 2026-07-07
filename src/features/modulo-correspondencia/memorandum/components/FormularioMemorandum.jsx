@@ -10,6 +10,15 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
     return usuario?.nombreArea || "Sin asignar";
   };
 
+  const getNombreUsuario = (u) => {
+    const nombre =
+      u?.nombreCompleto ??
+      u?.nombre_completo ??
+      [u?.nombre, u?.apellidoPaterno, u?.apellidoMaterno].filter(Boolean).join(' ');
+
+    return (nombre || u?.usuarioLogin || '').trim();
+  };
+
   const handleEmisorChange = (e) => {
     const userId = e.target.value;
     const usuarioSeleccionado = usuarios.find(u => u.id === Number(userId));
@@ -62,7 +71,11 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
           <label>Elaboró</label>
           <select name="idUsuarioEmisor" value={formData.idUsuarioEmisor} onChange={handleEmisorChange}>
             <option value="">Seleccione...</option>
-            {usuarios.map(u => <option key={u.id} value={u.id}>{u.usuarioLogin}</option>)}
+            {usuarios.map((u) => (
+              <option key={u.id} value={u.id}>
+                {getNombreUsuario(u)}
+              </option>
+            ))}
           </select>
         </div>
         <div className="form-group">
@@ -83,7 +96,11 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
           <label>Firmante</label>
           <select name="idUsuarioFirmante" value={formData.idUsuarioFirmante} onChange={handleChange}>
             <option value="">Seleccione...</option>
-            {usuarios.map(u => <option key={u.id} value={u.id}>{u.usuarioLogin}</option>)}
+            {usuarios.map((u) => (
+              <option key={u.id} value={u.id}>
+                {getNombreUsuario(u)}
+              </option>
+            ))}
           </select>
         </div>
         <div className="form-group">
