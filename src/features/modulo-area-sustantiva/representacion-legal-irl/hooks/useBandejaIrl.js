@@ -19,7 +19,7 @@ const ETAPAS_IRL = [
 
 const SUB_SWITCHES = [
   { key: "DIRECTO",   label: "IRL Asignación Directa", esEvolucion: false },
-  { key: "EVOLUCION", label: "IRL Evolución",          esEvolucion: true  },
+  { key: "EVOLUCION", label: "IRL Seguimiento",          esEvolucion: true  },
 ];
 
 export const useBandejaIrl = ({ enabled = true } = {}) => {
