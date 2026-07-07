@@ -131,7 +131,7 @@ body {
     height: 100vh; /* Altura fija de la pantalla */
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* Evita scroll en el contenedor padre */
+    overflow: auto; /* Evita scroll en el contenedor padre */
 }
 
 .content-body {

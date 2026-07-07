@@ -116,9 +116,7 @@
 .sigcqal-page-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 80px); /* Ajusta según el alto de tu navbar superior */
-    overflow: hidden; /* Evita scroll en toda la página */
-    background-color: #f8fafc;
+    height: 100%; /* Ajusta según el alto de tu navbar superior */ /* Evita scroll en toda la página */
 }
 
 .page-header {
@@ -132,28 +130,25 @@
 
 /* LA CLAVE: El contenedor Split */
 .split-view-container {
-    display: grid;
-    grid-template-columns: 45% 55%; /* El formulario un poco más estrecho que la hoja */
-    gap: 0;
+   display: grid;
+    grid-template-columns: 45% 55%;
     flex: 1;
+    min-height: 0; /* CRÍTICO: Evita que el contenedor crezca infinitamente */
     overflow: hidden;
 }
 
 /* Panel del Formulario con scroll independiente */
 .panel-formulario {
+    height: 100%;
+    overflow-y: auto; /* ESTO ES LO QUE HABILITA EL SCROLL */
     padding: 2rem;
-    overflow-y: auto;
-    background-color: white;
-    border-right: 1px solid #e2e8f0;
 }
 
 /* Panel de Vista Previa con fondo gris para resaltar la "hoja" */
 .panel-vista-previa {
-    padding: 2rem;
+    height: 100%;
     overflow-y: auto;
-    background-color: #e2e8f0; /* Fondo grisáceo tipo Word/Google Docs */
-    display: flex;
-    justify-content: center; /* Centra la hoja horizontalmente */
+    padding: 2rem; /* Centra la hoja horizontalmente */
 }
 
 /* Estilo de la "Hoja" de papel */
