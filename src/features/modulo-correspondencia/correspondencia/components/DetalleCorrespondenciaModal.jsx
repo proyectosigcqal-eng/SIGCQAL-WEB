@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { obtenerCorrespondenciaPorId } from '../services/correspondenciaService';
 import { crearAcuseCorrespondencia } from '../../acusecorrespondencia/services/acusecorrespondenciaService';
 import '../styles/detalleCorrespondenciaModal.css';
+import { useAuth } from '@/shared/context/AuthContext';
 
 export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
   const [correspondencia, setCorrespondencia] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [respondiendo, setRespondiendo] = useState(false);
+  const { session } = useAuth();
+const idUsuarioRevisor   = session?.idUsuario ?? session?.id ?? null;
+const nombre      = session?.username  ?? session?.nombre ?? null;
 
   useEffect(() => {
     if (!idCorrespondencia) return;
@@ -41,7 +45,7 @@ export const DetalleCorrespondenciaModal = ({ idCorrespondencia, onClose }) => {
 
       const request = {
         idCorrespondencia: correspondencia.id,
-        idUsuarioRevisor: 1, // TODO: Obtener del usuario logueado
+        idUsuarioRevisor, // TODO: Obtener del usuario logueado
         esDelArea: true
       };
 

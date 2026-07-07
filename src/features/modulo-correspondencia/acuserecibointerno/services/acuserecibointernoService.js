@@ -61,3 +61,7 @@ export const listarPorArea = async (idArea) => {
         throw error;
     }
 };
+
+export const listarTodos = async (options = {}) => {
+    return listarMemorandums();
+};

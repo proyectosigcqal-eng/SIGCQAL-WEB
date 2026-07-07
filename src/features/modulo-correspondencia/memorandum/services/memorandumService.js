@@ -99,26 +99,35 @@ export const finalizarAsignacion = async (id, archivo, idArea) => {
     // Añade esto a tu memorandumService.js
 
 export const registrarSeguimiento = async (idMemo, datosSeguimiento) => {
-    const formData = new FormData();
+    const API_SEGUIMIENTO = `${API_BASE_URL}/seguimiento-memorandum`;
     
-    // Los nombres de las llaves ('folio_respuesta', etc.) DEBEN coincidir 
-    // exactamente con los @RequestParam o el modelo de tu backend en Java.
-    formData.append('folio_respuesta', datosSeguimiento.folioRespuesta);
-    formData.append('respuesta_seguimiento_memorandum', datosSeguimiento.respuestaSeguimiento);
-    formData.append('archivo_adjunto', datosSeguimiento.archivoAdjunto);
-    // Añadimos fecha/hora de resolución para consistencia entre endpoints
+    const formData = new FormData();
+    formData.append('idMemo', idMemo);  // ← coincide con DTO
+    formData.append('respuestaSeguimientoMemorandum', datosSeguimiento.respuestaSeguimiento); // ← coincide con DTO
     formData.append('fechaResolucion', formatForBackend(new Date()));
     formData.append('horaResolucion', formatTimeForBackend(new Date()));
-    // NOTA: id_usuario y estatus idealmente lo maneja el backend, pero se pueden enviar si es necesario.
+    
+    // Archivo es opcional según el DTO
+    if (datosSeguimiento.archivoAdjunto) {
+        formData.append('archivoAdjunto', datosSeguimiento.archivoAdjunto); // ← coincide con DTO
+    }
 
-    const response = await fetch(`${API_URL}/${idMemo}/seguimiento`, {
+    const response = await fetch(`${API_SEGUIMIENTO}/guardar`, {  // ← ruta corregida
         method: 'POST',
-        body: formData 
+        // ← Sin Content-Type header — el browser lo asigna con boundary automáticamente
+        body: formData
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error al registrar el seguimiento en la base de datos');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al registrar el seguimiento');
     }
     return await response.json();
+
+  
+};
+
+// Al final de memorandumService.js, agregar:
+export const listarTodos = async (options = {}) => {
+    return listarMemorandums();
 };

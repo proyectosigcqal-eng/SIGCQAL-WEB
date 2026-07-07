@@ -1,44 +1,33 @@
+// useListaAcusesCorrespondenciaPorArea.js
 import { useState, useEffect } from 'react';
 import { listarAcusesPorArea } from '../services/acusecorrespondenciaService';
+import { useAreaUsuario } from '@/shared/hooks/useAreaUsuario';
 
 export const useListaAcusesCorrespondenciaPorArea = () => {
-  const [acuses, setAcuses] = useState([]);
+  const [acuses, setAcuses]   = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
 
-  // TODO: Obtener el área del usuario logueado
-  // Por ahora se fuerza un área para pruebas
-  const AREA_FORZADA = 1;
+  const idArea = useAreaUsuario();
 
-  const cargarAcuses = async (idArea) => {
+  const cargarAcuses = async () => {
+    if (!idArea) return; // ← guard: no fetchear si no hay área
     setLoading(true);
     setError(null);
     try {
       const data = await listarAcusesPorArea(idArea);
-      console.log('Acuses de correspondencia por área recibidos de la API:', data);
-      console.log('Primer acuse (keys):', data.length > 0 ? Object.keys(data[0]) : 'sin datos');
       setAcuses(data);
     } catch (err) {
       setError(err.message);
-      console.error("Error al cargar acuses de correspondencia por área:", err);
+      console.error('Error al cargar acuses de correspondencia por área:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    cargarAcuses(AREA_FORZADA);
-  }, []);
+    cargarAcuses();
+  }, [idArea]);
 
-  const recargar = () => {
-    cargarAcuses(AREA_FORZADA);
-  };
-
-  return {
-    acuses,
-    loading,
-    error,
-    recargar,
-    areaForzada: AREA_FORZADA
-  };
+  return { acuses, loading, error, recargar: cargarAcuses, areaForzada: idArea };
 };

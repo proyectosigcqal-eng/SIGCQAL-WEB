@@ -6,16 +6,21 @@ import { generarOficio, finalizarAsignacion } from '../../../features/modulo-cor
 import { obtenerCorrespondenciaPorId } from '../../../features/modulo-correspondencia/correspondencia/services/correspondenciaService';
 import { useCatalogos } from '../../../shared/hooks/useCatalogos';
 import { VistaPreviaOficio } from '../../../features/modulo-correspondencia/oficio/components/VistaPreviaOficio';
+import { useAuth } from '@/shared/context/AuthContext';
 import '@/features/modulo-correspondencia/memorandum/styles/memorandum.css';
 
-const FIRMANTE_FIJO = 5; // ana_admin fijo
-
 export const GenerarOficioContestacionPage = () => {
-  const location  = useLocation();
-  const navigate  = useNavigate();
-  const catalogos = useCatalogos();
-  const heredado  = location.state || {};
+  const { session }  = useAuth();
+  const location     = useLocation();
+  const navigate     = useNavigate();
+  const catalogos    = useCatalogos();
+  const heredado     = location.state || {};
 
+  // ── Id y nombre del usuario activo desde la sesión ──────────────────────
+  const idUsuarioSesion  = session?.idUsuario ?? session?.id ?? session?.usuarioId ?? null;
+  const nombreSesion     = session?.username  ?? session?.nombre ?? session?.nombreUsuario ?? null;
+
+  // ── Datos heredados del navigate (tienen prioridad sobre la sesión) ──────
   const fuente =
     heredado.oficio || heredado.memorandum || heredado.oficioOriginal ||
     heredado.memoOriginal || heredado.memorandumOriginal ||
@@ -23,20 +28,26 @@ export const GenerarOficioContestacionPage = () => {
 
   const idCorrespondenciaH =
     heredado.idCorrespondencia ?? fuente?.idCorrespondencia ?? fuente?.id ?? null;
-// Agrega este cálculo ANTES del handleGuardar, usando los catálogos ya disponibles
-const usuarioFirmante = catalogos.usuarios?.find(u => u.id === FIRMANTE_FIJO || u.idUsuario === FIRMANTE_FIJO);
-const areaFirmanteResuelta = usuarioFirmante?.nombreArea || usuarioFirmante?.area || 'Archivo';
-const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante?.username || 'ana_admin';
-  const firmanteH    = fuente?.firmante || fuente?.nombreFirmante || heredado.firmante || 'jperez';
-  const areaFirmanteH = fuente?.areaFirmante || fuente?.area || heredado.areaFirmante || 'Administración';
-  const textoSugeridoH = heredado.textoSugerido || fuente?.textoSugerido || fuente?.respuestaSeguimiento || '';
-  const folioHeredado  = heredado.folioOficio || fuente?.folioOficio || fuente?.folioUnico || '';
 
-  const [formData, setFormData]     = useState({ numOficioSalida: heredado.numOficioSalida || '' });
-  const [instruccion, setInstruccion] = useState(textoSugeridoH);
-  const [folioOficio, setFolioOficio] = useState(folioHeredado);
-  const [guardando, setGuardando]   = useState(false);
-  const [error, setError]           = useState(null);
+  // Si el componente que hace navigate ya resolvió idUsuarioFirmante/Emisor los usa;
+  // si no, cae al usuario de sesión activa.
+  const idUsuarioFirmanteH = heredado.idUsuarioFirmante ?? idUsuarioSesion;
+  const idUsuarioEmisorH   = heredado.idUsuarioEmisor   ?? idUsuarioSesion;
+
+  // Nombre del firmante para mostrar en el formulario y vista previa
+  const firmanteH    = heredado.firmante || heredado.nombreFirmante || nombreSesion || '';
+  const areaFirmanteH = heredado.areaFirmante || fuente?.areaFirmante || fuente?.area || '';
+  const nombreEmisorH = heredado.nombreEmisor || nombreSesion || '';
+
+  const textoSugeridoH = heredado.textoSugerido || fuente?.textoSugerido || fuente?.respuestaSeguimiento || '';
+  const folioHeredado  = heredado.folioOficio    || fuente?.folioOficio   || fuente?.folioUnico || '';
+
+  // ── State ────────────────────────────────────────────────────────────────
+  const [formData,       setFormData]       = useState({ numOficioSalida: heredado.numOficioSalida || '' });
+  const [instruccion,    setInstruccion]    = useState(textoSugeridoH);
+  const [folioOficio,    setFolioOficio]    = useState(folioHeredado);
+  const [guardando,      setGuardando]      = useState(false);
+  const [error,          setError]          = useState(null);
   const [errorNumOficio, setErrorNumOficio] = useState(false);
   const [correspondencia, setCorrespondencia] = useState(null);
 
@@ -52,16 +63,13 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const resolveIdUsuarioEmisor = () => {
-    const usuario = heredado?.usuario || heredado?.sessionUser || heredado?.user || null;
-    const id = usuario?.id ?? usuario?.idUsuario ?? heredado?.idUsuarioEmisor ?? heredado?.idUsuario ?? null;
-    if (id == null) return FIRMANTE_FIJO;
-    const n = Number(id);
-    return Number.isFinite(n) ? n : FIRMANTE_FIJO;
-  };
-
   const handleGuardar = async (e) => {
     e.preventDefault();
+
+    if (!idUsuarioFirmanteH || !idUsuarioEmisorH) {
+      setError('No se encontró sesión activa. Por favor inicia sesión nuevamente.');
+      return;
+    }
 
     if (!formData.numOficioSalida?.trim()) {
       setErrorNumOficio(true);
@@ -80,29 +88,25 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
 
     try {
       const payload = {
-  idCorrespondencia:      heredado.idCorrespondencia,
-  idUsuarioFirmante:      FIRMANTE_FIJO,
-  idUsuarioEmisor:        FIRMANTE_FIJO,
-  instruccionSeguimiento: instruccion,
-  observaciones:          correspondencia?.asunto || instruccion,
-  areaDestinatario:       correspondencia?.dependenciaRemitente || '',
+        idCorrespondencia:      Number(idCorrespondenciaH),
+        idUsuarioFirmante:      idUsuarioFirmanteH,
+        idUsuarioEmisor:        idUsuarioEmisorH,
+        instruccionSeguimiento: instruccion,
+        observaciones:          correspondencia?.asunto || instruccion,
+        areaDestinatario:       correspondencia?.dependenciaRemitente || '',
+        nombreFirmante:         firmanteH,
+        areaFirmante:           areaFirmanteH,
+        nombreEmisor:           nombreEmisorH,
+        idArea:                 null,
+        idPlantilla:            null,
+        folioUnico:             formData.numOficioSalida.trim(),
+        esContestacion:         true,
+      };
 
-  // ✅ Usar los datos resueltos desde catálogos, no hardcodeados
-  nombreFirmante:         nombreFirmanteResuelto,
-  areaFirmante:           areaFirmanteResuelta,
-  nombreEmisor:           nombreFirmanteResuelto,
-
-  idArea:                 null,   // ✅ null EXPLÍCITO — identifica que es contestación
-  idPlantilla:            null,
-  folioUnico:             formData.numOficioSalida || '', // ✅ usar el número de oficio capturado
-  esContestacion:         true,   // ✅ añadir este campo si el backend lo soporta
-};
-      // 1) Crear registro del oficio en el backend y obtener su id
       const resultado = await generarOficio(payload);
       const nuevoId = resultado?.id;
       if (!nuevoId) throw new Error('No se obtuvo id del oficio generado');
 
-      // 2) Generar PDF en cliente desde la vista previa (elemento con id 'oficio-pdf-content')
       const elemento = document.getElementById('oficio-pdf-content');
       if (!elemento) {
         console.warn('GenerarOficioContestacionPage: no se encontró #oficio-pdf-content para generar PDF');
@@ -110,83 +114,77 @@ const nombreFirmanteResuelto = usuarioFirmante?.nombreUsuario || usuarioFirmante
         return;
       }
 
-// ✅ Reemplaza toda la sección de generación del PDF
-const canvas  = await html2canvas(elemento, {
-  scale: 2,
-  useCORS: true,
-  logging: false,
-  onclone: (clonedDoc) => {
-    const el = clonedDoc.getElementById('oficio-pdf-content');
-    if (!el) return;
+      const canvas = await html2canvas(elemento, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.getElementById('oficio-pdf-content');
+          if (!el) return;
 
-    // ✅ Altura fija carta — evita que el contenido desborde
-    el.style.width     = '816px';
-    el.style.height    = '816px';
-    el.style.minHeight = '816px';
-    el.style.maxHeight = '816px';
-    el.style.overflow  = 'hidden';
-    el.style.position  = 'relative';
-    el.style.boxSizing = 'border-box';
+          el.style.width     = '816px';
+          el.style.height    = '816px';
+          el.style.minHeight = '816px';
+          el.style.maxHeight = '816px';
+          el.style.overflow  = 'hidden';
+          el.style.position  = 'relative';
+          el.style.boxSizing = 'border-box';
 
-    const imgMembrete = el.querySelector('.membrete-fondo');
-    if (imgMembrete) {
-      imgMembrete.style.position  = 'absolute';
-      imgMembrete.style.top       = '0';
-      imgMembrete.style.left      = '0';
-      imgMembrete.style.width     = '100%';
-      imgMembrete.style.height    = '100%';
-      imgMembrete.style.objectFit = 'fill';
-      imgMembrete.style.zIndex    = '0';
-    }
+          const imgMembrete = el.querySelector('.membrete-fondo');
+          if (imgMembrete) {
+            imgMembrete.style.position  = 'absolute';
+            imgMembrete.style.top       = '0';
+            imgMembrete.style.left      = '0';
+            imgMembrete.style.width     = '100%';
+            imgMembrete.style.height    = '100%';
+            imgMembrete.style.objectFit = 'fill';
+            imgMembrete.style.zIndex    = '0';
+          }
 
-    const contenido = el.querySelector('.membrete-contenido');
-    if (contenido) {
-      contenido.style.position      = 'absolute';
-      contenido.style.top           = '0';
-      contenido.style.left          = '0';
-      contenido.style.width         = '100%';
-      contenido.style.height        = '100%';
-      contenido.style.padding       = '200px 56px 80px 56px';
-      contenido.style.boxSizing     = 'border-box';
-      contenido.style.zIndex        = '1';
-      contenido.style.display       = 'flex';
-      contenido.style.flexDirection = 'column';
-      contenido.style.fontSize      = '13px';
-      contenido.style.lineHeight    = '1.5';
-      contenido.style.overflow      = 'hidden'; // ← evita desborde
-    }
+          const contenido = el.querySelector('.membrete-contenido');
+          if (contenido) {
+            contenido.style.position      = 'absolute';
+            contenido.style.top           = '0';
+            contenido.style.left          = '0';
+            contenido.style.width         = '100%';
+            contenido.style.height        = '100%';
+            contenido.style.padding       = '200px 56px 80px 56px';
+            contenido.style.boxSizing     = 'border-box';
+            contenido.style.zIndex        = '1';
+            contenido.style.display       = 'flex';
+            contenido.style.flexDirection = 'column';
+            contenido.style.fontSize      = '13px';
+            contenido.style.lineHeight    = '1.5';
+            contenido.style.overflow      = 'hidden';
+          }
 
-    const firma = el.querySelector('.membrete-footer-firma');
-    if (firma) {
-      firma.style.marginTop = 'auto'; // ← empuja firma al fondo dentro del flex
-      firma.style.textAlign = 'center';
-    }
+          const firma = el.querySelector('.membrete-footer-firma');
+          if (firma) {
+            firma.style.marginTop = 'auto';
+            firma.style.textAlign = 'center';
+          }
 
-    const parrafos = el.getElementsByTagName('p');
-    for (let p of parrafos) {
-      p.style.margin    = '4px 0';
-      p.style.wordBreak = 'normal';
-    }
-  }
-});
+          const parrafos = el.getElementsByTagName('p');
+          for (let p of parrafos) {
+            p.style.margin    = '4px 0';
+            p.style.wordBreak = 'normal';
+          }
+        }
+      });
 
-const imgData = canvas.toDataURL('image/png');
-const pdf     = new jsPDF('p', 'mm', 'letter');
+      const imgData = canvas.toDataURL('image/png');
+      const pdf     = new jsPDF('p', 'mm', 'letter');
+      pdf.addImage(imgData, 'PNG', 0, 0, 215.9, 279.4);
 
-// ✅ Fuerza una sola página — escala imagen al tamaño carta exacto
-pdf.addImage(imgData, 'PNG', 0, 0, 215.9, 279.4);
+      const pdfBlob = pdf.output('blob');
+      const file    = new File(
+        [pdfBlob],
+        `OFICIO_${resultado?.folioUnico || nuevoId}.pdf`,
+        { type: 'application/pdf' }
+      );
 
-const pdfBlob = pdf.output('blob');
-const file    = new File(
-  [pdfBlob],
-  `OFICIO_${resultado?.folioUnico || nuevoId}.pdf`,
-  { type: 'application/pdf' }
-);
-
-      // 3) Subir el PDF generado y asociarlo al oficio (usa el endpoint existente)
       await finalizarAsignacion(nuevoId, file, null);
 
-      // 4) Navegar a la lista
       navigate('/correspondencia/registradas', {
         state: { refreshInterna: true, tabActivo: 'INTERNA' },
       });
@@ -223,7 +221,8 @@ const file    = new File(
           <form onSubmit={handleGuardar}>
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
               <label>Firmante</label>
-              <input type="text" value={'ana_admin'} disabled className="input-readonly" />
+              {/* Muestra el nombre real de la sesión, no un string hardcodeado */}
+              <input type="text" value={firmanteH} disabled className="input-readonly" />
             </div>
 
             <div className="form-group full-width" style={{ marginBottom: '1rem' }}>
@@ -231,15 +230,21 @@ const file    = new File(
                 NO. OFICIO SALIDA <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <input
-                id="numOficioSalida" type="text" name="numOficioSalida"
-                value={formData.numOficioSalida} onChange={handleChange}
-                placeholder="Ej: OFICIO/001/2026" required
+                id="numOficioSalida"
+                type="text"
+                name="numOficioSalida"
+                value={formData.numOficioSalida}
+                onChange={handleChange}
+                placeholder="Ej: OFICIO/001/2026"
+                required
                 style={{ borderColor: errorNumOficio ? '#dc2626' : undefined }}
               />
-              {errorNumOficio && <span style={{ color: '#dc2626', fontSize: '0.78rem' }}>El número de oficio es obligatorio</span>}
+              {errorNumOficio && (
+                <span style={{ color: '#dc2626', fontSize: '0.78rem' }}>
+                  El número de oficio es obligatorio
+                </span>
+              )}
             </div>
-
-            {/* Campo 'Folio (manual)' eliminado por requerimiento */}
 
             <div className="form-group full-width rich-text-area" style={{ marginBottom: '1.5rem' }}>
               <div className="toolbar-mockup">
@@ -247,9 +252,13 @@ const file    = new File(
                 <span className="tool-btn">I</span>
                 <span className="tool-btn">U</span>
               </div>
-              <textarea className="cuerpo-documento" rows={10} value={instruccion}
+              <textarea
+                className="cuerpo-documento"
+                rows={10}
+                value={instruccion}
                 onChange={(e) => setInstruccion(e.target.value)}
-                placeholder="Cuerpo del oficio de contestación..." />
+                placeholder="Cuerpo del oficio de contestación..."
+              />
             </div>
 
             <button type="submit" className="btn-primario" disabled={guardando}>
@@ -259,18 +268,18 @@ const file    = new File(
         </section>
 
         <section className="panel-vista-previa">
-         <VistaPreviaOficio
-  formData={{
-    folioUnico:             formData.numOficioSalida || folioOficio || '',
-    asuntoCorrespondencia:  correspondencia?.asunto || '',
-    observaciones:          correspondencia?.asunto || '',
-    instruccionSeguimiento: instruccion,
-    idUsuarioFirmante:      FIRMANTE_FIJO,
-    idUsuarioEmisor:        FIRMANTE_FIJO,
-    // ✅ Pasar los datos ya resueltos para que la vista previa sea idéntica al PDF guardado
-    nombreFirmante:         nombreFirmanteResuelto,
-    areaFirmante:           areaFirmanteResuelta,
-  }}
+          <VistaPreviaOficio
+            formData={{
+              folioUnico:             formData.numOficioSalida || folioOficio || '',
+              asuntoCorrespondencia:  correspondencia?.asunto || '',
+              observaciones:          correspondencia?.asunto || '',
+              instruccionSeguimiento: instruccion,
+              idUsuarioFirmante:      idUsuarioFirmanteH,
+              idUsuarioEmisor:        idUsuarioEmisorH,
+              nombreFirmante:         firmanteH,
+              areaFirmante:           areaFirmanteH,
+              nombreEmisor:           nombreEmisorH,
+            }}
             usuarios={catalogos.usuarios}
             areaDestino={{
               nombre:     correspondencia?.dependenciaRemitente || '',

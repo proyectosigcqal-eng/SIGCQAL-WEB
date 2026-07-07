@@ -2,11 +2,15 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registrarSeguimiento } from '../../oficio/services/oficioService';
 import '../styles/contestacion-oficio.css';
-
-const FIRMANTE_FIJO = 5; // ana_admin
+import { useAuth } from '@/shared/context/AuthContext';
 
 export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onError }) => {
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
+  const { session } = useAuth();
+
+  const idUsuario = session?.idUsuario ?? session?.id ?? null;
+  const nombre    = session?.username  ?? session?.nombre ?? null;
+
   const [respuesta, setRespuesta]                   = useState('');
   const [archivo, setArchivo]                       = useState(null);
   const [guardando, setGuardando]                   = useState(false);
@@ -30,6 +34,10 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
       onError && onError('El informe de atención es obligatorio.');
       return;
     }
+    if (!idUsuario) {
+      onError && onError('No se encontró sesión activa. Por favor inicia sesión nuevamente.');
+      return;
+    }
     setGuardando(true);
     try {
       const idOficio = acuse?.idOficio || acuse?.id || acuse?.id_oficio;
@@ -38,18 +46,16 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
       const datos = {
         respuestaSeguimiento: respuesta,
         archivoAdjunto:       archivo || null,
-        idUsuario:            1, // ← fijo, sin depender de numeroUsuario
-        idEstatus:            5,
+        idUsuario,
+        idEstatus: 5,
       };
 
       const seguimientoResp = await registrarSeguimiento(idOficio, datos);
       setFolioGenerado(seguimientoResp?.folioRespuesta ?? '');
       if (!folioManual) setFolioManual(seguimientoResp?.folioRespuesta ?? '');
-      // Resolver idCorrespondencia a partir del acuse o del oficio
       const resolvedIdCorr = acuse?.idCorrespondencia ?? oficio?.idCorrespondencia ?? acuse?.id ?? oficio?.id ?? null;
       setIdCorrespondencia(resolvedIdCorr || null);
       setMostrarModalOficio(true);
-
     } catch (err) {
       onError && onError(err.message || 'Error al guardar seguimiento de oficio');
     } finally {
@@ -62,11 +68,11 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia: Number(idCorrespondencia) || null,
-        idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
+        idUsuarioFirmante: idUsuario,   // ← antes: FIRMANTE_FIJO
+        idUsuarioEmisor:   idUsuario,   // ← antes: FIRMANTE_FIJO
+        firmante:          nombre ?? '',
         areaFirmante:      'Administración',
-        idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
+        nombreEmisor:      nombre ?? '',
         textoSugerido:     respuesta,
       }
     });
@@ -122,7 +128,6 @@ export const FormularioContestacionOficio = ({ acuse, oficio, onGuardado, onErro
                 Folio registrado: <strong>{folioGenerado}</strong>
               </p>
             )}
-            {/* Campo 'Folio para Oficio (manual)' eliminado por requerimiento */}
             <div className="modal-oficio-btns">
               <button className="btn-si-oficio" onClick={handleGenerarOficio}>
                 Sí, generar oficio

@@ -33,3 +33,7 @@ export const listarCorrespondenciasPorTipo = async (idNatural) => {
   );
   return response.data;
 };
+
+export const obtenerTodasCorrespondenciasPendientes = async () => {
+  return listarCorrespondencias();
+};

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { guardarSeguimiento, obtenerProximoFolio } from '../services/seguimientoService';
+import { useAuth } from '@/shared/context/AuthContext';
 
 const FIRMANTE_FIJO = 5;
 
@@ -12,6 +13,10 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
   const [guardando, setGuardando]         = useState(false);
   const [mostrarModalOficio, setMostrarModalOficio] = useState(false);
   const navigate = useNavigate();
+  const { session } = useAuth();
+
+  const idUsuario   = session?.idUsuario ?? session?.id ?? null;
+const nombre      = session?.username  ?? session?.nombre ?? null;
 
   useEffect(() => {
     obtenerProximoFolio()
@@ -45,7 +50,7 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
         fechaResolucion:                     new Date().toISOString().split('T')[0],
         horaResolucion:                      new Date().toTimeString().split(' ')[0],
         archivoAdjunto:                      archivo ?? null,
-        idUsuario:                           5,
+        idUsuario                           ,
         idEstatus:                           5,
         numeroOficioContestacion:            '',
       };
@@ -59,21 +64,20 @@ export const FormularioContestacionCorrespondencia = ({ acuse, correspondencia, 
       setGuardando(false);
     }
   };
-
-  const handleGenerarOficio = () => {
-    setMostrarModalOficio(false);
-    navigate('/correspondencia/nuevo-oficio-contestacion', {
-      state: {
-        idCorrespondencia: acuse?.idCorrespondencia || correspondencia?.id || null,
-        idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
-        areaFirmante:      'Administración',
-        idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
-        textoSugerido:     respuesta,
-      }
-    });
-  };
+const handleGenerarOficio = () => {
+  setMostrarModalOficio(false);
+  navigate('/correspondencia/nuevo-oficio-contestacion', {
+    state: {
+      idCorrespondencia: acuse?.idCorrespondencia || correspondencia?.id || null,
+      idUsuarioFirmante: idUsuario,   // ← antes: FIRMANTE_FIJO
+      idUsuarioEmisor:   idUsuario,   // ← antes: FIRMANTE_FIJO
+      firmante:          nombre ?? '',
+      areaFirmante:      'Administración',
+      nombreEmisor:      nombre ?? '',
+      textoSugerido:     respuesta,
+    }
+  });
+};
 
   const handleNoOficio = () => {
     setMostrarModalOficio(false);

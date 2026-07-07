@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { listarAcusesPorArea } from '../services/acuseoficioService';
+import { useAreaUsuario } from '@/shared/hooks/useAreaUsuario';
 
 
 export const useListaAcusesOficioPorArea = () => {
@@ -8,9 +9,10 @@ export const useListaAcusesOficioPorArea = () => {
   const [error, setError] = useState(null);
 
   // TODO: Obtener el área del usuario logueado
-  const AREA_FORZADA = 1;
+  const idArea = useAreaUsuario();
 
   const cargarAcuses = async (idArea) => {
+    if (!idArea) return;
     setLoading(true);
     setError(null);
     try {
@@ -26,11 +28,11 @@ export const useListaAcusesOficioPorArea = () => {
   };
 
   useEffect(() => {
-    cargarAcuses(AREA_FORZADA);
-  }, []);
+    cargarAcuses(idArea);
+  }, [idArea]);
 
   const recargar = () => {
-    cargarAcuses(AREA_FORZADA);
+    cargarAcuses(idArea);
   };
 
   return {
@@ -38,6 +40,6 @@ export const useListaAcusesOficioPorArea = () => {
     loading,
     error,
     recargar,
-    areaForzada: AREA_FORZADA
+    areaForzada: idArea
   };
 };

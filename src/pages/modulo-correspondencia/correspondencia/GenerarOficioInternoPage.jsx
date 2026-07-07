@@ -24,15 +24,13 @@ export const GenerarOficioInternoPage = () => {
   const [errorArchivo, setErrorArchivo] = useState(null);
   const catalogos = useCatalogos();
 
-  const getSessionUsername = () => {
-    try {
-      const raw = localStorage.getItem('user');
-      return raw ? JSON.parse(raw)?.username : null;
-    } catch {
-      return null;
-    }
-  };
-
+const getSessionUsername = () => {
+  try {
+    // ✅ Leer del AuthContext real (sessionStorage + clave correcta)
+    const raw = sessionStorage.getItem('sigcqal_session');
+    return raw ? JSON.parse(raw)?.usuarioLogin : null;
+  } catch { return null; }
+};
   const [idUsuarioEmisor, setIdUsuarioEmisor] = useState(null);
 
   useEffect(() => {
