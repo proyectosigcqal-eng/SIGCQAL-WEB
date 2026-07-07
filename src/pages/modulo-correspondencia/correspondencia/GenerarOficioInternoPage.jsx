@@ -125,7 +125,7 @@ const getSessionUsername = () => {
   }
 
   return (
-    <div className="sigcqal-page-container">
+    <div className="sigcqal-page-container"  style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="page-header-corr">
         <button type="button" className="btn-secundario-corr" onClick={() => navigate(-1)}>
           ← Volver
@@ -182,7 +182,7 @@ const getSessionUsername = () => {
       )}
 
       <div className="split-view-container">
-        <section className="panel-formulario">
+        <section className="panel-formulario" style={{ height: '100%', overflowY: 'auto' }}>
           <FormularioOficio
             formData={formData}
             setFormData={setFormData}
@@ -234,7 +234,7 @@ const getSessionUsername = () => {
             </div>
           </FormularioOficio>
         </section>
-        <section className="panel-vista-previa">
+        <section className="panel-vista-previa" style={{ height: '100%', overflowY: 'auto' }}>
           <VistaPreviaOficio
             formData={formData}
             usuarios={catalogos.usuarios}

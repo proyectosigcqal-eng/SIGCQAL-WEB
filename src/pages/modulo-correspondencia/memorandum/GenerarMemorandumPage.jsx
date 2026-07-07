@@ -31,10 +31,9 @@ export const GenerarMemorandumPage = () => {
   }
 
   return (
-    <div className="sigcqal-page-container">
-      <div className="split-view-container">
-        <section className="panel-formulario">
-          <FormularioMemorandum
+   <div className="sigcqal-page-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="generar-memorandum-container" style={{ display: 'grid', gridTemplateColumns: '45% 55%', flex: '1', minHeight: '0', overflow: 'hidden' }}>
+        <section className="panel-formulario" style={{ height: '100%', overflowY: 'auto' }}>       <FormularioMemorandum
             formData={formData}
             setFormData={setFormData}
             handleChange={handleChange}
@@ -42,7 +41,7 @@ export const GenerarMemorandumPage = () => {
             catalogos={catalogos}
           />
         </section>
-        <section className="panel-vista-previa">
+        <section className="panel-vista-previa" style={{ height: '100%', overflowY: 'auto' }}>
          <VistaPreviaMemorandum
           formData={formData}
           usuarios={catalogos.usuarios}
