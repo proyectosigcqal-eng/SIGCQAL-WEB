@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { guardarSeguimientoMemorandum, subirPdfFirmado, obtenerProximoFolio } from '../services/contestacionService'; // ← import agregado
+import { guardarSeguimientoMemorandum, subirPdfFirmado, obtenerProximoFolio } from '../services/contestacionService';
 import { formatForBackend, formatTimeForBackend } from '@/shared/utils/dateUtils';
-
-const FIRMANTE_FIJO = 5; // ana_admin
+import { useAuth } from '@/shared/context/AuthContext';
 
 export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError }) => {
   const [folioGenerado, setFolioGenerado] = useState(null);
-  const [folioPreview, setFolioPreview]   = useState(null); // ← agregado
+  const [folioPreview, setFolioPreview]   = useState(null);
   const [respuesta, setRespuesta]         = useState('');
   const [archivo, setArchivo]             = useState(null);
   const [guardando, setGuardando]         = useState(false);
   const [mostrarModalOficio, setMostrarModalOficio] = useState(false);
   const [idCorrespondencia, setIdCorrespondencia]   = useState(null);
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
+  const { session } = useAuth();
+
+  const idUsuario = session?.idUsuario ?? session?.id ?? null;
+  const nombre    = session?.username  ?? session?.nombre ?? null;
 
   useEffect(() => {
     obtenerProximoFolio()
@@ -21,7 +24,7 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
       .catch(() => setFolioPreview(null));
   }, []);
 
-  const folioMostrar = folioGenerado ?? folioPreview; // ← agregado
+  const folioMostrar = folioGenerado ?? folioPreview;
 
   const handleArchivoChange = (e) => {
     const file = e.target.files[0];
@@ -38,6 +41,10 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
       onError('El informe de atención es obligatorio.');
       return;
     }
+    if (!idUsuario) {
+      onError('No se encontró sesión activa. Por favor inicia sesión nuevamente.');
+      return;
+    }
     setGuardando(true);
     try {
       const payload = {
@@ -46,8 +53,8 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
         fechaResolucion:                formatForBackend(new Date()),
         horaResolucion:                 formatTimeForBackend(new Date()),
         archivoAdjunto:                 archivo?.name ?? null,
-        idUsuario:                      1,
-        idEstatus:                      5,
+        idUsuario,
+        idEstatus: 5,
       };
 
       const seguimientoGuardado = await guardarSeguimientoMemorandum(payload);
@@ -57,11 +64,7 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
       }
 
       setFolioGenerado(seguimientoGuardado?.folioFormateado ?? folioPreview);
-
-      // Guardamos el idCorrespondencia para heredarlo al oficio
       setIdCorrespondencia(acuse?.idCorrespondencia || null);
-
-      // Mostramos el modal para preguntar si se desea generar un oficio
       setMostrarModalOficio(true);
     } catch (err) {
       onError(err.message);
@@ -73,15 +76,14 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
   const handleGenerarOficio = () => {
     setMostrarModalOficio(false);
     const resolvedIdCorrespondencia = acuse?.idCorrespondencia ?? memorandum?.idCorrespondencia ?? acuse?.id ?? memorandum?.id ?? null;
-
     navigate('/correspondencia/nuevo-oficio-contestacion', {
       state: {
         idCorrespondencia: Number(resolvedIdCorrespondencia) || null,
-        idUsuarioFirmante: FIRMANTE_FIJO,
-        firmante:          'ana_admin',
+        idUsuarioFirmante: idUsuario,   // ← antes: FIRMANTE_FIJO
+        idUsuarioEmisor:   idUsuario,   // ← antes: FIRMANTE_FIJO
+        firmante:          nombre ?? '',
         areaFirmante:      'Administración',
-        idUsuarioEmisor:   FIRMANTE_FIJO,
-        nombreEmisor:      'ana_admin',
+        nombreEmisor:      nombre ?? '',
         textoSugerido:     respuesta,
       }
     });
@@ -95,54 +97,51 @@ export const FormularioContestacion = ({ acuse, memorandum, onGuardado, onError 
   return (
     <>
       <form className="contestacion-form" onSubmit={handleSubmit}>
-      <div className="input-group-custom">
-        <label>Folio de Contestación</label>
-        <div className="folio-preview-box">
-          {folioMostrar ? (
-            <>
-              <span className="folio-prefix">CM-</span>
-              <span className="folio-consecutivo">{folioMostrar.split('-')[1]}</span>
-              <span className="folio-prefix">-{new Date().getFullYear()}</span>
-              <span className="folio-auto-badge">
-                {folioGenerado}
-              </span>
-            </>
-          ) : (
-            <span style={{ color: 'var(--muted-2)', fontSize: '0.9rem' }}>Calculando folio...</span>
-          )}
+        <div className="input-group-custom">
+          <label>Folio de Contestación</label>
+          <div className="folio-preview-box">
+            {folioMostrar ? (
+              <>
+                <span className="folio-prefix">CM-</span>
+                <span className="folio-consecutivo">{folioMostrar.split('-')[1]}</span>
+                <span className="folio-prefix">-{new Date().getFullYear()}</span>
+                <span className="folio-auto-badge">{folioGenerado}</span>
+              </>
+            ) : (
+              <span style={{ color: 'var(--muted-2)', fontSize: '0.9rem' }}>Calculando folio...</span>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="mb-3">
-        <label className="fw-bold small text-uppercase">Informe de Atención</label>
-        <textarea
-          className="form-control"
-          rows={5}
-          value={respuesta}
-          onChange={(e) => setRespuesta(e.target.value)}
-          placeholder="Describa las acciones tomadas..."
-        />
-      </div>
-
-      <div className="upload-box">
-        <div className="upload-icon">
-          <span style={{ fontSize: 14 }}>⬆</span>
+        <div className="mb-3">
+          <label className="fw-bold small text-uppercase">Informe de Atención</label>
+          <textarea
+            className="form-control"
+            rows={5}
+            value={respuesta}
+            onChange={(e) => setRespuesta(e.target.value)}
+            placeholder="Describa las acciones tomadas..."
+          />
         </div>
-        <div className="upload-text">
-          <label className="fw-bold small text-uppercase">Oficio adjunto (opcional)</label>
-          <p>{archivo ? archivo.name : 'Seleccionar archivo'}</p>
-          <span>Solo archivos .pdf</span>
-        </div>
-        <input type="file" accept=".pdf" onChange={handleArchivoChange} />
-      </div>
-      {archivo && <p className="upload-success">✓ {archivo.name}</p>}
 
-      <button type="submit" className="btn-enviar" disabled={guardando}>
-        {guardando ? 'Guardando...' : 'Enviar Contestación'}
-      </button>
+        <div className="upload-box">
+          <div className="upload-icon">
+            <span style={{ fontSize: 14 }}>⬆</span>
+          </div>
+          <div className="upload-text">
+            <label className="fw-bold small text-uppercase">Oficio adjunto (opcional)</label>
+            <p>{archivo ? archivo.name : 'Seleccionar archivo'}</p>
+            <span>Solo archivos .pdf</span>
+          </div>
+          <input type="file" accept=".pdf" onChange={handleArchivoChange} />
+        </div>
+        {archivo && <p className="upload-success">✓ {archivo.name}</p>}
+
+        <button type="submit" className="btn-enviar" disabled={guardando}>
+          {guardando ? 'Guardando...' : 'Enviar Contestación'}
+        </button>
       </form>
 
-      {/* Modal ¿Generar Oficio de Contestación? */}
       {mostrarModalOficio && (
         <div className="modal-overlay">
           <div className="modal-oficio-pregunta">

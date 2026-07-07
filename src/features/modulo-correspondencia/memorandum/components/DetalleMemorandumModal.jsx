@@ -62,7 +62,8 @@ const horaStr = fecha
         esDelArea: true,
         fechaAceptacion: formatForBackend(now),
         horaAceptacion: formatTimeForBackend(now),
-        idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
+        idUsuarioRevisor: memo.idUsuarioRevisor 
+  ?? (session?.idUsuario ?? session?.id ?? null), // Ajustar según el usuario logueado
         idMemorandum: memo.idMemorandum || memo.id,
         idCorrespondencia: memo.idCorrespondencia,
         numMemo: memo.numMemo || memo.folioUnico,
@@ -98,7 +99,8 @@ const horaStr = fecha
         esDelArea: false,
         fechaAceptacion: formatForBackend(now),
         horaAceptacion: formatTimeForBackend(now),
-        idUsuarioRevisor: memo.idUsuarioRevisor || 1, // Ajustar según el usuario logueado
+        idUsuarioRevisor: memo.idUsuarioRevisor 
+  ?? (session?.idUsuario ?? session?.id ?? null), // Ajustar según el usuario logueado
         idMemorandum: memo.idMemorandum || memo.id,
         idCorrespondencia: memo.idCorrespondencia,
         numMemo: memo.numMemo || memo.folioUnico,

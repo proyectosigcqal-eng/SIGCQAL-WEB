@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { listarPorArea } from '../services/oficioService';
+import { useAreaUsuario } from '@/shared/hooks/useAreaUsuario';
 
 export const useListaOficios = () => {
   const [oficios, setOficios] = useState([]);
@@ -7,9 +8,10 @@ export const useListaOficios = () => {
   const [error, setError] = useState(null);
 
   // TODO: Obtener el área del usuario logueado
-  const AREA_FORZADA = 1;
+  const idArea = useAreaUsuario();
 
   const cargarOficios = async (idArea) => {
+    if (!idArea) return;
     setLoading(true);
     setError(null);
     try {
@@ -25,11 +27,11 @@ export const useListaOficios = () => {
   };
 
   useEffect(() => {
-    cargarOficios(AREA_FORZADA);
-  }, []);
+    cargarOficios(idArea);
+  }, [idArea]);
 
   const recargar = () => {
-    cargarOficios(AREA_FORZADA);
+    cargarOficios(idArea);
   };
 
   return {
@@ -37,6 +39,6 @@ export const useListaOficios = () => {
     loading,
     error,
     recargar,
-    areaForzada: AREA_FORZADA
+    areaForzada: idArea
   };
 };
