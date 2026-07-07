@@ -115,7 +115,7 @@ export const usePostRegistroCorrespondencia = () => {
 
         const corrResp = await listarCorrespondencias();
         setTodasCorrespondencias(Array.isArray(corrResp) ? corrResp : []);
-        setFase('CON_AREA');
+        navigate('/correspondencia/registradas');
       } catch (err) {
         const mensaje =
           err?.response?.data?.message ||
@@ -137,7 +137,7 @@ export const usePostRegistroCorrespondencia = () => {
     try {
       const corrResp = await listarCorrespondencias();
       setTodasCorrespondencias(Array.isArray(corrResp) ? corrResp : []);
-      setFase('SIN_AREA');
+      navigate('/correspondencia/registradas');
     } catch (err) {
       const mensaje =
         err?.response?.data?.message ||
