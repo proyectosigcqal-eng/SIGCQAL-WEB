@@ -14,9 +14,16 @@ export const FormularioQuejaAri = ({ formData, setFormData, handleChange, handle
     <form className="quejaari-form" onSubmit={handleSubmit}>
 
       <div className="form-group full-width">
-        <label>No. Expediente (Oficial)</label>
-        <input type="text" name="numExpedienteOficial" value={formData.numExpedienteOficial || ''} disabled placeholder="Se generará automáticamente" />
-      </div>
+          <label>No. Expediente (Oficial)</label>
+          <input 
+            type="text" 
+            name="numExpedienteOficial" 
+            value={formData.numExpedienteOficial || ''} 
+            onChange={handleChange} 
+            placeholder="Ingrese el número de expediente manual (Ej. CEDECON-ZAC-QR-001-2026)" 
+            required
+          />
+        </div>
 
       <div className="form-group full-width">
         <label>Motivo de la visita</label>
