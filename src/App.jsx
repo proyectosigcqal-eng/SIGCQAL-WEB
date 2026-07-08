@@ -60,6 +60,14 @@ import NotificacionSentenciaPage   from './pages/modulo-area-sustantiva/sentenci
 
 
 
+const handleLoginExitoso = (response) => {
+  login(response); // guarda en AuthContext
+  if (response.roles?.length === 1) {
+    navigate(response.roles[0].urlBase || '/');
+  } else {
+    navigate('/seleccionarrol');
+  }
+};
 
 
 function App() {
@@ -208,6 +216,17 @@ function App() {
             element={
               <ProtectedRoute
                 allowedRoles={ROUTE_ROLES["/correspondencia/seguimiento"]}
+              >
+                <ContestacionPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+          path="seleccionarrol"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/seleccionarrol"]}
               >
                 <ContestacionPage />
               </ProtectedRoute>
