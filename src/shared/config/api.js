@@ -25,3 +25,37 @@ export function fileUrl(relativePath) {
   if (!relativePath) return null;
   return `${API_HOST}${relativePath.startsWith('/') ? '' : '/'}${relativePath}`;
 }
+
+// src/shared/config/api.js  — agrega esto al final del archivo actual
+
+import axios from 'axios';
+
+const TOKEN_KEY = 'sigcqal_token'; // misma clave que usa AuthContext
+
+// ✅ Instancia configurada — úsala en todos los servicios en lugar de axios directo
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+// Interceptor de request: inyecta Bearer token en cada llamada
+apiClient.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Interceptor de response: si expira el token, limpia y redirige
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      sessionStorage.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export { apiClient };
