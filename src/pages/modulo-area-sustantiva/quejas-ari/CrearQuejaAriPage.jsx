@@ -189,13 +189,28 @@ export const CrearQuejaAriPage = () => {
             cargando={cargando}
             downloadUrl={downloadUrl}
           />
-          <button
-            type="button"
-            onClick={() => navigate('/atencion-juridica/bandeja')}
-            style={{ marginTop: '1rem' }}
-          >
-            ← Volver a la bandeja
-          </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '5rem' }}>
+              <button
+                type="button"
+                onClick={() => navigate('/atencion-juridica/bandeja')}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: '#1e2235', // Color azul oscuro del botón original
+                  padding: '8px 0px', // Sin padding lateral para que alinee perfecto a la izquierda
+                  border: 'none',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  transition: 'opacity 0.2s ease',
+                }}
+                onMouseEnter={(e) => e.target.style.opacity = '0.7'}
+                onMouseLeave={(e) => e.target.style.opacity = '1'}
+              >
+                ← Volver a la bandeja
+              </button>
+            </div>
         </section>
 
         <section className="panel-vista-previa-contenedor" style={{ height: '100%', overflow: 'hidden' }}>
