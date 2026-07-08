@@ -7,7 +7,7 @@ const REFRESH_KEY    = 'sigcqal_refresh_token';
 const SESSION_KEY    = 'sigcqal_session';
 const ROL_ACTIVO_KEY = 'sigcqal_rol_activo';
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
 export const AuthProvider = ({ children }) => {
 
