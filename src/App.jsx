@@ -253,6 +253,17 @@ function App() {
           />
 
           <Route
+          path="correspondencia/personal"
+          element={
+            <ProtectedRoute
+              allowedRoles={ROUTE_ROLES["/correspondencia/personal"]} // Asegúrate de definir esta ruta en tu config de roles
+            >
+              <PersonalPage />
+            </ProtectedRoute>
+          }
+        />
+
+          <Route
             path="atencion-juridica/bandeja"
             element={
               <ProtectedRoute
@@ -657,16 +668,7 @@ function App() {
         />
         {/* ... dentro de <Route path="/" element={<MainLayout />}> ... */}
 
-        <Route
-          path="correspondencia/personal"
-          element={
-            <ProtectedRoute
-              allowedRoles={ROUTE_ROLES["/correspondencia/personal"]} // Asegúrate de definir esta ruta en tu config de roles
-            >
-              <PersonalPage />
-            </ProtectedRoute>
-          }
-        />
+        
       </Routes>
       
     </BrowserRouter>

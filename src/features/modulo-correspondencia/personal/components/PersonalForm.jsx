@@ -44,7 +44,6 @@ const FormPersonal = ({ onSave , onCancel, personalData}) => {
         // Mapeamos los datos del servidor a tu estado
         // IMPORTANTE: Asegúrate de que las llaves coincidan con lo que devuelve el API
         setFormData({
-            ...personalData,
             // Si el API devuelve "nombreCompleto" y tú tienes "nombre", debes mapearlo:
             nombre: partesNombre[0] || '', 
             apellidoPaterno: partesNombre[1] || '', 

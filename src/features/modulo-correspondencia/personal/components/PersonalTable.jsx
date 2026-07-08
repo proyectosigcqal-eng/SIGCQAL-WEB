@@ -12,7 +12,7 @@ export const PersonalTable = ({ data, onDelete, onEdit }) => (
             {data.map(p => (
                 <tr key={p.idPersonal}>
                     <td>{p.nombreCompleto}</td>
-                    <td>{p.curp}</td>
+                    <td>{p.curp ? p.curp : <pre>{JSON.stringify(p, null, 2)}</pre>}</td>
                     <td>{p.activo ? 'Sí' : 'No'}</td>
                     <td>
                         <button onClick={() => onEdit(p)}>Editar</button>
