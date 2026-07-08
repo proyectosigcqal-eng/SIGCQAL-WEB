@@ -232,7 +232,7 @@ export const TablaIrl = ({
   const etapaActual    = etapaActiva ?? estatusActivo ?? "TODAS";
   const setEtapaActual = setEtapaActiva ?? setEstatusActivo ?? (() => {});
 
-  const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_dev';
+  const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/SIGCQAL_Prod';
 
   // Cargar semáforos solo cuando estamos en la pestaña DEMANDA_PRESENTADA
   useEffect(() => {
