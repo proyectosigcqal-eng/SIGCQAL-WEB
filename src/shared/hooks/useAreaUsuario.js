@@ -1,46 +1,29 @@
 // src/shared/hooks/useAreaUsuario.js
 
-// Valor especial que indica "mostrar todo" (para admins sin área asignada)
 export const TODAS_LAS_AREAS = 'ALL';
 
-/**
- * Devuelve el idArea del usuario logueado.
- * Si el usuario es admin sin área asignada, devuelve TODAS_LAS_AREAS ('ALL').
- * Si no hay usuario, devuelve null.
- */
 export const useAreaUsuario = () => {
-  const rawUser =
-    localStorage.getItem('user') ||
-    localStorage.getItem('usuario') ||
-    localStorage.getItem('currentUser');
-
-  if (!rawUser) return null;
+  // ✅ CORRECCIÓN: AuthContext guarda en sessionStorage con clave 'sigcqal_session'
+  // (no en localStorage con 'user'/'usuario'/'currentUser')
+  const raw = sessionStorage.getItem('sigcqal_session');
+  if (!raw) return null;
 
   try {
-    const user = JSON.parse(rawUser);
+    const session = JSON.parse(raw);
+    // session = { idUsuario, usuarioLogin, idArea, nombreArea, roles }
+    // que es el AuthResponse sin token/refreshToken
 
-    const idArea =
-      user?.idArea ??
-      user?.area?.id ??
-      user?.area ??
-      user?.id_area ??
-      null;
+    const idArea = session?.idArea ?? null;
 
-    // Si tiene área asignada, usarla normalmente
+    // Detectar Administrador
+    const esAdmin = Array.isArray(session?.roles)
+      ? session.roles.some(r => r.idRol === 1 || r.nombreRol === 'Administrador')
+      : false;
+
+    if (esAdmin) return TODAS_LAS_AREAS;
     if (idArea !== null && idArea !== undefined) return idArea;
+    return null;
 
-    // Sin área → verificar si es admin para mostrar todo
-    const esAdmin =
-      user?.rol === 'Administrador' ||
-      user?.role === 'Administrador' ||
-      user?.rol === 'ADMIN' ||
-      user?.role === 'ADMIN' ||
-      user?.esAdmin === true ||
-      user?.isAdmin === true ||
-      user?.roles?.includes('ADMIN') ||
-      user?.roles?.includes('Administrador');
-
-    return esAdmin ? TODAS_LAS_AREAS : null;
   } catch {
     return null;
   }

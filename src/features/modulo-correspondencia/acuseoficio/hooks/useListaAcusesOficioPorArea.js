@@ -22,7 +22,7 @@ export const useListaAcusesOficioPorArea = () => {
       // Admin → endpoint sin filtro de área (ajusta la URL si tu backend la tiene)
        const data = idArea === TODAS_LAS_AREAS
                     ? await listarTodos()
-                    : await listarPorArea(idArea);
+                    : await listarAcusesPorArea(idArea);
       setOficios(data);
     } catch (err) {
       setError(err.message);
