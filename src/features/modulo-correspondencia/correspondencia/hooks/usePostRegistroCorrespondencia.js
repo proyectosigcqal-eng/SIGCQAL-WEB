@@ -66,25 +66,19 @@ export const usePostRegistroCorrespondencia = () => {
     const esInterna = String(idTipo) === '2' || descripcionTipo.includes('INTERNA');
 
     if (esInterna) {
-      setFase('GUARDANDO');
-      setLoading(true);
-      listarCorrespondencias()
-        .then((corrResp) => {
-          setTodasCorrespondencias(Array.isArray(corrResp) ? corrResp : []);
-          setFase('SIN_AREA');
-        })
-        .catch((err) => {
-          const mensaje =
-            err?.response?.data?.message ||
-            err?.response?.data?.mensaje ||
-            err?.message ||
-            'Ocurrió un error al recargar la bandeja.';
-          setError(mensaje);
-          setFase('SIN_AREA');
-        })
-        .finally(() => setLoading(false));
-      return;
-    }
+  setFase('GUARDANDO');
+  setLoading(true);
+  listarCorrespondencias()
+    .then((corrResp) => {
+      setTodasCorrespondencias(Array.isArray(corrResp) ? corrResp : []);
+      navigate('/correspondencia/registradas'); 
+    })
+    .catch((err) => {
+      navigate('/correspondencia/registradas');
+    })
+    .finally(() => setLoading(false));
+  return;
+}
 
     setFase('MODAL_AREA');
   }, []);
