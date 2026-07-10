@@ -46,6 +46,7 @@ export const MainLayout = () => {
                 { label: 'Correspondencia Asignada',               to: '/correspondencia/acuses-correspondencia',    icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
                 { label: 'Acuse Memorándum',                 to: '/correspondencia/lista-memorandums-revision',icon: <FileText size={18} />,   roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
                 { label: 'Memorándums Asignados',                  to: '/correspondencia/memorandums-por-area',      icon: <CheckSquare size={18} />,roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
+                { label: 'Acuse Oficio',                 to: '/correspondencia/lista-oficios-revision',icon: <FileText size={18} />,   roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
                 { label: 'Oficios Asignados',              to: '/correspondencia/oficios-por-area',          icon: <FolderCheck size={18} />,roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
                 { label: 'Bandeja de Correspondencia',                to: '/correspondencia/bandeja',                   icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia',] },
             ],
