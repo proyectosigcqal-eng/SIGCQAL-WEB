@@ -42,12 +42,12 @@ export const MainLayout = () => {
             items: [
                 { label: 'Registrar Correspondencia',              to: '/correspondencia/registrar',                 icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia'] },
                 { label: 'Correspondencia Registrada',             to: '/correspondencia/registradas',               icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia', ] },
-                { label: 'Pendiente de Revisión',                  to: '/correspondencia/pendiente-revision-area',   icon: <Mail size={18} />,       roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
+                { label: 'Acuse Correspondencia',                  to: '/correspondencia/pendiente-revision-area',   icon: <Mail size={18} />,       roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
                 { label: 'Correspondencia Asignada',               to: '/correspondencia/acuses-correspondencia',    icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
-                { label: 'Memorándums Pendientes',                 to: '/correspondencia/lista-memorandums-revision',icon: <FileText size={18} />,   roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
+                { label: 'Acuse Memorándum',                 to: '/correspondencia/lista-memorandums-revision',icon: <FileText size={18} />,   roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
                 { label: 'Memorándums Asignados',                  to: '/correspondencia/memorandums-por-area',      icon: <CheckSquare size={18} />,roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
-                { label: 'Acuses de Oficio por Área',              to: '/correspondencia/oficios-por-area',          icon: <FolderCheck size={18} />,roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
-                { label: 'Contestación de Bandeja',                to: '/correspondencia/bandeja',                   icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia',] },
+                { label: 'Oficios Asignados',              to: '/correspondencia/oficios-por-area',          icon: <FolderCheck size={18} />,roles: ['Administrador', 'Administrador Correspondencia', 'Gestor de Correspondencia'] },
+                { label: 'Bandeja de Correspondencia',                to: '/correspondencia/bandeja',                   icon: <Archive size={18} />,    roles: ['Administrador', 'Administrador Correspondencia',] },
             ],
         },
         sustantiva: {
