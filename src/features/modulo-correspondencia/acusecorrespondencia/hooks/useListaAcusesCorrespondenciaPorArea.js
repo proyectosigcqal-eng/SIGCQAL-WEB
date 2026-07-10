@@ -17,7 +17,7 @@ export const useListaAcusesCorrespondenciaPorArea = () => {
     try {
       const data = idArea === TODAS_LAS_AREAS
               ? await listarTodos()
-              : await listarPorArea(idArea);
+              : await listarAcusesPorArea(idArea);
       setAcuses(data);
     } catch (err) {
       setError(err.message);
