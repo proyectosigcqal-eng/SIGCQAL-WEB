@@ -91,7 +91,10 @@ export const ListaMemorandumsPorArea = () => {
                       <button 
                         className="btn-accion btn-contestacion"
                         title="Contestación"
-                        onClick={() => navigate(`/correspondencia/contestacion/${memo.idAcuse}`)}
+                        onClick={() => {
+                          console.log('ID enviado a contestación:', memo.id, 'folio:', memo.folioUnico);
+                          navigate(`/correspondencia/contestacion/${memo.id}`);
+                        }}
                       >
                         Contestación
                       </button>

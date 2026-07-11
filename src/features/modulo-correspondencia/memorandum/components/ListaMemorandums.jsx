@@ -1,11 +1,11 @@
-import { useListaMemorandums } from '../hooks/useListaMemorandums';
+import { useListaMemorandums  } from '../hooks/useListaMemorandums';
 import '@/features/modulo-correspondencia/memorandum/styles/listaMemorandums.css';
 import { useState } from 'react';
 import { DetalleMemorandumModal } from './DetalleMemorandumModal';
 import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
 
 export const ListaMemorandums = () => {
-  const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandums();
+  const { memorandums, loading, error, recargar, areaForzada } = useListaMemorandums ();
   const [detalleId, setDetalleId] = useState(null);
 
   // Utiliza helpers compartidos para normalizar y mostrar fechas

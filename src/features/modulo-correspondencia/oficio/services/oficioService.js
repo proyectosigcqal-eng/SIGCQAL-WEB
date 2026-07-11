@@ -126,3 +126,8 @@ export const listarTodos = async () => {
         throw error;
     }
 };
+
+export const listarTodosPendientesOficios = async () => {
+  const { data } = await axios.get(`${API_BASE_URL}/oficios/pendientesacuse/todos`);
+  return Array.isArray(data) ? data : data.content ?? [];
+};

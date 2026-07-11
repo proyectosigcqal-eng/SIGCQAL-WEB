@@ -74,7 +74,7 @@ export const ListaAcusesOficioPorArea = () => {
                   <td>
                     <button
     className="btn-contestacion-acuse-oficio"
-    onClick={() => navigate(`/correspondencia/contestacion-oficio/${acuse.idOficio ?? acuse.id}`)}
+    onClick={() => navigate(`/correspondencia/contestacion-oficio/${acuse.id}`)}
   >
     Contestación
   </button>
