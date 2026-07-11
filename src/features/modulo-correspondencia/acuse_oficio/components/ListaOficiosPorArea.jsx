@@ -39,16 +39,16 @@ export const ListaOficiosPorArea = () => {
             </thead>
             <tbody>
               {oficios.map((oficio, index) => (
-                <tr key={oficio.idAcuseOficio}>
+                <tr key={oficio.id}>
                   <td>{index + 1}</td>
                   <td>{oficio.folioUnico || '-'}</td>
-                  <td>{oficio.observaciones || '-'}</td>
-                  <td>{`Usuario ${oficio.idUsuarioEmisor}`}</td>
+                  <td>{oficio.asuntoCorrespondencia || oficio.observaciones || '-'}</td>
+                  <td>{oficio.nombreUsuarioEmisor || '-'}</td>
                   <td>{formatFecha(oficio, oficio.fechaEmision)}</td>
                   <td>
                     <button
                       className="btn-accion btn-contestacion"
-                      onClick={() => navigate(`/correspondencia/contestacion-oficio/${oficio.idAcuseOficio}`)}
+                      onClick={() => navigate(`/correspondencia/contestacion-oficio/${oficio.id}`)}
                     >
                       Contestación
                     </button>

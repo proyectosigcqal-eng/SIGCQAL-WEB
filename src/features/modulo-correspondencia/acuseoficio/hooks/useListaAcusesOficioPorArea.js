@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { listarAcusesPorArea, listarTodos } from '../services/acuseoficioService';
 import { useAreaUsuario, TODAS_LAS_AREAS } from '@/shared/hooks/useAreaUsuario';
- 
-const API = 'http://localhost:8081/SIGCQAL_Prod/api/v1';
+import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
  
 export const useListaAcusesOficioPorArea = () => {
-  const [oficios, setOficios] = useState([]);
+  const [acuses, setAcuses] = useState([]);  // ← renombrado a acuses
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState(null);
  
@@ -14,16 +12,14 @@ export const useListaAcusesOficioPorArea = () => {
  
   const cargarOficios = async () => {
     if (!idArea) return;
-    if (idArea === null) return;
- 
     setLoading(true);
     setError(null);
     try {
-      // Admin → endpoint sin filtro de área (ajusta la URL si tu backend la tiene)
-       const data = idArea === TODAS_LAS_AREAS
-                    ? await listarTodos()
-                    : await listarAcusesPorArea(idArea);
-      setOficios(data);
+      const url = idArea === TODAS_LAS_AREAS
+        ? `${API_BASE_URL}/oficios/asignados/todos`
+        : `${API_BASE_URL}/oficios/asignados/area/${idArea}`;
+      const { data } = await axios.get(url);
+      setAcuses(Array.isArray(data) ? data : data.content ?? []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -35,5 +31,5 @@ export const useListaAcusesOficioPorArea = () => {
     if (idArea !== null) cargarOficios();
   }, [idArea]);
  
-  return { oficios, loading, error, recargar: cargarOficios, areaForzada: idArea };
+  return { acuses, loading, error, recargar: cargarOficios, areaForzada: idArea };
 };

@@ -1,5 +1,6 @@
+// useListaMemorandums.js
 import { useState, useEffect } from 'react';
-import { listarPorArea, listarTodos } from '../services/memorandumService';
+import { listarPorArea, listarTodos, listarTodosPendientes } from '../services/memorandumService';
 import { useAreaUsuario, TODAS_LAS_AREAS } from '@/shared/hooks/useAreaUsuario';
  
 export const useListaMemorandums = () => {
@@ -11,15 +12,12 @@ export const useListaMemorandums = () => {
  
   const cargarMemorandums = async () => {
     if (!idArea) return;
-    if (idArea === null) return; // sin usuario logueado
- 
     setLoading(true);
     setError(null);
     try {
-      // Admin sin área → cargar todos
       const data = idArea === TODAS_LAS_AREAS
-        ? await listarTodos({ page: 0, size: 10000 })
-        : await listarPorArea(idArea, { page: 0, size: 10000 });
+        ? await listarTodosPendientes()   // ← cambia listarTodos por este
+        : await listarPorArea(idArea);
       setMemorandums(data);
     } catch (err) {
       setError(err.message);
@@ -29,9 +27,7 @@ export const useListaMemorandums = () => {
     }
   };
  
-  useEffect(() => {
-    cargarMemorandums();
-  }, [idArea]);
+  useEffect(() => { cargarMemorandums(); }, [idArea]);
  
   return { memorandums, loading, error, recargar: cargarMemorandums, areaForzada: idArea };
 };

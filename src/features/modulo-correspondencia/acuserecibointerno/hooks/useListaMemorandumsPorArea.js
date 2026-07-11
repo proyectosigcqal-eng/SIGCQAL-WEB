@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { listarPorArea, listarTodos } from '../services/acuserecibointernoService';
 import { useAreaUsuario, TODAS_LAS_AREAS } from '@/shared/hooks/useAreaUsuario';
+import axios from 'axios';
+import API_BASE_URL from '@/shared/config/api';
  
 export const useListaMemorandumsPorArea = () => {
   const [memorandums, setMemorandums] = useState([]);
@@ -11,15 +12,14 @@ export const useListaMemorandumsPorArea = () => {
  
   const cargarMemorandums = async () => {
     if (!idArea) return;
-    if (idArea === null) return;
- 
     setLoading(true);
     setError(null);
     try {
-      const data = idArea === TODAS_LAS_AREAS
-        ? await listarTodos()
-        : await listarPorArea(idArea);
-      setMemorandums(data);
+      const url = idArea === TODAS_LAS_AREAS
+        ? `${API_BASE_URL}/memorandums/asignados/todos`
+        : `${API_BASE_URL}/memorandums/asignados/area/${idArea}`;
+      const { data } = await axios.get(url);
+      setMemorandums(Array.isArray(data) ? data : data.content ?? []);
     } catch (err) {
       setError(err.message);
       console.error('Error al cargar memorandums por área:', err);
@@ -34,4 +34,3 @@ export const useListaMemorandumsPorArea = () => {
  
   return { memorandums, loading, error, recargar: cargarMemorandums, areaForzada: idArea };
 };
- 

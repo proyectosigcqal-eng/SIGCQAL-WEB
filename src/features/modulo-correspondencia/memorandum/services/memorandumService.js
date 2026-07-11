@@ -131,3 +131,8 @@ export const registrarSeguimiento = async (idMemo, datosSeguimiento) => {
 export const listarTodos = async (options = {}) => {
     return listarMemorandums();
 };
+
+export const listarTodosPendientes = async () => {
+  const { data } = await axios.get(`${API_BASE_URL}/memorandums/pendientesacuse/todos`);
+  return Array.isArray(data) ? data : data.content ?? [];
+};
