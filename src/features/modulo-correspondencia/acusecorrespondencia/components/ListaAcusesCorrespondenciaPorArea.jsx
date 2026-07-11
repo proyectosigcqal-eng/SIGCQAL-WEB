@@ -1,13 +1,24 @@
-import { useNavigate } from 'react-router-dom';
-import { useListaAcusesCorrespondenciaPorArea } from '../hooks/useListaAcusesCorrespondenciaPorArea';
-import '@/features/modulo-correspondencia/acusecorrespondencia/styles/listaAcusesCorrespondencia.css';
-import { pickFecha, formatDateDisplay } from '@/shared/utils/dateUtils';
+import { useNavigate } from "react-router-dom";
+import { useListaAcusesCorrespondenciaPorArea } from "../hooks/useListaAcusesCorrespondenciaPorArea";
+import "@/features/modulo-correspondencia/acusecorrespondencia/styles/listaAcusesCorrespondencia.css";
+import { pickFecha, formatDateDisplay } from "@/shared/utils/dateUtils";
 
+// DESPUÉS
 export const ListaAcusesCorrespondenciaPorArea = () => {
-  const { acuses, loading, error, recargar, areaForzada } = useListaAcusesCorrespondenciaPorArea();
+  const {
+    acuses,
+    loading,
+    error,
+    recargar,
+    areaForzada,
+    limpiarContestados,
+    mostrarTodos,
+    ocultarContestados,
+  } = useListaAcusesCorrespondenciaPorArea();
   const navigate = useNavigate();
 
-  const formatFecha = (obj, fallback) => formatDateDisplay(pickFecha(obj) || fallback);
+  const formatFecha = (obj, fallback) =>
+    formatDateDisplay(pickFecha(obj) || fallback);
 
   if (loading) {
     return (
@@ -25,7 +36,9 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
       <div className="lista-acuses-correspondencia-container">
         <div className="error-state">
           <p>Error al cargar: {error}</p>
-          <button onClick={recargar} className="btn-reintentar">Reintentar</button>
+          <button onClick={recargar} className="btn-reintentar">
+            Reintentar
+          </button>
         </div>
       </div>
     );
@@ -40,6 +53,23 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
           <button onClick={recargar} className="btn-actualizar-acuse">
             ↻ Actualizar
           </button>
+          {!ocultarContestados ? (
+            <button
+              onClick={limpiarContestados}
+              className="btn-limpiar-acuse"
+              title="Ocultar los oficios ya contestados"
+            >
+              🗹 Limpiar
+            </button>
+          ) : (
+            <button
+              onClick={mostrarTodos}
+              className="btn-limpiar-acuse"
+              title="Mostrar todos"
+            >
+              👁 Mostrar todos
+            </button>
+          )}
         </div>
       </div>
 
@@ -65,26 +95,36 @@ export const ListaAcusesCorrespondenciaPorArea = () => {
               {acuses.map((acuse, index) => (
                 <tr key={acuse.id || index}>
                   <td className="num-index">{index + 1}</td>
-                  <td>{acuse.folioUnico || '-'}</td>
-                  <td>{acuse.dependenciaRemitente || '-'}</td>
-                  <td>{acuse.asunto || '-'}</td>
+                  <td>{acuse.folioUnico || "-"}</td>
+                  <td>{acuse.dependenciaRemitente || "-"}</td>
+                  <td>{acuse.asunto || "-"}</td>
                   <td>{formatFecha(acuse, acuse.fechaExpedicion)}</td>
                   <td>{formatFecha(acuse, acuse.fechaAceptacion)}</td>
                   <td>
-                  <button 
-  className="btn-contestacion-acuse-correspondencia"
-  onClick={() => {
-    // ✅ Usar idCorrespondencia, no el id del acuse
-    const idDestino = acuse.idCorrespondencia;
-    if (idDestino) {
-      navigate(`/correspondencia/contestacion-correspondencia/${idDestino}`);
-    } else {
-      console.error("No se encontró idCorrespondencia en el acuse:", acuse);
-    }
-  }}
->
-  Contestación
-</button>
+                    <button
+                      className={`btn-contestacion-acuse-correspondencia ${acuse.idEstatus >= 5 ? "btn-contestacion-disabled" : ""}`}
+                      disabled={acuse.idEstatus >= 5}
+                      title={
+                        acuse.idEstatus >= 5
+                          ? "Ya fue contestado"
+                          : "Ir a contestación"
+                      }
+                      onClick={() => {
+                        const idDestino = acuse.idCorrespondencia;
+                        if (idDestino) {
+                          navigate(
+                            `/correspondencia/contestacion-correspondencia/${idDestino}`,
+                          );
+                        } else {
+                          console.error(
+                            "No se encontró idCorrespondencia en el acuse:",
+                            acuse,
+                          );
+                        }
+                      }}
+                    >
+                      {acuse.idEstatus >= 5 ? "Contestado" : "Contestación"}
+                    </button>
                   </td>
                 </tr>
               ))}
