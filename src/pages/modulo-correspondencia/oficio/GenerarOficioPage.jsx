@@ -31,9 +31,9 @@ export const GenerarOficioPage = () => {
   }
 
   return (
-    <div className="sigcqal-page-container">
+    <div className="sigcqal-page-container" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="split-view-container">
-        <section className="panel-formulario">
+        <section className="panel-formulario" style={{ height: '100%', overflowY: 'auto' }}>
           <FormularioOficio
             formData={formData}
             setFormData={setFormData}
@@ -42,7 +42,7 @@ export const GenerarOficioPage = () => {
             catalogos={catalogos}
           />
         </section>
-        <section className="panel-vista-previa">
+        <section className="panel-vista-previa" style={{ height: '100%', overflowY: 'auto' }}>
           <VistaPreviaOficio
             formData={formData}
             usuarios={catalogos.usuarios}
