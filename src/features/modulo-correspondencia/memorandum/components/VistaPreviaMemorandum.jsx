@@ -8,112 +8,182 @@ export const VistaPreviaMemorandum = ({
   areaDestino,
 }) => {
   const getNombreUsuario = (id) => {
-    if (!id) return "_________________________";
+    if (!id) return "";
     const usuario = usuarios.find((u) => u.id === Number(id));
-    if (!usuario) return "_________________________";
-    return (
-      usuario.nombreCompleto ||
-      usuario.usuarioLogin ||
-      "_________________________"
-    );
+    if (!usuario) return "";
+    return (usuario.nombreCompleto || usuario.usuarioLogin || "").trim();
   };
 
   const getAreaUsuario = (id) => {
-    if (!id) return "_________________________";
+    if (!id) return "";
     const usuario = usuarios.find((u) => u.id === Number(id));
-    return usuario?.nombreArea || "_________________________";
+    return usuario?.nombreArea || "";
   };
 
   const obtenerFechaActual = () => {
     const meses = [
-      "enero",
-      "febrero",
-      "marzo",
-      "abril",
-      "mayo",
-      "junio",
-      "julio",
-      "agosto",
-      "septiembre",
-      "octubre",
-      "noviembre",
-      "diciembre",
+      "enero","febrero","marzo","abril","mayo","junio",
+      "julio","agosto","septiembre","octubre","noviembre","diciembre",
     ];
     const fecha = new Date();
     return `${fecha.getDate()} de ${meses[fecha.getMonth()]} de ${fecha.getFullYear()}`;
   };
 
-  // Valores dinámicos — igual que los marcadores de la plantilla
-  const folio = formData.folioUnico || "{{FOLIO}}";
-  const asunto =
-    formData.asuntoCorrespondencia || formData.observaciones || "{{ASUNTO}}";
-  const fecha = obtenerFechaActual();
-  const areaDestinatario = formData.idArea
-    ? areaDestino?.nombre || areaDestino?.nombreArea || null
-    : null;
-  const areaEmisor =
-    getAreaUsuario(formData.idUsuarioEmisor) || "[Sin Área Asignada]";
-  const nombreEmisor = getNombreUsuario(formData.idUsuarioEmisor);
-  const instruccion = formData.instruccionSeguimiento || "";
-  const nombreFirmante = getNombreUsuario(formData.idUsuarioFirmante);
-  const areaFirmante = getAreaUsuario(formData.idUsuarioFirmante);
+  // ── Variables que mapean 1:1 con los marcadores de la plantilla ──────────
+  const folio          = formData.folioUnico   || "MEMO-XXXXXXXX"; // ← sin tocar, es el de arriba
+const numOficioRef   = formData.numeroOficio || folio;           // ← nuevo, para el cuerpo
+  const asunto         = formData.asuntoCorrespondencia || formData.observaciones || "";
+  const fecha          = obtenerFechaActual();
+  const usuarioEncargado = formData.nombreEncargado
+                          || getNombreUsuario(formData.idUsuarioEncargado)
+                          || "";
+  const cargoEncargado   = formData.cargoEncargado || "";
+  const areaDestinatario = areaDestino?.nombre || areaDestino?.nombreArea
+                          || getAreaUsuario(formData.idArea) || "";
+  const instruccion      = formData.instruccionSeguimiento || "";
+  const nombreFirmante   = getNombreUsuario(formData.idUsuarioFirmante);
+  const areaFirmante     = getAreaUsuario(formData.idUsuarioFirmante);
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Estilos inline para replicar el Word fielmente
+  const s = {
+    page: {
+      position: 'relative',
+      fontFamily: '"Times New Roman", Times, serif',
+      fontSize: 12,
+      color: '#000',
+      lineHeight: 1.4,
+    },
+    headerBox: {
+      // bloque superior derecho: folio + asunto en blockquote
+      textAlign: 'right',
+      marginBottom: 8,
+    },
+    folioLine: {
+      fontWeight: 700,
+      fontSize: 13,
+    },
+    fecha: {
+      marginBottom: 14,
+    },
+    destinatarioNombre: {
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      marginBottom: 0,
+    },
+    destinatarioCargo: {
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      marginTop: 0,
+      marginBottom: 14,
+    },
+    presente: {
+      fontWeight: 700,
+      letterSpacing: '0.25em',
+      marginBottom: 12,
+    },
+    cuerpo: {
+      textAlign: 'justify',
+      marginBottom: 10,
+    },
+    saludo: {
+      textAlign: 'justify',
+      marginBottom: 24,
+    },
+    atentamente: {
+      fontWeight: 700,
+      marginBottom: 32,
+    },
+    firmaNombre: {
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      marginBottom: 0,
+    },
+    firmaArea: {
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      marginTop: 0,
+      marginBottom: 14,
+    },
+    ccp: {
+      marginTop: 8,
+    },
+    placeholder: {
+      color: '#aaa',
+      fontStyle: 'italic',
+    },
+  };
+
+  const ph = (val, label) =>
+    val
+      ? val
+      : <span style={s.placeholder}>[{label}]</span>;
 
   return (
     <div className="hoja-membretada-container">
-      <div className="hoja-membretada-papel" id="memorandum-pdf-content">
+      <div className="hoja-membretada-papel" id="memorandum-pdf-content" style={s.page}>
         <img src={membreteImg} alt="membrete" className="membrete-fondo" />
 
         <div className="membrete-contenido">
-          {/* META INFO — esquina superior derecha */}
-          <div className="membrete-meta-info">
-            <p className="meta-folio">
-              <strong>{formData.folioUnico || "MEMO-XXXXXXXX"}</strong>
-            </p>
-            <p>Guadalupe, Zacatecas, a {fecha}.</p>
+
+          {/* ── HEADER: folio + asunto (blockquote derecho en Word) ───────── */}
+          <div style={s.headerBox}>
+            <p style={s.folioLine}><strong>{folio}</strong></p>
+            <p><strong>Asunto:</strong> {ph(asunto, 'Asunto')}</p>
           </div>
 
-          {/* DESTINATARIO */}
-          <div className="cuerpo-memorandum">
-            <p className="area-destinatario">
-              <strong>{areaDestinatario}</strong>
-            </p>
-            <p className="texto-presente">
-              <strong>P R E S E N T E.</strong>
-            </p>
+          {/* ── FECHA ────────────────────────────────────────────────────── */}
+          <p style={s.fecha}>
+            Guadalupe, Zacatecas, a {fecha}.
+          </p>
 
-            {/* Texto del cuerpo — idéntico a la plantilla Word */}
-            <div className="texto-contenido">
-              <p>
-                Por este conducto, remito a Usted el oficio{" "}
-                <strong>{folio}</strong>, emitido por{" "}
-                <strong>{nombreEmisor}</strong>, Encargado(a) de{" "}
-                <strong>{areaEmisor}</strong>{" "}
-                {instruccion || (
-                  <span className="placeholder-muted">
-                    [Sin instrucciones de seguimiento]
-                  </span>
-                )}
-              </p>
-              <p>
-                Sin más por el momento, aprovecho la ocasión para enviarle un
-                cordial saludo.
-              </p>
-            </div>
-          </div>
+          {/* ── DESTINATARIO ─────────────────────────────────────────────── */}
+          <p style={s.destinatarioNombre}>
+            <strong>{ph(usuarioEncargado, 'USUARIO_ENCARGADO')}</strong>
+          </p>
+          {/* Cargo + Área en la misma línea, igual que la plantilla */}
+          <p style={s.destinatarioCargo}>
+            <strong>
+              {cargoEncargado || areaDestinatario
+                ? `${cargoEncargado}${cargoEncargado && areaDestinatario ? ' ' : ''}${areaDestinatario}`
+                : <span style={s.placeholder}>[CARGO_ENCARGADO AREA_DESTINATARIO]</span>
+              }
+            </strong>
+          </p>
 
-          {/* FIRMA */}
-          <div className="membrete-footer-firma">
-            <p>
-              <strong>Atentamente</strong>
-            </p>
-            <div className="bloque-firma">
-              <p>
-                <strong>{nombreFirmante}</strong>
-              </p>
-              <p>{areaFirmante}</p>
-            </div>
-            <p className="texto-ccp">C.c.p.- Archivo.</p>
-          </div>
+          {/* ── PRESENTE ─────────────────────────────────────────────────── */}
+          <p style={s.presente}><strong>P R E S E N T E.</strong></p>
+
+          {/* ── CUERPO — idéntico al Word ─────────────────────────────────
+              "En atención a su memorándum número {{FOLIO}},
+               informo a Usted que {{INSTRUCCION}}"                        */}
+          <p style={s.cuerpo}>
+            En atención a su oficio número <strong>{numOficioRef}</strong>,
+            informo a Usted que{' '}
+            {instruccion
+              ? instruccion
+              : <span style={s.placeholder}>[Sin instrucciones de seguimiento]</span>
+            }
+          </p>
+
+          {/* ── SALUDO ───────────────────────────────────────────────────── */}
+          <p style={s.saludo}>
+            Sin más por el momento, aprovecho la ocasión para enviarle un
+            cordial saludo.
+          </p>
+
+          {/* ── FIRMA ────────────────────────────────────────────────────── */}
+          <p style={s.atentamente}><strong>Atentamente</strong></p>
+
+          <p style={s.firmaNombre}>
+            <strong>{ph(nombreFirmante, 'NOMBRE_FIRMANTE')}</strong>
+          </p>
+          <p style={s.firmaArea}>
+            <strong>{ph(areaFirmante, 'AREA_FIRMANTE')}</strong>
+          </p>
+
+          <p style={s.ccp}>C.c.p. Archivo.</p>
+
         </div>
       </div>
     </div>

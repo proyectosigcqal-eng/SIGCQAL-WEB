@@ -21,28 +21,40 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
 
   const handleEmisorChange = (e) => {
     const userId = e.target.value;
-    const usuarioSeleccionado = usuarios.find(u => u.id === Number(userId));
     setFormData(prev => ({
       ...prev,
       idUsuarioEmisor: userId !== '' ? Number(userId) : '',
-      idArea: usuarioSeleccionado?.idArea ? Number(usuarioSeleccionado.idArea) : ''
+      // ✅ NO tocar idArea — viene fijo desde la correspondencia
     }));
   };
 
   return (
     <form className="memorandum-form-container" onSubmit={handleSubmit}>
 
-      {/* Folio — solo lectura */}
-     <div className="form-group full-width">
-  <label>No. Oficio</label>
-  <input
-    type="text"
-    value={formData.folioUnico || ''}
-    placeholder="Se generará al guardar"
-    disabled
-    className="input-readonly"
-  />
-</div>
+      {/* No. Oficio de gobierno — precargado desde la correspondencia, readonly */}
+      <div className="form-group full-width">
+        <label>No. Oficio</label>
+        <input
+          type="text"
+          value={formData.numeroOficio || ''}
+          placeholder="Se cargará desde la correspondencia"
+          disabled
+          className="input-readonly"
+        />
+      </div>
+
+      {/* Folio interno — lo genera el backend */}
+      <div className="form-group full-width">
+        <label>Folio Interno</label>
+        <input
+          type="text"
+          value={formData.folioUnico || ''}
+          placeholder="Se generará al guardar"
+          disabled
+          className="input-readonly"
+        />
+      </div>
+
       {/* Asunto */}
       <div className="form-group full-width">
         <label>Asunto</label>
@@ -114,8 +126,6 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
           />
         </div>
       </div>
-
-      {/* Plantilla removida por requerimiento: campo oculto en formularios */}
 
       {/* Cuerpo */}
       <div className="form-group full-width rich-text-area">
