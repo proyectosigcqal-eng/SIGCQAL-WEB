@@ -1,20 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { hasAreaAsignada } from '../utils/correspondenciaUtils';
-import { formatDateTimeDisplay } from '@/shared/utils/dateUtils';
+import React, { useEffect, useMemo, useState } from "react";
+import { hasAreaAsignada } from "../utils/correspondenciaUtils";
+import { useCambiarTipoCorrespondencia } from "../hooks/useCambiarTipoCorrespondencia";
+import { formatDateTimeDisplay } from "@/shared/utils/dateUtils";
 
 const PAGE_SIZE = 10;
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
 const normalizeText = (value) =>
-  String(value ?? '')
+  String(value ?? "")
     .trim()
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
 const safeDateLabel = (value) => {
-  if (!value) return '—';
+  if (!value) return "—";
   return formatDateTimeDisplay(value);
 };
 
@@ -40,27 +41,28 @@ const getIdEstatus = (item) => item?.idEstatus ?? item?.id_estatus ?? null;
 
 const getEstatusLabel = (item) => {
   const raw = item?.idEstatus ?? item?.id_estatus;
-  if (raw === 1 || raw === null || raw === undefined) return 'Registrado';
-  if (raw === 2) return 'Asignado';
-  if (raw === 3) return 'En Seguimiento';
-  if (raw === 4) return 'Concluido';
+  if (raw === 1 || raw === null || raw === undefined) return "Registrado";
+  if (raw === 2) return "Asignado";
+  if (raw === 3) return "En Seguimiento";
+  if (raw === 4) return "Concluido";
   return String(raw);
 };
 
 const getEstatusColors = (label) => {
   const n = normalizeText(label);
-  if (n.includes('registr')) return { bg: '#DBEAFE', fg: '#1D4ED8' };
-  if (n.includes('asign')) return { bg: '#FEF3C7', fg: '#B45309' };
-  if (n.includes('seguim')) return { bg: '#DCFCE7', fg: '#166534' };
-  if (n.includes('conclu') || n.includes('cerrad') || n.includes('final')) return { bg: '#E5E7EB', fg: '#374151' };
-  return { bg: '#E2E8F0', fg: '#0F172A' };
+  if (n.includes("registr")) return { bg: "#DBEAFE", fg: "#1D4ED8" };
+  if (n.includes("asign")) return { bg: "#FEF3C7", fg: "#B45309" };
+  if (n.includes("seguim")) return { bg: "#DCFCE7", fg: "#166534" };
+  if (n.includes("conclu") || n.includes("cerrad") || n.includes("final"))
+    return { bg: "#E5E7EB", fg: "#374151" };
+  return { bg: "#E2E8F0", fg: "#0F172A" };
 };
 
 const buildOptions = (items, getIdFn, getLabelFn) => {
   const map = new Map();
   asArray(items).forEach((it) => {
     const id = getIdFn(it);
-    if (id === null || id === undefined || String(id).trim() === '') return;
+    if (id === null || id === undefined || String(id).trim() === "") return;
     const key = String(id);
     if (map.has(key)) return;
     const label = getLabelFn(it);
@@ -69,11 +71,19 @@ const buildOptions = (items, getIdFn, getLabelFn) => {
   return Array.from(map.entries()).map(([value, label]) => ({ value, label }));
 };
 
-export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarMemo, onGenerarOficio, loading }) => {
-  const [texto, setTexto] = useState('');
-  const [filtroArea, setFiltroArea] = useState('');
-  const [filtroEstatus, setFiltroEstatus] = useState('');
+export const TablaCorrespondenciasExterna = ({
+  correspondencias = [],
+  onGenerarMemo,
+  onGenerarOficio,
+  loading,
+  onRefresh,
+}) => {
+  const [texto, setTexto] = useState("");
+  const [filtroArea, setFiltroArea] = useState("");
+  const [filtroEstatus, setFiltroEstatus] = useState("");
   const [page, setPage] = useState(1);
+  const { cambiarTipo, loading: loadingCambio } =
+    useCambiarTipoCorrespondencia();
 
   const rows = useMemo(() => asArray(correspondencias), [correspondencias]);
 
@@ -85,10 +95,14 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
         (it) => {
           const label = getAreaLabel(it);
           const id = getIdArea(it);
-          return label ? String(label) : id != null ? `Área ${id}` : 'Sin asignar';
-        }
+          return label
+            ? String(label)
+            : id != null
+              ? `Área ${id}`
+              : "Sin asignar";
+        },
       ),
-    [rows]
+    [rows],
   );
 
   const estatusOptions = useMemo(
@@ -96,32 +110,37 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
       buildOptions(
         rows,
         (it) => getIdEstatus(it),
-        (it) => getEstatusLabel(it)
+        (it) => getEstatusLabel(it),
       ),
-    [rows]
+    [rows],
   );
 
   const filtered = useMemo(() => {
     const q = normalizeText(texto);
-    const area = String(filtroArea || '');
-    const estatus = String(filtroEstatus || '');
+    const area = String(filtroArea || "");
+    const estatus = String(filtroEstatus || "");
 
     return rows.filter((item) => {
       if (q) {
-        const folio = normalizeText(item?.folioUnico ?? item?.folio_unico ?? '');
-        const remitente = normalizeText(item?.dependenciaRemitente ?? item?.dependencia_remitente ?? '');
-        const asunto = normalizeText(item?.asunto ?? '');
-        if (!folio.includes(q) && !remitente.includes(q) && !asunto.includes(q)) return false;
+        const folio = normalizeText(
+          item?.folioUnico ?? item?.folio_unico ?? "",
+        );
+        const remitente = normalizeText(
+          item?.dependenciaRemitente ?? item?.dependencia_remitente ?? "",
+        );
+        const asunto = normalizeText(item?.asunto ?? "");
+        if (!folio.includes(q) && !remitente.includes(q) && !asunto.includes(q))
+          return false;
       }
 
       if (area) {
         const idArea = getIdArea(item);
-        if (String(idArea ?? '') !== area) return false;
+        if (String(idArea ?? "") !== area) return false;
       }
 
       if (estatus) {
         const idEstatus = getIdEstatus(item);
-        if (String(idEstatus ?? '') !== estatus) return false;
+        if (String(idEstatus ?? "") !== estatus) return false;
       }
 
       return true;
@@ -138,35 +157,63 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
     setPage(1);
   }, [texto, filtroArea, filtroEstatus]);
 
-  const paged = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
+  const paged = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page],
+  );
 
   const handleClear = () => {
-    setTexto('');
-    setFiltroArea('');
-    setFiltroEstatus('');
+    setTexto("");
+    setFiltroArea("");
+    setFiltroEstatus("");
     setPage(1);
+  };
+
+  const manejarCambiarTipo = async (id, idNuevoTipo) => {
+    if (!window.confirm("¿Cambiar a Correspondencia Interna?")) return;
+    try {
+      await cambiarTipo(id, idNuevoTipo);
+      alert("Tipo actualizado. Por favor, recarga la página.");
+      onRefresh?.();
+    } catch (error) {
+      alert(
+        `Error: ${error?.response?.data?.detail || error?.message || "Error al cambiar tipo"}`,
+      );
+    }
   };
 
   return (
     <div className="tabla-full-container">
       <div className="tabla-header-row">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+          }}
+        >
           <h2 className="tabla-titulo">Correspondencia Registrada Externa</h2>
           <span
             style={{
-              background: '#E2E8F0',
-              color: '#0F172A',
-              padding: '4px 10px',
+              background: "#E2E8F0",
+              color: "#0F172A",
+              padding: "4px 10px",
               borderRadius: 999,
-              fontSize: '0.8rem',
-              fontWeight: 700
+              fontSize: "0.8rem",
+              fontWeight: 700,
             }}
           >
             {filtered.length} registros
           </span>
         </div>
 
-        <button type="button" className="btn-secundario-corr" onClick={() => window.location.reload()} disabled={loading}>
+        <button
+          type="button"
+          className="btn-secundario-corr"
+          onClick={() => window.location.reload()}
+          disabled={loading}
+        >
           Actualizar lista
         </button>
       </div>
@@ -179,11 +226,11 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
           onChange={(e) => setTexto(e.target.value)}
           disabled={loading}
           style={{
-            padding: '7px 10px',
-            border: '1px solid #cbd5e1',
+            padding: "7px 10px",
+            border: "1px solid #cbd5e1",
             borderRadius: 6,
-            fontSize: '0.85rem',
-            minWidth: 240
+            fontSize: "0.85rem",
+            minWidth: 240,
           }}
         />
 
@@ -215,13 +262,26 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
           ))}
         </select>
 
-        <button type="button" className="btn-secundario-corr" onClick={handleClear} disabled={loading}>
+        <button
+          type="button"
+          className="btn-secundario-corr"
+          onClick={handleClear}
+          disabled={loading}
+        >
           Limpiar filtros
         </button>
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 0', color: '#64748b' }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "1rem 0",
+            color: "#64748b",
+          }}
+        >
           <span className="spinner-corr" />
           <span style={{ fontWeight: 600 }}>Cargando correspondencias...</span>
         </div>
@@ -245,68 +305,140 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
             <tbody>
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={10} style={{ padding: '1rem', color: '#64748b' }}>
+                  <td
+                    colSpan={10}
+                    style={{ padding: "1rem", color: "#64748b" }}
+                  >
                     No hay correspondencias con los filtros actuales.
                   </td>
                 </tr>
               ) : (
                 paged.map((item, idx) => {
                   const id = getId(item);
-                  const folio = item?.folioUnico ?? item?.folio_unico ?? '—';
-                  const oficio = item?.numeroOficio ?? item?.num_oficio_externo ?? '—';
-                  const remitente = item?.dependenciaRemitente ?? item?.dependencia_remitente ?? '—';
-                  const destinatario = item?.titularDependencia ?? item?.nombre_remitente ?? '—';
-                  const asunto = item?.asunto ?? '—';
-                  const fecha = item?.fechaRecibido ?? item?.fecha_recibido ?? '—';
+                  const folio = item?.folioUnico ?? item?.folio_unico ?? "—";
+                  const oficio =
+                    item?.numeroOficio ?? item?.num_oficio_externo ?? "—";
+                  const remitente =
+                    item?.dependenciaRemitente ??
+                    item?.dependencia_remitente ??
+                    "—";
+                  const destinatario =
+                    item?.titularDependencia ?? item?.nombre_remitente ?? "—";
+                  const asunto = item?.asunto ?? "—";
+                  const fecha =
+                    item?.fechaRecibido ?? item?.fecha_recibido ?? "—";
                   const fechaRecibido = safeDateLabel(fecha);
 
-                  const nombreArea = item?.nombreArea ?? item?.nombre_area ?? null;
+                  const nombreArea =
+                    item?.nombreArea ?? item?.nombre_area ?? null;
                   const idArea = item?.idArea ?? item?.id_area ?? null;
-                  const hasArea = idArea !== null && idArea !== undefined && String(idArea).trim() !== '';
+                  const hasArea =
+                    idArea !== null &&
+                    idArea !== undefined &&
+                    String(idArea).trim() !== "";
                   const areaLabelRaw = nombreArea ?? getAreaLabel(item);
-                  const areaLabel = hasArea ? areaLabelRaw || `Área ${idArea}` : 'Sin asignar';
+                  const areaLabel = hasArea
+                    ? areaLabelRaw || `Área ${idArea}`
+                    : "Sin asignar";
 
                   const estatusLabel = getEstatusLabel(item);
                   const badge = getEstatusColors(estatusLabel);
 
                   return (
-                    <tr key={id ?? `${idx}`}> 
-                      <td style={{ whiteSpace: 'nowrap' }}>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{folio}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{oficio}</td>
+                    <tr key={id ?? `${idx}`}>
+                      <td style={{ whiteSpace: "nowrap" }}>
+                        {(page - 1) * PAGE_SIZE + idx + 1}
+                      </td>
+                      <td style={{ whiteSpace: "nowrap" }}>{folio}</td>
+                      <td style={{ whiteSpace: "nowrap" }}>{oficio}</td>
                       <td>{remitente}</td>
                       <td>{destinatario}</td>
                       <td
-                        title={asunto || ''}
-                        style={{ maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        title={asunto || ""}
+                        style={{
+                          maxWidth: 320,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {asunto}
                       </td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{fechaRecibido || '—'}</td>
+                      <td style={{ whiteSpace: "nowrap" }}>
+                        {fechaRecibido || "—"}
+                      </td>
                       <td>
                         <span
                           style={
                             hasArea
-                              ? { background: '#EEF2FF', color: '#3730A3', padding: '4px 10px', borderRadius: 12, fontWeight: 600, fontSize: '0.8rem' }
-                              : { background: '#FEF3C7', color: '#D97706', padding: '4px 10px', borderRadius: 12, fontWeight: 600, fontSize: '0.8rem' }
+                              ? {
+                                  background: "#EEF2FF",
+                                  color: "#3730A3",
+                                  padding: "4px 10px",
+                                  borderRadius: 12,
+                                  fontWeight: 600,
+                                  fontSize: "0.8rem",
+                                }
+                              : {
+                                  background: "#FEF3C7",
+                                  color: "#D97706",
+                                  padding: "4px 10px",
+                                  borderRadius: 12,
+                                  fontWeight: 600,
+                                  fontSize: "0.8rem",
+                                }
                           }
                         >
                           {areaLabel}
                         </span>
                       </td>
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        <span className="badge-estado" style={{ background: badge.bg, color: badge.fg }}>
+                      <td style={{ whiteSpace: "nowrap" }}>
+                        <span
+                          className="badge-estado"
+                          style={{ background: badge.bg, color: badge.fg }}
+                        >
                           {estatusLabel}
                         </span>
                       </td>
-                      <td style={{ padding: '10px 12px' }}>
+                      <td style={{ padding: "10px 12px" }}>
                         <div className="acciones-cell">
+                          <button
+                            type="button"
+                            onClick={() => manejarCambiarTipo(id, 2)}
+                            disabled={loadingCambio}
+                            style={{
+                              padding: "8px 12px",
+                              backgroundColor: "#0066cc",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              cursor: loadingCambio ? "not-allowed" : "pointer",
+                              fontSize: "13px",
+                              fontWeight: "500",
+                              width: '120px',
+                              textAlign: 'center',
+                              whiteSpace: 'nowrap',
+                              opacity: loadingCambio ? 0.6 : 1,
+                            }}
+                          >
+                            {loadingCambio
+                              ? "Cambiando..."
+                              : "Cambiar a Interna"}
+                          </button>{" "}
                           {!hasAreaAsignada(item) && (
                             <>
-                              <button type="button" className="btn-generar-memo" onClick={() => onGenerarMemo?.(item)}>
+                              <button
+                                type="button"
+                                className="btn-generar-memo"
+                                onClick={() => onGenerarMemo?.(item)}
+                              >
                                 Generar Memo
                               </button>
-                              <button type="button" className="btn-generar-oficio" onClick={() => onGenerarOficio?.(item)}>
+                              <button
+                                type="button"
+                                className="btn-generar-oficio"
+                                onClick={() => onGenerarOficio?.(item)}
+                              >
                                 Generar Oficio
                               </button>
                             </>
@@ -326,7 +458,7 @@ export const TablaCorrespondenciasExterna = ({ correspondencias = [], onGenerarM
         <div>
           Página {page} de {totalPages}
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"
             className="btn-secundario-corr"
