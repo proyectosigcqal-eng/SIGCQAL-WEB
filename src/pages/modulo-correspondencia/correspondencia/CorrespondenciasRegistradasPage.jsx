@@ -23,6 +23,7 @@ export const CorrespondenciasRegistradasPage = () => {
   const [loadingExt, setLoadingExt] = useState(false);
   const [loadingInt, setLoadingInt] = useState(false);
   const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const cargarExterna = useCallback(async () => {
     setLoadingExt(true);
@@ -171,6 +172,12 @@ export const CorrespondenciasRegistradasPage = () => {
     cargarInterna();
   };
 
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+    cargarExterna();
+    cargarInterna();
+  };
+
   const handleGenerarMemo = (item) => {
     const id = getId(item);
     if (!id) return;
@@ -241,20 +248,24 @@ export const CorrespondenciasRegistradasPage = () => {
 
       {vistaActual === 'EXTERNA' ? (
         <TablaCorrespondenciasExterna
+          key={`ext-${refreshKey}`}
           correspondencias={corrExterna}
           loading={loadingExt}
           onGenerarMemo={handleGenerarMemo}
           onGenerarOficio={handleGenerarOficioExterno}
+          onRefresh={handleRefresh}
         />
       ) : null}
 
       {vistaActual === 'INTERNA' ? (
         <TablaCorrespondenciasInterna
+          key={`int-${refreshKey}`}
           correspondencias={corrInterna}
           loading={loadingInt}
           onGenerarOficio={handleGenerarOficioInterno}
           oficiosGuardados={oficiosGuardados}
           archivosAdjuntos={archivosAdjuntos}
+          onRefresh={handleRefresh}
         />
       ) : null}
     </div>
