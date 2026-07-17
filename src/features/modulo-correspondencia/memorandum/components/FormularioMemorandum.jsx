@@ -80,7 +80,7 @@ export const FormularioMemorandum = ({ formData, setFormData, handleChange, hand
       {/* Elaboró + Dependencia */}
       <div className="form-row">
         <div className="form-group">
-          <label>Elaboró</label>
+          <label>Elaboró Memorandum</label>
           <select name="idUsuarioEmisor" value={formData.idUsuarioEmisor} onChange={handleEmisorChange}>
             <option value="">Seleccione...</option>
             {usuarios.map((u) => (

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { hasAreaAsignada } from "../utils/correspondenciaUtils";
 import { useCambiarTipoCorrespondencia } from "../hooks/useCambiarTipoCorrespondencia";
 import { formatDateTimeDisplay } from "@/shared/utils/dateUtils";
+import { ModalEditarCorrespondencia } from "./ModalEditarCorrespondencia";
 
 const PAGE_SIZE = 10;
 
@@ -84,6 +85,26 @@ export const TablaCorrespondenciasExterna = ({
   const [page, setPage] = useState(1);
   const { cambiarTipo, loading: loadingCambio } =
     useCambiarTipoCorrespondencia();
+
+  // ── NUEVO: estado del modal de edición ────────────────────────────────────
+  const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+  const [itemAEditar, setItemAEditar] = useState(null);
+
+  const handleAbrirEditar = (item) => {
+    setItemAEditar(item);
+    setModalEditarAbierto(true);
+  };
+
+  const handleCerrarEditar = () => {
+    setModalEditarAbierto(false);
+    setItemAEditar(null);
+  };
+
+  const handleEditarExito = () => {
+    handleCerrarEditar();
+    onRefresh?.();
+  };
+  // ───────────────────────────────────────────────────────────────────────────
 
   const rows = useMemo(() => asArray(correspondencias), [correspondencias]);
 
@@ -402,6 +423,15 @@ export const TablaCorrespondenciasExterna = ({
                       </td>
                       <td style={{ padding: "10px 12px" }}>
                         <div className="acciones-cell">
+                          {/* ── NUEVO: botón Editar, mismo estilo que Generar Oficio ── */}
+                          <button
+                            type="button"
+                            className="btn-generar-oficio"
+                            onClick={() => handleAbrirEditar(item)}
+                          >
+                            ✏️ Editar
+                          </button>
+
                           <button
                             type="button"
                             onClick={() => manejarCambiarTipo(id, 2)}
@@ -477,6 +507,14 @@ export const TablaCorrespondenciasExterna = ({
           </button>
         </div>
       </div>
+
+      {/* ── NUEVO: Modal de edición ─────────────────────────────────────────── */}
+      <ModalEditarCorrespondencia
+        isOpen={modalEditarAbierto}
+        onClose={handleCerrarEditar}
+        item={itemAEditar}
+        onSuccess={handleEditarExito}
+      />
     </div>
   );
 };

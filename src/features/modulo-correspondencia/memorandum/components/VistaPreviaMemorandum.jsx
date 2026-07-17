@@ -158,8 +158,8 @@ const numOficioRef   = formData.numeroOficio || folio;           // ← nuevo, p
               "En atención a su memorándum número {{FOLIO}},
                informo a Usted que {{INSTRUCCION}}"                        */}
           <p style={s.cuerpo}>
-            En atención a su oficio número <strong>{numOficioRef}</strong>,
-            informo a Usted que{' '}
+            Adjunto al presente remito a Usted copia del oficio número <strong>{numOficioRef}</strong>,
+            emitido por {' '}
             {instruccion
               ? instruccion
               : <span style={s.placeholder}>[Sin instrucciones de seguimiento]</span>
