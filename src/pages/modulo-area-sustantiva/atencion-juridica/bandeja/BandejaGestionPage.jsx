@@ -5,13 +5,18 @@ import {
   TablaTramites,
   TIPO_TRAMITE_TABS,
 } from "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites";
+import DocumentosImprimirModal from "@/features/modulo-area-sustantiva/documentos-imprimir/components/DocumentosImprimirModal";
 import "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css";
 
 export const BandejaGestionPage = () => {
   const [tipoActivo, setTipoActivo] = useState("QUEJAS_RECLAMACIONES");
-
-  const isIrl    = tipoActivo === "REPRESENTACION_LEGAL_IRL";
+  const isIrl = tipoActivo === "REPRESENTACION_LEGAL_IRL";
   const isQuejas = tipoActivo === "QUEJAS_RECLAMACIONES";
+
+  // ← Estado para Modal de Documentos
+  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
+  const [selectedDocType, setSelectedDocType] = useState(null);
+  const [expedienteActual, setExpedienteActual] = useState(null);
 
   const {
     busqueda,
@@ -24,14 +29,19 @@ export const BandejaGestionPage = () => {
     ETAPAS,
     recargar,
   } = useBandejaGestion({
-    // ← Solo activo cuando el tab de quejas está visible
     enabled: isQuejas,
   });
 
-  // ← Cuando el usuario regresa al tab de Quejas, refetch automático
   useEffect(() => {
     if (isQuejas) recargar();
-  }, [tipoActivo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tipoActivo]);
+
+  // ← Función para abrir modal
+  const abrirDocumento = (tipo, expId) => {
+    setSelectedDocType(tipo);
+    setExpedienteActual(expId);
+    setIsDocModalOpen(true);
+  };
 
   return (
     <div className="bdg-page">
@@ -59,7 +69,6 @@ export const BandejaGestionPage = () => {
       </div>
 
       <div className="bdg-filtros-card">
-
         {/* ── Buscador + etapas — solo en Quejas ── */}
         {isQuejas && (
           <>
@@ -75,7 +84,6 @@ export const BandejaGestionPage = () => {
                 />
               </div>
             </div>
-
             <div className="bdg-switch-bar">
               {ETAPAS.map((etapa, i) => (
                 <button
@@ -97,30 +105,48 @@ export const BandejaGestionPage = () => {
         )}
 
         {/* ── Contenido Quejas ── */}
-        {isQuejas && (
-          cargando ? (
-            <div className="bdg-empty"><p>Cargando...</p></div>
+        {isQuejas &&
+          (cargando ? (
+            <div className="bdg-empty">
+              <p>Cargando...</p>
+            </div>
           ) : error ? (
-            <div className="bdg-empty"><p>{error}</p></div>
+            <div className="bdg-empty">
+              <p>{error}</p>
+            </div>
           ) : (
-            <TablaTramites tramites={tramites} tipoActivo={tipoActivo} />
-          )
-        )}
+            <TablaTramites
+              tramites={tramites}
+              tipoActivo={tipoActivo}
+              onAbrirDocumento={abrirDocumento}
+            />
+          ))}
 
-        {/* ── Contenido IRL — TablaTramites maneja su propio fetch interno ── */}
+        {/* ── Contenido IRL ── */}
         {isIrl && (
-          <TablaTramites tramites={[]} tipoActivo={tipoActivo} />
+          <TablaTramites
+            tramites={[]}
+            tipoActivo={tipoActivo}
+            onAbrirDocumento={abrirDocumento}
+          />
         )}
 
-        {/* ── Asesoría Simplificada — próximamente ── */}
+        {/* ── Asesoría Simplificada ── */}
         {tipoActivo === "ASESORIA_SIMPLIFICADA" && (
           <div className="bdg-empty">
             <div className="bdg-empty-icon">📂</div>
             <p>Asesoría Simplificada estará disponible próximamente.</p>
           </div>
         )}
-
       </div>
+
+      {/* ← Modal de Documentos Imprimir */}
+      <DocumentosImprimirModal
+        isOpen={isDocModalOpen}
+        onClose={() => setIsDocModalOpen(false)}
+        expedienteId={expedienteActual}
+        tipoDocumento={selectedDocType}
+      />
     </div>
   );
 };
