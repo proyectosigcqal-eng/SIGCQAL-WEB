@@ -14,7 +14,7 @@ export const MainLayout = () => {
     const [sustantivaOpen,      setSustantivaOpen]    = useState(
         pathname.startsWith('/atencion-juridica') || pathname.startsWith('/area-sustantiva')
     );
-
+    const [docsOpen, setDocsOpen] = useState(pathname.startsWith('/atencion-juridica/doc'));
     const nombreRolActivo = rolActivo?.nombreRol ?? session?.roles?.[0]?.nombreRol ?? '';
 
     // ── Definición completa de los 4 módulos con sus roles permitidos ──
@@ -60,7 +60,20 @@ export const MainLayout = () => {
                 { label: 'Registro y Calificación',  to: '/atencion-juridica/clasificacion',     icon: <CheckSquare size={18} /> },
                 { label: 'Gestión de Expedientes',        to: '/atencion-juridica/bandeja',           icon: <Archive size={18} /> },
                 { label: 'Seguimiento de Queja',     to: '/atencion-juridica/bandeja-tramites-irl', icon: <Archive size={18} /> },
-                { label: 'Asignación de Casos',      to: '/atencion-juridica/asignacion',        icon: <FolderCheck size={18} /> },
+                ],
+        },
+        documentosImprimir: { // Nuevo módulo independiente
+            label: 'Documentos para imprimir',
+            icon: <FileText size={20} />,
+            roles: ['Administrador', 'Asesor'],
+            items: [
+                { label: 'Solicitud de servicio representación legal', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Solicitud de servicio asesoría', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Informe de terminación o dictamen', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Informe de terminación de servicio', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Hoja final de amparo impuesto predial', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Carta compromiso representación legal', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                
             ],
         },
     };
@@ -89,6 +102,7 @@ export const MainLayout = () => {
         gestionEmpleados: [adminOpen,           setAdminOpen],
         correspondencia:  [correspondenciaOpen, setCorrespondenciaOpen],
         sustantiva:       [sustantivaOpen,      setSustantivaOpen],
+        documentosImprimir: [docsOpen,          setDocsOpen],
     };
 
     return (
