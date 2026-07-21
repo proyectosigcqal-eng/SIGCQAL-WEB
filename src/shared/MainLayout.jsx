@@ -67,12 +67,12 @@ export const MainLayout = () => {
             icon: <FileText size={20} />,
             roles: ['Administrador', 'Asesor'],
             items: [
-                { label: 'Solicitud de servicio representación legal', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
-                { label: 'Solicitud de servicio asesoría', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
-                { label: 'Informe de terminación o dictamen', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
-                { label: 'Informe de terminación de servicio', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
-                { label: 'Hoja final de amparo impuesto predial', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
-                { label: 'Carta compromiso representación legal', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Solicitud de Servicio Representación Legal', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Solicitud de Servicio Asesoría', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Informe de Terminación ó Dictamen', to: '/src/pages/modulo-area-sustantiva/area', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Informe de Terminación de Servicio', to: '/area-sustantiva/documentos-imprimir/informe-terminacion', icon: <FileText size={16} /> }, 
+                { label: 'Hoja Final de Amparo Impuesto Predial', to: '/area-sustantiva/documentos-imprimir/amparo-predial', icon: <FileText size={16} /> },
+                { label: 'Carta Compromiso Representación Legal', to: '/area-sustantiva/documentos-imprimir/carta-compromiso', icon: <FileText size={16} /> },
                 
             ],
         },
