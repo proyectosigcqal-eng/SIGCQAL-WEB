@@ -44,6 +44,9 @@
   '/area-sustantiva/quejas-ari':          ['Administrador', 'Asesor'],
  '/area-sustantiva/rl-cir': ['Administrador', 'Asesor'],
   '/area-sustantiva/queja-rl-cir': ['Administrador', 'Asesor'],
+  '/area-sustantiva/documentos-imprimir/informe-terminacion': ['Administrador', 'Asesor'],
+  'area-sustantiva/documentos-imprimir/amparo-predial': ['Administrador', 'Asesor'],
+  'area-sustantiva/documentos-imprimir/carta-compromiso': ['Administrador', 'Asesor'],
 
 
   // Admin — solo Administrador

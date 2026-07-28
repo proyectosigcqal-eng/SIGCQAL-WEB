@@ -14,7 +14,7 @@ export const MainLayout = () => {
     const [sustantivaOpen,      setSustantivaOpen]    = useState(
         pathname.startsWith('/atencion-juridica') || pathname.startsWith('/area-sustantiva')
     );
-
+    const [docsOpen, setDocsOpen] = useState(pathname.startsWith('/atencion-juridica/doc'));
     const nombreRolActivo = rolActivo?.nombreRol ?? session?.roles?.[0]?.nombreRol ?? '';
 
     // ── Definición completa de los 4 módulos con sus roles permitidos ──
@@ -60,7 +60,20 @@ export const MainLayout = () => {
                 { label: 'Registro y Calificación',  to: '/atencion-juridica/clasificacion',     icon: <CheckSquare size={18} /> },
                 { label: 'Gestión de Expedientes',        to: '/atencion-juridica/bandeja',           icon: <Archive size={18} /> },
                 { label: 'Seguimiento de Queja',     to: '/atencion-juridica/bandeja-tramites-irl', icon: <Archive size={18} /> },
-                { label: 'Asignación de Casos',      to: '/atencion-juridica/asignacion',        icon: <FolderCheck size={18} /> },
+                ],
+        },
+        documentosImprimir: { // Nuevo módulo independiente
+            label: 'Documentos para imprimir',
+            icon: <FileText size={20} />,
+            roles: ['Administrador', 'Asesor'],
+            items: [
+                { label: 'Solicitud de Servicio Representación Legal', to: '/atencion-juridica/doc-a', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Solicitud de Servicio Asesoría', to: '/atencion-juridica/doc-b', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Informe de Terminación ó Dictamen', to: '/src/pages/modulo-area-sustantiva/area', icon: <FileText size={16} /> }, /*Cambiar las URL de la ruta en cuanto se tenga la plantilla*/
+                { label: 'Informe de Terminación de Servicio', to: '/area-sustantiva/documentos-imprimir/informe-terminacion', icon: <FileText size={16} /> }, 
+                { label: 'Hoja Final de Amparo Impuesto Predial', to: '/area-sustantiva/documentos-imprimir/amparo-predial', icon: <FileText size={16} /> },
+                { label: 'Carta Compromiso Representación Legal', to: '/area-sustantiva/documentos-imprimir/carta-compromiso', icon: <FileText size={16} /> },
+                
             ],
         },
     };
@@ -89,6 +102,7 @@ export const MainLayout = () => {
         gestionEmpleados: [adminOpen,           setAdminOpen],
         correspondencia:  [correspondenciaOpen, setCorrespondenciaOpen],
         sustantiva:       [sustantivaOpen,      setSustantivaOpen],
+        documentosImprimir: [docsOpen,          setDocsOpen],
     };
 
     return (

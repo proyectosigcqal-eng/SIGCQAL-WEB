@@ -3,26 +3,45 @@ import { Search } from 'lucide-react';
 import { useBandejaGestion } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion';
 import { TablaTramites, TIPO_TRAMITE_TABS } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites';
 import { esAsesor } from '@/shared/utils/sessionUtils';
+import DocumentosImprimirModal from '@/features/modulo-area-sustantiva/documentos-imprimir/components/DocumentosImprimirModal';
 import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css';
 
 export const BandejaGestionPage = () => {
   const [tipoActivo, setTipoActivo] = useState("QUEJAS_RECLAMACIONES");
-  const usuarioEsAsesor = esAsesor(); // ← leer una vez al montar
+  const usuarioEsAsesor = esAsesor();
 
   const isIrl    = tipoActivo === "REPRESENTACION_LEGAL_IRL";
   const isQuejas = tipoActivo === "QUEJAS_RECLAMACIONES";
 
+  // Estado para Modal de Documentos
+  const [isDocModalOpen, setIsDocModalOpen]     = useState(false);
+  const [selectedDocType, setSelectedDocType]   = useState(null);
+  const [expedienteActual, setExpedienteActual] = useState(null);
+
   const {
-    busqueda, setBusqueda,
-    etapaActiva, setEtapaActiva,
-    asesorSeleccionado, setAsesorSeleccionado,  // ← agregar
-    asesores,                                    // ← agregar
-    tramites, cargando, error, ETAPAS, recargar,
+    busqueda,
+    setBusqueda,
+    etapaActiva,
+    setEtapaActiva,
+    asesorSeleccionado,
+    setAsesorSeleccionado,
+    asesores,
+    tramites,
+    cargando,
+    error,
+    ETAPAS,
+    recargar,
   } = useBandejaGestion({ enabled: isQuejas });
 
   useEffect(() => {
     if (isQuejas) recargar();
-  }, [tipoActivo]);
+  }, [tipoActivo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const abrirDocumento = (tipo, expId) => {
+    setSelectedDocType(tipo);
+    setExpedienteActual(expId);
+    setIsDocModalOpen(true);
+  };
 
   return (
     <div className="bdg-page">
@@ -33,6 +52,7 @@ export const BandejaGestionPage = () => {
         </div>
       </div>
 
+      {/* ── Triple Switch ── */}
       <div className="bdg-switch-bar" style={{ marginBottom: "16px" }}>
         {TIPO_TRAMITE_TABS.map((tab) => (
           <button
@@ -48,6 +68,7 @@ export const BandejaGestionPage = () => {
 
       <div className="bdg-filtros-card">
 
+        {/* ── Buscador + etapas — solo en Quejas ── */}
         {isQuejas && (
           <>
             <div className="bdg-filtros-row">
@@ -102,28 +123,46 @@ export const BandejaGestionPage = () => {
           </>
         )}
 
+        {/* ── Contenido Quejas ── */}
         {isQuejas && (
           cargando ? (
             <div className="bdg-empty"><p>Cargando...</p></div>
           ) : error ? (
             <div className="bdg-empty"><p>{error}</p></div>
           ) : (
-            <TablaTramites tramites={tramites} tipoActivo={tipoActivo} />
+            <TablaTramites
+              tramites={tramites}
+              tipoActivo={tipoActivo}
+              onAbrirDocumento={abrirDocumento}
+            />
           )
         )}
 
+        {/* ── Contenido IRL ── */}
         {isIrl && (
-          <TablaTramites tramites={[]} tipoActivo={tipoActivo} />
+          <TablaTramites
+            tramites={[]}
+            tipoActivo={tipoActivo}
+            onAbrirDocumento={abrirDocumento}
+          />
         )}
 
+        {/* ── Asesoría Simplificada ── */}
         {tipoActivo === "ASESORIA_SIMPLIFICADA" && (
           <div className="bdg-empty">
             <div className="bdg-empty-icon">📂</div>
             <p>Asesoría Simplificada estará disponible próximamente.</p>
           </div>
         )}
-
       </div>
+
+      {/* Modal de Documentos Imprimir */}
+      <DocumentosImprimirModal
+        isOpen={isDocModalOpen}
+        onClose={() => setIsDocModalOpen(false)}
+        expedienteId={expedienteActual}
+        tipoDocumento={selectedDocType}
+      />
     </div>
   );
 };

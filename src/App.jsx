@@ -58,6 +58,9 @@ import SentenciaEjecutoriaPage     from './pages/modulo-area-sustantiva/sentenci
 import NotificacionSentenciaPage   from './pages/modulo-area-sustantiva/sentencia/NotificacionSentenciaPage';
 
 
+import { CrearInformeTerminacionPage } from "./pages/modulo-area-sustantiva/documentos-imprimir/CrearInformeTerminacionPage";
+import { CrearAmparoPredialPage } from "./pages/modulo-area-sustantiva/documentos-imprimir/CrearAmparoPredialPage";
+import { CrearCartaCompromisoPage } from "./pages/modulo-area-sustantiva/documentos-imprimir/CrearCartaCompromisoPage";
 
 
 const handleLoginExitoso = (response) => {
@@ -634,6 +637,39 @@ function App() {
                 allowedRoles={ROUTE_ROLES["/area-sustantiva/quejas-ari"]}
               >
                 <CrearQuejaAriPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="area-sustantiva/documentos-imprimir/informe-terminacion"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/documentos-imprimir/informe-terminacion"]}
+              >
+                <CrearInformeTerminacionPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="area-sustantiva/documentos-imprimir/amparo-predial"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/documentos-imprimir/amparo-predial"]}
+              >
+                <CrearAmparoPredialPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="area-sustantiva/documentos-imprimir/carta-compromiso"
+            element={
+              <ProtectedRoute
+                allowedRoles={ROUTE_ROLES["/area-sustantiva/documentos-imprimir/carta-compromiso"]}
+              >
+                <CrearCartaCompromisoPage />
               </ProtectedRoute>
             }
           />

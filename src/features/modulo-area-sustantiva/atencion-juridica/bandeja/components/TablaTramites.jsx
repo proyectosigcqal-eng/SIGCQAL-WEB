@@ -1,11 +1,9 @@
-// features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SemaforoContador } from "@/features/modulo-area-sustantiva/atencion-juridica/prevencion/components/SemaforoPlazo";
 import { SemaforoPlazosAutoridad } from "@/features/modulo-area-sustantiva/atencion-juridica/plazo-autoridad/components/SemaforoPlazosAutoridad";
 import BitacoraHistoricaSustantivaModal from "../../../../../pages/modulo-area-sustantiva/bitacora-historica-sustantiva/BitacoraHistoricaSustantivaModal";
-import { FileText } from "lucide-react";
+import { FileText, Printer } from "lucide-react";
 import { useBandejaIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/hooks/useBandejaIrl";
 import { TablaIrl } from "@/features/modulo-area-sustantiva/representacion-legal-irl/components/TablaIrl";
 
@@ -80,7 +78,6 @@ const calcularAcciones = (t, estUp) => {
       },
     ];
   }
-
   if (estUp.includes("VALIDACIÓN") || estUp.includes("VALIDACION")) {
     return [
       {
@@ -90,7 +87,6 @@ const calcularAcciones = (t, estUp) => {
       },
     ];
   }
-
   if (estUp.includes("CIR")) {
     return [
       {
@@ -111,7 +107,6 @@ const calcularAcciones = (t, estUp) => {
           },
     ];
   }
-
   if (estUp.includes("ARI")) {
     return [
       {
@@ -132,7 +127,6 @@ const calcularAcciones = (t, estUp) => {
           },
     ];
   }
-
   if (estUp.includes("OFICIO")) {
     return [
       {
@@ -153,7 +147,6 @@ const calcularAcciones = (t, estUp) => {
           },
     ];
   }
-
   if (estUp.includes("CONTESTACIÓN") || estUp.includes("CONTESTACION")) {
     return [
       {
@@ -163,7 +156,6 @@ const calcularAcciones = (t, estUp) => {
       },
     ];
   }
-
   if (estUp.includes("ACCI")) {
     return [
       {
@@ -184,7 +176,6 @@ const calcularAcciones = (t, estUp) => {
           },
     ];
   }
-
   if (estUp.includes("RESOLUCIÓN") || estUp.includes("RESOLUCION")) {
     return [
       {
@@ -199,7 +190,6 @@ const calcularAcciones = (t, estUp) => {
       },
     ];
   }
-
   if (
     estUp.includes("NOTIFICACIÓN FINAL") ||
     estUp.includes("NOTIFICACION FINAL")
@@ -212,7 +202,6 @@ const calcularAcciones = (t, estUp) => {
       },
     ];
   }
-
   return [
     {
       tipo: "navegacion",
@@ -222,7 +211,8 @@ const calcularAcciones = (t, estUp) => {
   ];
 };
 
-export const TablaTramites = ({ tramites, tipoActivo }) => {
+// ✅ Se añade onAbrirDocumento a las props
+export const TablaTramites = ({ tramites, tipoActivo, onAbrirDocumento }) => {
   const navigate = useNavigate();
   const [idQuejaSeleccionada, setIdQuejaSeleccionada] = useState(null);
 
@@ -233,9 +223,6 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
     setBusqueda: setIrlBusqueda,
     subSwitchActivo,
     setSubSwitchActivo,
-    // ✅ CORRECCIÓN: se usa etapaActiva/setEtapaActiva, no estatusActivo/setEstatusActivo.
-    // fetchBandeja en useBandejaIrl depende de etapaActiva — sin esto el tab cambia
-    // visualmente pero no dispara refetch y los datos nunca se filtran.
     etapaActiva: irlEtapaActiva,
     setEtapaActiva: setIrlEtapaActiva,
     items: irlItems,
@@ -245,7 +232,6 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
     ESTATUS_TABS,
     recargar: irlRecargar,
   } = useBandejaIrl({ enabled: isIrlActivo });
-  
 
   const tramitesFiltrados =
     tipoActivo === "QUEJAS_RECLAMACIONES" ? (tramites ?? []) : [];
@@ -254,17 +240,16 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
     primerEstatusUp.includes("ASIGNADA A ASESOR") ||
     primerEstatusUp.includes("VALIDACIÓN") ||
     primerEstatusUp.includes("VALIDACION");
-  const headerSemaforo = usaSemaforo ? "SEMÁFORO / CONTADOR" : "FECHA DE REGISTRO";
+  const headerSemaforo = usaSemaforo
+    ? "SEMÁFORO / CONTADOR"
+    : "FECHA DE REGISTRO";
 
   return (
     <div className="bdg-tabla-wrapper">
-      {/* ── Tab IRL ── */}
       {isIrlActivo ? (
         <TablaIrl
           subSwitchActivo={subSwitchActivo}
           setSubSwitchActivo={setSubSwitchActivo}
-          // ✅ Se pasan las props correctas: TablaIrl usa setEtapaActiva al hacer clic
-          // en un tab → actualiza etapaActiva → fetchBandeja reacciona → refetch con filtro
           etapaActiva={irlEtapaActiva}
           setEtapaActiva={setIrlEtapaActiva}
           busqueda={irlBusqueda}
@@ -275,6 +260,8 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
           SUB_SWITCHES={SUB_SWITCHES}
           ESTATUS_TABS={ESTATUS_TABS}
           recargar={irlRecargar}
+          // ✅ Pasamos la función a TablaIrl para que también ahí puedan abrir documentos si se requiere
+          onAbrirDocumento={onAbrirDocumento}
         />
       ) : tramitesFiltrados.length === 0 ? (
         <div className="bdg-empty">
@@ -305,6 +292,7 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
                 const bloqueado = t.bloqueado === true;
                 const estUp = (t.estatus ?? "").toUpperCase();
                 const acciones = calcularAcciones(t, estUp);
+                const expedienteId = t.idExpediente || t.id; // Fallback de ID
 
                 return (
                   <tr
@@ -359,6 +347,39 @@ export const TablaTramites = ({ tramites, tipoActivo }) => {
                       )}
                     </td>
                     <td className="bdg-action-cell">
+                      {/* ✅ Botones de documentos inyectados aquí de forma quirúrgica */}
+                      {onAbrirDocumento && !bloqueado && (
+                        <div className="bdg-doc-buttons flex gap-1 mb-2">
+                          <button
+                            className="bdg-btn-action bdg-btn-action--secundario"
+                            onClick={() =>
+                              onAbrirDocumento("ASESORIA", expedienteId)
+                            }
+                            title="Generar Asesoría"
+                          >
+                            📄 Asesoría
+                          </button>
+                          <button
+                            className="bdg-btn-action bdg-btn-action--secundario"
+                            onClick={() =>
+                              onAbrirDocumento("REPRESENTACION", expedienteId)
+                            }
+                            title="Generar Representación"
+                          >
+                            📄 Representación
+                          </button>
+                          <button
+                            className="bdg-btn-action bdg-btn-action--secundario"
+                            onClick={() =>
+                              onAbrirDocumento("INFORME", expedienteId)
+                            }
+                            title="Generar Informe"
+                          >
+                            📄 Informe
+                          </button>
+                        </div>
+                      )}
+
                       <button
                         className="bdg-btn-action bdg-btn-action--icon"
                         onClick={() => setIdQuejaSeleccionada(t.id)}
