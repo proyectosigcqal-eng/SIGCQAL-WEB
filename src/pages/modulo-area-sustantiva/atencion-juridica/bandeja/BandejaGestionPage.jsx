@@ -1,50 +1,38 @@
-import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
-import { useBandejaGestion } from "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion";
-import {
-  TablaTramites,
-  TIPO_TRAMITE_TABS,
-} from "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites";
-import "@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css";
+import { useState, useEffect } from 'react';
+import { Search } from 'lucide-react';
+import { useBandejaGestion } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/hooks/useBandejaGestion';
+import { TablaTramites, TIPO_TRAMITE_TABS } from '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/components/TablaTramites';
+import { esAsesor } from '@/shared/utils/sessionUtils';
+import '@/features/modulo-area-sustantiva/atencion-juridica/bandeja/styles/bandeja-gestion.css';
 
 export const BandejaGestionPage = () => {
   const [tipoActivo, setTipoActivo] = useState("QUEJAS_RECLAMACIONES");
+  const usuarioEsAsesor = esAsesor(); // ← leer una vez al montar
 
   const isIrl    = tipoActivo === "REPRESENTACION_LEGAL_IRL";
   const isQuejas = tipoActivo === "QUEJAS_RECLAMACIONES";
 
   const {
-    busqueda,
-    setBusqueda,
-    etapaActiva,
-    setEtapaActiva,
-    tramites,
-    cargando,
-    error,
-    ETAPAS,
-    recargar,
-  } = useBandejaGestion({
-    // ← Solo activo cuando el tab de quejas está visible
-    enabled: isQuejas,
-  });
+    busqueda, setBusqueda,
+    etapaActiva, setEtapaActiva,
+    asesorSeleccionado, setAsesorSeleccionado,  // ← agregar
+    asesores,                                    // ← agregar
+    tramites, cargando, error, ETAPAS, recargar,
+  } = useBandejaGestion({ enabled: isQuejas });
 
-  // ← Cuando el usuario regresa al tab de Quejas, refetch automático
   useEffect(() => {
     if (isQuejas) recargar();
-  }, [tipoActivo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tipoActivo]);
 
   return (
     <div className="bdg-page">
       <div className="bdg-header">
         <div>
           <h1 className="bdg-title">Bandeja de Gestión</h1>
-          <p className="bdg-subtitle">
-            Monitoreo de plazos legales y atención ciudadana.
-          </p>
+          <p className="bdg-subtitle">Monitoreo de plazos legales y atención ciudadana.</p>
         </div>
       </div>
 
-      {/* ── Triple Switch ── */}
       <div className="bdg-switch-bar" style={{ marginBottom: "16px" }}>
         {TIPO_TRAMITE_TABS.map((tab) => (
           <button
@@ -60,7 +48,6 @@ export const BandejaGestionPage = () => {
 
       <div className="bdg-filtros-card">
 
-        {/* ── Buscador + etapas — solo en Quejas ── */}
         {isQuejas && (
           <>
             <div className="bdg-filtros-row">
@@ -74,6 +61,26 @@ export const BandejaGestionPage = () => {
                   onChange={(e) => setBusqueda(e.target.value)}
                 />
               </div>
+
+              {/* ── Selector de asesor — solo visible para admin/comisionado ── */}
+              {!usuarioEsAsesor && asesores.length > 0 && (
+                <select
+                  className="bdg-select"
+                  value={asesorSeleccionado}
+                  onChange={(e) => setAsesorSeleccionado(e.target.value)}
+                  style={{ marginLeft: 8 }}
+                >
+                  <option value="">Todos los asesores</option>
+                  {asesores.map((a) => (
+                    <option
+                      key={a.idAsesor ?? a.id}
+                      value={a.idAsesor ?? a.id}
+                    >
+                      {a.nombreCompleto ?? a.nombre ?? a.usuarioLogin ?? `Asesor ${a.idAsesor}`}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="bdg-switch-bar">
@@ -83,10 +90,9 @@ export const BandejaGestionPage = () => {
                   className={`bdg-switch-btn ${etapaActiva === etapa.key ? "is-active" : ""}`}
                   onClick={() => setEtapaActiva(etapa.key)}
                   style={{
-                    borderRight:
-                      i < ETAPAS.length - 1
-                        ? "0.5px solid var(--color-border-secondary)"
-                        : "none",
+                    borderRight: i < ETAPAS.length - 1
+                      ? "0.5px solid var(--color-border-secondary)"
+                      : "none",
                   }}
                 >
                   {etapa.label}
@@ -96,7 +102,6 @@ export const BandejaGestionPage = () => {
           </>
         )}
 
-        {/* ── Contenido Quejas ── */}
         {isQuejas && (
           cargando ? (
             <div className="bdg-empty"><p>Cargando...</p></div>
@@ -107,12 +112,10 @@ export const BandejaGestionPage = () => {
           )
         )}
 
-        {/* ── Contenido IRL — TablaTramites maneja su propio fetch interno ── */}
         {isIrl && (
           <TablaTramites tramites={[]} tipoActivo={tipoActivo} />
         )}
 
-        {/* ── Asesoría Simplificada — próximamente ── */}
         {tipoActivo === "ASESORIA_SIMPLIFICADA" && (
           <div className="bdg-empty">
             <div className="bdg-empty-icon">📂</div>

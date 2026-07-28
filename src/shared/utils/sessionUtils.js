@@ -21,3 +21,17 @@ export const getNombreUsuarioActual = () => {
   const s = getSesionRaw();
   return s?.username ?? s?.nombre ?? s?.nombreUsuario ?? s?.nombre_usuario ?? null;
 };
+
+// Agregar al final del archivo:
+export const getRolActual = () => {
+  const s = getSesionRaw();
+  // Prueba las variaciones más comunes — ajusta si tu backend guarda otro campo
+  return s?.rol ?? s?.role ?? s?.nombreRol ?? s?.rolNombre ?? s?.authorities?.[0] ?? null;
+};
+
+export const esAsesor = () => {
+  const rol = getRolActual();
+  if (!rol) return false;
+  const r = String(rol).toLowerCase();
+  return r.includes('asesor');
+};

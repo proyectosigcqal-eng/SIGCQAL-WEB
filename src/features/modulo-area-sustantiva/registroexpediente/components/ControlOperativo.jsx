@@ -48,7 +48,6 @@ export const ControlOperativo = ({ formData, erroresCampo, handleChange, municip
               type="date"
               value={formData.fechaSolicitud}
               onChange={handleChange}
-              disabled
               className={erroresCampo.fechaSolicitud ? 'campo-con-error' : ''}
             />
             {erroresCampo.fechaSolicitud && (
